@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UJCOB Exercises</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#132238;
+      --muted:#6b778c;
+      --primary:#0f6b5f;
+      --primary-2:#0a8c7b;
+      --border:#e5e9f0;
+      --success:#137333;
+      --success-bg:#e8f5e9;
+      --danger:#b3261e;
+      --danger-bg:#fdecea;
+      --shadow:0 14px 40px rgba(15,39,66,.08);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:linear-gradient(180deg,#f7fafc 0%,#eef3f8 100%);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    .topbar{
+      background:#fff;
+      border-bottom:1px solid var(--border);
+      position:sticky;
+      top:0;
+      z-index:20;
+    }
+
+    .topbar-inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:18px 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-mark{
+      width:42px;height:42px;border-radius:12px;
+      background:linear-gradient(135deg,var(--primary),var(--primary-2));
+      color:#fff;display:grid;place-items:center;font-weight:800;
+      box-shadow:0 8px 18px rgba(15,107,95,.25);
+    }
+    .brand h1{font-size:18px;margin:0}
+    .brand p{font-size:12px;margin:3px 0 0;color:var(--muted)}
+
+    .container{max-width:1100px;margin:0 auto;padding:42px 24px 60px}
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:24px;
+      align-items:stretch;
+      margin-bottom:28px;
+    }
+
+    .hero-card,.side-card,.quiz-card,.result-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero-card{padding:34px}
+    .eyebrow{
+      display:inline-flex;
+      background:#e6f5f1;
+      color:var(--primary);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:12px;font-weight:700;
+      margin-bottom:16px;
+    }
+    .hero h2{font-size:38px;line-height:1.15;margin:0 0 14px}
+    .hero p{font-size:16px;line-height:1.7;color:var(--muted);margin:0}
+
+    .side-card{padding:26px;display:flex;flex-direction:column;justify-content:center}
+    .side-card strong{font-size:32px;color:var(--primary)}
+    .side-card span{color:var(--muted);font-size:14px;margin-top:6px}
+
+    .section-title{font-size:22px;margin:0 0 16px}
+
+    .course-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+      margin-bottom:30px;
+    }
+
+    .course-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:20px;
+      cursor:pointer;
+      transition:.2s ease;
+      min-height:150px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .course-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(15,39,66,.08);border-color:#c7d8d4}
+    .course-code{font-size:13px;color:var(--primary);font-weight:800}
+    .course-name{font-size:16px;line-height:1.45;font-weight:700;margin:8px 0 14px}
+    .course-meta{font-size:12px;color:var(--muted)}
+
+    .quiz-wrap{display:none}
+    .quiz-head{
+      display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px
+    }
+    .quiz-head h3{margin:0;font-size:22px}
+    .quiz-head p{margin:6px 0 0;color:var(--muted);font-size:14px}
+    .btn{
+      border:0;border-radius:12px;padding:11px 15px;font-weight:700;cursor:pointer;font-family:inherit
+    }
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-secondary{background:#eef2f6;color:var(--text)}
+
+    .progress-wrap{margin:14px 0 20px}
+    .progress-track{height:9px;background:#edf1f5;border-radius:999px;overflow:hidden}
+    .progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary-2));transition:.25s ease}
+    .progress-text{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px}
+
+    .quiz-card{padding:26px}
+    .question-number{font-size:12px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.08em}
+    .question-text{font-size:22px;line-height:1.5;margin:10px 0 22px}
+
+    .options{display:grid;gap:12px}
+    .option{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:15px 16px;
+      cursor:pointer;
+      transition:.18s ease;
+      background:#fff;
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+    }
+    .option:hover{border-color:#9ebdb7;background:#fbfdfd}
+    .option input{margin-top:3px;accent-color:var(--primary)}
+    .option.selected{border-color:var(--primary);background:#f0faf7}
+    .option.correct{border-color:#81c995;background:var(--success-bg)}
+    .option.wrong{border-color:#f28b82;background:var(--danger-bg)}
+
+    .feedback{
+      display:none;
+      margin-top:18px;
+      padding:14px 16px;
+      border-radius:12px;
+      font-size:14px;
+      line-height:1.6;
+    }
+    .feedback.correct{display:block;background:var(--success-bg);color:var(--success)}
+    .feedback.wrong{display:block;background:var(--danger-bg);color:var(--danger)}
+
+    .quiz-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+    .result-card{display:none;padding:32px;text-align:center}
+    .result-score{font-size:54px;font-weight:800;color:var(--primary);margin:8px 0}
+    .result-card p{color:var(--muted);line-height:1.6}
+
+    footer{padding:26px 24px 42px;text-align:center;color:var(--muted);font-size:12px}
+
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (max-width:620px){
+      .container{padding:28px 16px 48px}
+      .topbar-inner{padding:14px 16px}
+      .hero-card{padding:24px}
+      .hero h2{font-size:30px}
+      .course-grid{grid-template-columns:1fr}
+      .quiz-head{flex-direction:column}
+      .question-text{font-size:19px}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">UJ</div>
+        <div>
+          <h1>UJCOB Exercises</h1>
+          <p>College of Business · University of Jeddah</p>
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="goHome()">Courses</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="homeView">
+      <div class="hero">
+        <div class="hero-card">
+          <div class="eyebrow">Interactive Practice</div>
+          <h2>Practice. Check. Improve.</h2>
+          <p>Select a course, solve short exercises, and get instant feedback on whether your answer is correct or incorrect.</p>
+        </div>
+        <div class="side-card">
+          <strong>6 Courses</strong>
+          <span>Focused practice for selected College of Business courses.</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">Choose a course</h3>
+      <div class="course-grid" id="courseGrid"></div>
+    </section>
+
+    <section id="quizView" class="quiz-wrap">
+      <div class="quiz-head">
+        <div>
+          <h3 id="quizCourseTitle"></h3>
+          <p>Choose one answer, then check your response.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="goHome()">Change course</button>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="progress-text"><span id="progressLabel"></span><span id="scoreLabel"></span></div>
+      </div>
+
+      <div class="quiz-card" id="questionCard">
+        <div class="question-number" id="questionNumber"></div>
+        <div class="question-text" id="questionText"></div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="quiz-actions">
+          <button class="btn btn-primary" id="checkBtn" onclick="checkAnswer()">Check answer</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none">Next question</button>
+        </div>
+      </div>
+
+      <div class="result-card" id="resultCard">
+        <div class="eyebrow">Completed</div>
+        <h3 id="resultTitle">Your Result</h3>
+        <div class="result-score" id="resultScore"></div>
+        <p id="resultMessage"></p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">
+          <button class="btn btn-primary" onclick="restartQuiz()">Try again</button>
+          <button class="btn btn-secondary" onclick="goHome()">Choose another course</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>UJCOB Exercises · Practice environment for students</footer>
+
+  <script>
+    const courses = [
+      {
+        code:'BCIS 313',
+        name:'Programming for Business',
+        questions:[
+          {q:'Which data type is commonly used to store True/False values?', options:['String','Boolean','Float','Array'], answer:1, explain:'Boolean values represent logical states such as True and False.'},
+          {q:'What does a loop help a program do?', options:['Repeat a block of code','Delete variables','Create a database','Encrypt files'], answer:0, explain:'Loops are used to repeat instructions while a condition or sequence applies.'},
+          {q:'Which operator is typically used to test equality in many programming languages?', options:['=','==','+=','!='], answer:1, explain:'== is commonly used for comparison, while = is usually assignment.'},
+          {q:'What is the main purpose of a function?', options:['Store images','Group reusable logic','Replace all variables','Connect only to websites'], answer:1, explain:'Functions package logic into reusable blocks that can be called when needed.'},
+          {q:'Which structure is best suited for storing multiple ordered values?', options:['List/Array','Boolean','Comment','Operator'], answer:0, explain:'Lists and arrays are designed to store collections of ordered values.'}
+        ]
+      },
+      {
+        code:'BCIS 324',
+        name:'Enterprise Resource Planning (ERP) Systems',
+        questions:[
+          {q:'What is a core purpose of an ERP system?', options:['Integrate business processes and data','Replace every employee','Only manage social media','Only create websites'], answer:0, explain:'ERP systems integrate functions such as finance, HR, procurement, and operations using shared data.'},
+          {q:'Which of the following is commonly an ERP module?', options:['Finance','Photo editing','Game engine','Video streaming'], answer:0, explain:'Finance is a standard ERP functional module.'},
+          {q:'A major benefit of ERP integration is:', options:['More data silos','Single source of shared information','Less process visibility','Manual duplication'], answer:1, explain:'ERP reduces duplicated data and enables a common enterprise-wide information base.'},
+          {q:'Which implementation challenge is common in ERP projects?', options:['Change management','No need for training','Zero data migration','No process redesign'], answer:0, explain:'ERP projects often require organizational change, training, and process redesign.'},
+          {q:'What is master data in an ERP context?', options:['Core shared business data','Temporary browser history','Only email messages','Source code comments'], answer:0, explain:'Master data includes core entities such as customers, products, suppliers, and materials.'}
+        ]
+      },
+      {
+        code:'BCIS 317',
+        name:'Web, Design, Development & Management',
+        questions:[
+          {q:'What does HTML primarily define?', options:['Page structure','Database indexing','Server hardware','Image compression'], answer:0, explain:'HTML provides the semantic structure and content of a web page.'},
+          {q:'What is CSS mainly used for?', options:['Styling and layout','Database transactions','Compiling Java','Managing routers'], answer:0, explain:'CSS controls presentation, spacing, layout, typography, and visual styling.'},
+          {q:'Which language commonly adds interactivity in the browser?', options:['JavaScript','SQL','XML only','Markdown'], answer:0, explain:'JavaScript is the standard scripting language for browser-side interactivity.'},
+          {q:'Responsive design aims to:', options:['Adapt layouts to different screen sizes','Make sites desktop-only','Remove navigation','Disable media queries'], answer:0, explain:'Responsive design adjusts content and layout across phones, tablets, and desktops.'},
+          {q:'Which practice improves web accessibility?', options:['Alternative text for meaningful images','Very low contrast text','Removing keyboard navigation','Using color as the only indicator'], answer:0, explain:'Alt text helps users who rely on screen readers understand meaningful images.'}
+        ]
+      },
+      {
+        code:'BCIS 411',
+        name:'Business Intelligence System',
+        questions:[
+          {q:'Business Intelligence primarily helps organizations to:', options:['Turn data into useful insights','Replace databases with paper','Avoid decision-making','Remove reporting'], answer:0, explain:'BI combines data, analysis, and reporting to support better decisions.'},
+          {q:'What is a data warehouse designed for?', options:['Analytical reporting and historical data','Only live chat messages','Operating system files','Website hosting only'], answer:0, explain:'Data warehouses organize integrated historical data for analytics and reporting.'},
+          {q:'What does ETL stand for?', options:['Extract, Transform, Load','Enter, Track, Link','Evaluate, Test, Launch','Export, Transfer, Log'], answer:0, explain:'ETL is the process of extracting data, transforming it, and loading it into a target store.'},
+          {q:'A KPI is best described as:', options:['A measurable performance indicator','A programming language','A file format','A network device'], answer:0, explain:'KPIs track progress against important business objectives.'},
+          {q:'Which visualization is usually best for showing a trend over time?', options:['Line chart','Pie chart only','Scatterplot with no time axis','Text paragraph'], answer:0, explain:'Line charts are commonly used to show changes and trends across time.'}
+        ]
+      },
+      {
+        code:'BCIS 421',
+        name:'Business Data Analytics',
+        questions:[
+          {q:'Descriptive analytics answers which type of question?', options:['What happened?','What will definitely happen?','Why is coding impossible?','Who owns the internet?'], answer:0, explain:'Descriptive analytics summarizes historical data to explain what has happened.'},
+          {q:'Which statistic measures the central value of a dataset?', options:['Mean','Range only','Variance only','Correlation only'], answer:0, explain:'The mean is a common measure of central tendency.'},
+          {q:'A correlation coefficient near +1 indicates:', options:['Strong positive relationship','Strong negative relationship','No relationship by definition','A data entry error'], answer:0, explain:'Values close to +1 indicate a strong positive linear relationship.'},
+          {q:'Which task is an example of predictive analytics?', options:['Forecasting future sales','Listing yesterday’s sales','Formatting a table','Renaming a file'], answer:0, explain:'Predictive analytics uses patterns in historical data to estimate future outcomes.'},
+          {q:'Why is data cleaning important before analysis?', options:['It improves data quality and reliability','It always increases file size','It removes all variability','It guarantees perfect predictions'], answer:0, explain:'Cleaning addresses missing, inconsistent, duplicate, or incorrect data before analysis.'}
+        ]
+      },
+      {
+        code:'BCIS 311',
+        name:'Database Management System',
+        questions:[
+          {q:'What is the main purpose of a primary key?', options:['Uniquely identify each row','Store duplicate values only','Style a table','Encrypt a website'], answer:0, explain:'A primary key uniquely identifies each record in a relational table.'},
+          {q:'Which SQL command is used to retrieve data?', options:['SELECT','DELETE','DROP','ALTER'], answer:0, explain:'SELECT is used to query and retrieve rows from database tables.'},
+          {q:'What does a foreign key do?', options:['Links related tables','Formats text','Creates images','Compiles code'], answer:0, explain:'A foreign key references a key in another table and supports relationships between tables.'},
+          {q:'Normalization is mainly used to:', options:['Reduce redundancy and improve data structure','Make every field contain repeated data','Remove all keys','Convert databases into spreadsheets only'], answer:0, explain:'Normalization organizes relational data to reduce redundancy and update anomalies.'},
+          {q:'Which SQL clause filters rows based on a condition?', options:['WHERE','ORDER BY only','GROUP BY only','AS'], answer:0, explain:'WHERE limits returned rows according to specified conditions.'}
+        ]
+      }
+    ];
+
+    let activeCourse = null;
+    let currentIndex = 0;
+    let score = 0;
+    let selectedIndex = null;
+    let answered = false;
+
+    const courseGrid = document.getElementById('courseGrid');
+
+    function renderCourses(){
+      courseGrid.innerHTML = courses.map((c,i)=>`
+        <div class="course-card" onclick="startCourse(${i})">
+          <div>
+            <div class="course-code">${c.code}</div>
+            <div class="course-name">${c.name}</div>
+          </div>
+          <div class="course-meta">${c.questions.length} practice questions</div>
+        </div>
+      `).join('');
+    }
+
+    function startCourse(index){
+      activeCourse = courses[index];
+      currentIndex = 0;
+      score = 0;
+      selectedIndex = null;
+      answered = false;
+      document.getElementById('homeView').style.display='none';
+      document.getElementById('quizView').style.display='block';
+      document.getElementById('resultCard').style.display='none';
+      document.getElementById('questionCard').style.display='block';
+      document.getElementById('quizCourseTitle').textContent = `${activeCourse.code} - ${activeCourse.name}`;
+      renderQuestion();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function renderQuestion(){
+      const item = activeCourse.questions[currentIndex];
+      selectedIndex = null;
+      answered = false;
+      document.getElementById('questionNumber').textContent = `Question ${currentIndex+1}`;
+      document.getElementById('questionText').textContent = item.q;
+      document.getElementById('options').innerHTML = item.options.map((opt,i)=>`
+        <label class="option" data-index="${i}">
+          <input type="radio" name="answer" value="${i}" onchange="selectOption(${i})" />
+          <span>${opt}</span>
+        </label>
+      `).join('');
+      const feedback = document.getElementById('feedback');
+      feedback.className='feedback';
+      feedback.textContent='';
+      document.getElementById('checkBtn').style.display='inline-block';
+      document.getElementById('nextBtn').style.display='none';
+      updateProgress();
+    }
+
+    function selectOption(i){
+      if(answered) return;
+      selectedIndex = i;
+      document.querySelectorAll('.option').forEach(el=>el.classList.remove('selected'));
+      document.querySelector(`.option[data-index="${i}"]`).classList.add('selected');
+    }
+
+    function checkAnswer(){
+      if(selectedIndex === null){
+        alert('Please select an answer first.');
+        return;
+      }
+      answered = true;
+      const item = activeCourse.questions[currentIndex];
+      const isCorrect = selectedIndex === item.answer;
+      if(isCorrect) score++;
+
+      document.querySelectorAll('.option').forEach((el,i)=>{
+        const radio = el.querySelector('input');
+        radio.disabled = true;
+        if(i === item.answer) el.classList.add('correct');
+        if(i === selectedIndex && i !== item.answer) el.classList.add('wrong');
+      });
+
+      const feedback = document.getElementById('feedback');
+      feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+      feedback.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${item.explain}`;
+      document.getElementById('checkBtn').style.display='none';
+      document.getElementById('nextBtn').style.display='inline-block';
+      document.getElementById('nextBtn').textContent = currentIndex === activeCourse.questions.length-1 ? 'View result' : 'Next question';
+      updateProgress();
+    }
+
+    function nextQuestion(){
+      if(currentIndex < activeCourse.questions.length-1){
+        currentIndex++;
+        renderQuestion();
+      }else{
+        showResult();
+      }
+    }
+
+    function showResult(){
+      document.getElementById('questionCard').style.display='none';
+      const card = document.getElementById('resultCard');
+      card.style.display='block';
+      const total = activeCourse.questions.length;
+      const pct = Math.round((score/total)*100);
+      document.getElementById('resultScore').textContent = `${score}/${total}`;
+      document.getElementById('resultMessage').textContent = pct >= 80
+        ? `Excellent work — you scored ${pct}%.`
+        : pct >= 60
+          ? `Good progress — you scored ${pct}%. Review the questions you missed and try again.`
+          : `You scored ${pct}%. A second attempt will help reinforce the key concepts.`;
+      updateProgress(true);
+    }
+
+    function updateProgress(done=false){
+      const total = activeCourse.questions.length;
+      const completed = done ? total : currentIndex + (answered ? 1 : 0);
+      const pct = Math.round((completed/total)*100);
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('progressLabel').textContent = `${completed} of ${total} completed`;
+      document.getElementById('scoreLabel').textContent = `Score: ${score}`;
+    }
+
+    function restartQuiz(){
+      const idx = courses.indexOf(activeCourse);
+      startCourse(idx);
+    }
+
+    function goHome(){
+      document.getElementById('quizView').style.display='none';
+      document.getElementById('homeView').style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    renderCourses();
+  </script>
+</body>
+</html>
