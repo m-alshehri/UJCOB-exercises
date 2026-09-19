@@ -125,3 +125,9 @@ drop policy if exists "Users can insert own answers" on public.attempt_answers;
 create policy "Users can insert own answers" on public.attempt_answers for insert with check (
   exists (select 1 from public.attempts a where a.id = attempt_id and a.user_id = auth.uid())
 );
+
+
+-- Auth profile policies for registered students
+create policy "Users can read own profile" on public.profiles for select using (auth.uid() = id);
+create policy "Users can insert own profile" on public.profiles for insert with check (auth.uid() = id);
+create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
