@@ -18,7 +18,7 @@ async function setup(page, { signedIn = true, failSave = false } = {}) {
   if (signedIn)
     await page.addInitScript(
       ({ uid }) =>
-        localStorage.setItem(
+        window===window.top && localStorage.setItem(
           "sb-ulueevjobheawtnqgupf-auth-token",
           JSON.stringify({
             access_token: "test-token",
@@ -202,3 +202,4 @@ test("resources header reflects the session; dashboard handles no history", asyn
   await expect(page.locator("#list")).toContainText("No completed attempts");
   expect(errors).toEqual([]);
 });
+test('Web Lab checks JavaScript interaction and mobile layout behavior',async({page})=>{const {errors}=await setup(page);await page.goto('/web-lab.html');for(let n=0;n<3;n++)await page.getByRole('button',{name:'Next exercise',exact:true}).click();await page.locator('#code').fill('<p id="message">Ready</p><button onclick="document.getElementById(\'message\').textContent=\'Changed\'">Change</button>');await page.getByRole('button',{name:'Check task',exact:true}).click();await expect(page.locator('#status')).toContainText('Correct!');await page.getByRole('button',{name:'Next exercise',exact:true}).click();await page.locator('#code').fill('<style>.container{display:grid;grid-template-columns:1fr 1fr}@media(max-width:600px){.container{grid-template-columns:1fr}}</style><div class="container"><div>One</div><div>Two</div></div>');await page.getByRole('button',{name:'Check task',exact:true}).click();await expect(page.locator('#status')).toContainText('Correct!');expect(errors).toEqual([]);});
