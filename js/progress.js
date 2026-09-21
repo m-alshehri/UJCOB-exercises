@@ -61,25 +61,24 @@ window.LabProgress = class {
       const exercise = this.exercises[index];
       Tamareen.status("Saving completion…");
       await Tamareen.checked(
-        Tamareen.client()
-          .from("lab_progress")
-          .upsert(
-            {
-              user_id: this.user.id,
-              course_id: this.courseId,
-              lab_type: this.lab,
-              exercise_key: exercise.id,
-              exercise_title: exercise.title,
-              completed: true,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "user_id,course_id,lab_type,exercise_key" },
-          ),
+        Tamareen.client().from("lab_progress").upsert(
+          {
+            user_id: this.user.id,
+            course_id: this.courseId,
+            lab_type: this.lab,
+            exercise_key: exercise.id,
+            exercise_title: exercise.title,
+            completed: true,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,course_id,lab_type,exercise_key" },
+        ),
       );
       this.solved.add(index);
       Tamareen.status("Completion saved.", "success");
       return true;
     } catch (e) {
+      Tamareen.report?.("progress_save");
       Tamareen.status(
         "Your check passed, but completion was not saved. " + e.message,
         "error",

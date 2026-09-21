@@ -43,6 +43,7 @@ function draw() {
   $("status").className = "status";
   $("status").textContent = "Edit the code, then run and check your work.";
   run();
+  window.refreshLabSupport?.();
 }
 function run() {
   $("preview").srcdoc = $("code").value;
@@ -96,7 +97,5 @@ async function check() {
   if (ok) await saveProgress(exercise);
   else {
     wrongAttempts[i] = (wrongAttempts[i] || 0) + 1;
-    if (wrongAttempts[i] >= 3)
-      $("status").textContent += " Suggested solution:\n" + SOL[i];
   }
 }

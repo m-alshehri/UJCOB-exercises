@@ -203,3 +203,33 @@ test("resources header reflects the session; dashboard handles no history", asyn
   expect(errors).toEqual([]);
 });
 test('Web Lab checks JavaScript interaction and mobile layout behavior',async({page})=>{const {errors}=await setup(page);await page.goto('/web-lab.html');for(let n=0;n<3;n++)await page.getByRole('button',{name:'Next exercise',exact:true}).click();await page.locator('#code').fill('<p id="message">Ready</p><button onclick="document.getElementById(\'message\').textContent=\'Changed\'">Change</button>');await page.getByRole('button',{name:'Check task',exact:true}).click();await expect(page.locator('#status')).toContainText('Correct!');await page.getByRole('button',{name:'Next exercise',exact:true}).click();await page.locator('#code').fill('<style>.container{display:grid;grid-template-columns:1fr 1fr}@media(max-width:600px){.container{grid-template-columns:1fr}}</style><div class="container"><div>One</div><div>Two</div></div>');await page.getByRole('button',{name:'Check task',exact:true}).click();await expect(page.locator('#status')).toContainText('Correct!');expect(errors).toEqual([]);});
+
+test('resume restores an existing attempt without creating another or resetting the clock',async({page})=>{
+ const {writes,errors}=await setup(page);const aid='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+ await page.route('**/rest/v1/attempts?**',r=>r.fulfill({json:{id:aid,mode:'exam',started_at:new Date(Date.now()-120000).toISOString(),completed_at:null,question_ids:[qid],courses:{code:'BCIS 313'}}}));
+ await page.goto('/?resume='+aid);await expect(page.locator('#qtext')).toHaveText('Which value is correct?');await expect(page.locator('#examTimer')).toContainText(/Time left: [78]:/);
+ expect(writes.filter(w=>w.path.endsWith('start_practice_attempt'))).toHaveLength(0);expect(errors).toEqual([]);
+});
+test('review page shows wrong answer, explanation and a targeted practice link',async({page})=>{
+ const {errors}=await setup(page);
+ await page.route('**/rest/v1/attempts?**',r=>r.fulfill({json:[{id:'a',courses:{code:'BCIS 313'}}]}));
+ await page.route('**/rest/v1/attempt_answers?**',r=>r.fulfill({json:[{id:'answer',question_id:qid,is_correct:false,selected_answer:'Wrong one',answered_at:new Date().toISOString(),questions:{id:qid,question:'Review this question',correct_answer:'Correct option',explanation:'A clear explanation',is_active:true,topics:{name:'Basics'},courses:{code:'BCIS 313'},option_explanations:{'Wrong one':'Why it fails'}}}]}));
+ await page.goto('/review.html');await expect(page.locator('#reviewList')).toContainText('Wrong one');await page.getByText('Review answer and explanation',{exact:true}).click();await expect(page.locator('#reviewList')).toContainText('Why it fails');await expect(page.getByRole('link',{name:'Practice this question again →'})).toHaveAttribute('href',new RegExp('reviewQuestion='+qid));expect(errors).toEqual([]);
+});
+test('cloud drafts restore and hints progress without revealing a complete solution',async({page})=>{
+ const {errors,writes}=await setup(page);
+ await page.route('**/rest/v1/lab_drafts?**',r=>r.fulfill({json:[{code:'print("cloud draft")',revision:3}]}));
+ await page.goto('/python-lab.html');await expect(page.locator('#editor')).toHaveValue('print("cloud draft")');
+ for(let n=0;n<3;n++)await page.getByRole('button',{name:'Show next hint',exact:true}).click();await expect(page.locator('#hintList li')).toHaveCount(3);await expect(page.locator('#hintNext')).toBeDisabled();
+ await page.locator('#editor').fill('print("edited")');await page.getByRole('button',{name:'Save cloud draft',exact:true}).click();await expect(page.locator('#draftState')).toContainText('Cloud draft saved');expect(writes.find(w=>w.path.endsWith('save_lab_draft')).body.p_revision).toBe(3);expect(errors).toEqual([]);
+});
+test('mobile navigation and learning pages do not overflow at 390px',async({page})=>{
+ const {errors}=await setup(page);await page.setViewportSize({width:390,height:844});
+ for(const path of ['/projects.html','/review.html','/python-lab.html','/web-lab.html']){await page.goto(path);await expect(page.locator('h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+ await page.goto('/projects.html');await page.getByRole('button',{name:'Open navigation',exact:true}).click();await expect(page.getByRole('link',{name:'Groups',exact:true})).toBeVisible();expect(errors).toEqual([]);
+});
+test('instructor can create a group and assign selected exercises through the UI',async({page})=>{
+ const {errors}=await setup(page);const requests=[];let created=false;
+ await page.route('**/api/classrooms',r=>{const b=r.request().postDataJSON();requests.push(b);if(b.action==='createGroup')created=true;return r.fulfill({json:b.action==='load'?{instructor:true,health:[{kind:'quiz_save',page:'/',count:5,alert:true}],groups:created?[{id:'g',name:'Section A',join_code:'a'.repeat(32),owned:true,members:0,assignments:[],topics:[]}]:[]}:{ok:true}});});
+ await page.goto('/classrooms.html');await page.locator('#groupName').fill('Section A');await page.getByRole('button',{name:'Create group',exact:true}).click();await expect(page.locator('#groups')).toContainText('Section A');await page.getByText('Create assignment',{exact:true}).click();await page.locator('input[name=title]').fill('Basics practice');await page.locator('select[name=kind]').selectOption('lab');await page.locator('input[name=exercise]').first().check();await page.getByRole('button',{name:'Assign to group',exact:true}).click();await expect.poll(()=>requests.some(x=>x.action==='assign'&&x.exercises.length===1)).toBe(true);await expect(page.locator('#healthTitle')).toContainText('Attention');expect(errors).toEqual([]);
+});

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Review mistakes · tamareen</title>
+    <link rel="stylesheet" href="/styles/shared.css" />
+    <link rel="stylesheet" href="/styles/learning.css" />
+  </head>
+  <body class="learningPage">
+    <div id="siteHeader"></div>
+    <main id="main">
+      <p class="eyebrow">LEARN FROM FEEDBACK</p>
+      <h1>Review mistakes</h1>
+      <p>
+        Revisit earlier mistakes. A later correct answer moves a question to
+        reviewed; it becomes due again after seven days.
+      </p>
+      <div class="actions">
+        <label
+          >Course<select id="reviewCourse">
+            <option value="">All courses</option>
+          </select></label
+        ><label
+          >Review status<select id="reviewState">
+            <option value="true">Due for review</option>
+            <option value="false">Reviewed</option>
+            <option value="">All mistakes</option>
+          </select></label
+        ><button id="reviewPractice">Practice due questions</button>
+      </div>
+      <p id="reviewCount" role="status"></p>
+      <div id="reviewList">Loading your saved answers…</div>
+    </main>
+    <div id="siteFooter"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+    <script src="/supabase-client.js"></script>
+    <script src="/js/lab-content.js"></script>
+    <script src="/js/catalog.js"></script>
+    <script src="/js/shared.js"></script>
+    <script src="/js/learning.js"></script>
+    <script src="/js/monitoring.js"></script>
+    <script src="/js/shell.js"></script>
+    <script src="/js/review.js"></script>
+  </body>
+</html>

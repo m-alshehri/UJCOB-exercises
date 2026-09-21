@@ -1333,3 +1333,79 @@ window.LAB_CONTENT = {
     },
   ],
 };
+// Capstones combine collections, branching, arithmetic and reusable functions.
+LAB_CONTENT["python-lab"].push(
+  Object.assign(
+    [
+      "Projects",
+      "Advanced",
+      "Project: sales dashboard",
+      'Define sales_report(rows). Each row has region, amount and status. Include only status="paid"; return a dictionary of total amount per region. Empty input returns {}.',
+      'sales_report([{region:"West",amount:100,status:"paid"}]) → {"West":100}',
+      "def sales_report(rows):\n    pass",
+      [
+        ["expr", "sales_report([])", {}],
+        [
+          "expr",
+          'sales_report([{"region":"West","amount":100,"status":"paid"},{"region":"West","amount":30,"status":"paid"},{"region":"East","amount":20,"status":"pending"},{"region":"East","amount":40,"status":"paid"}])',
+          { West: 130, East: 40 },
+        ],
+        [
+          "expr",
+          'sales_report([{"region":"North","amount":0,"status":"paid"}])',
+          { North: 0 },
+        ],
+      ],
+    ],
+    { id: "project-sales-dashboard", legacyIndex: 30 },
+  ),
+  Object.assign(
+    [
+      "Projects",
+      "Advanced",
+      "Project: inventory planner",
+      "Define reorder(items). Each item has sku, stock and target (nonnegative integers). Return a dictionary mapping only understocked SKUs to target-stock. SKUs are unique.",
+      "stock 3, target 8 → order 5",
+      "def reorder(items):\n    pass",
+      [
+        ["expr", "reorder([])", {}],
+        [
+          "expr",
+          'reorder([{"sku":"A","stock":3,"target":8},{"sku":"B","stock":10,"target":10},{"sku":"C","stock":12,"target":9}])',
+          { A: 5 },
+        ],
+        ["expr", 'reorder([{"sku":"D","stock":0,"target":4}])', { D: 4 }],
+      ],
+    ],
+    { id: "project-inventory-planner", legacyIndex: 31 },
+  ),
+  Object.assign(
+    [
+      "Projects",
+      "Advanced",
+      "Project: customer invoice",
+      'Define invoice(lines). Each line has price and quantity (nonnegative numbers). Return {"subtotal": sum(price*quantity), "discount":10% of subtotal if subtotal>=500 else 0, "total":subtotal-discount}. Round all returned values to 2 decimals.',
+      "[{price:100,quantity:5}] → {subtotal:500,discount:50,total:450}",
+      "def invoice(lines):\n    pass",
+      [
+        ["expr", "invoice([])", { subtotal: 0, discount: 0, total: 0 }],
+        [
+          "expr",
+          'invoice([{"price":100,"quantity":5}])',
+          { subtotal: 500, discount: 50, total: 450 },
+        ],
+        [
+          "expr",
+          'invoice([{"price":49.9,"quantity":10}])',
+          { subtotal: 499, discount: 0, total: 499 },
+        ],
+        [
+          "expr",
+          'invoice([{"price":200,"quantity":2},{"price":80,"quantity":3}])',
+          { subtotal: 640, discount: 64, total: 576 },
+        ],
+      ],
+    ],
+    { id: "project-customer-invoice", legacyIndex: 32 },
+  ),
+);

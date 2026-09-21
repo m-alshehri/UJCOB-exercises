@@ -6,6 +6,7 @@
     <title>My Progress · tamareen</title>
     <link rel="stylesheet" href="/styles/dashboard.css" />
     <link rel="stylesheet" href="/styles/shared.css" />
+    <link rel="stylesheet" href="/styles/learning.css" />
   </head>
   <body>
     <div id="siteHeader"></div>
@@ -14,7 +15,12 @@
       id="drawerBackdrop"
       onclick="closeMobileNav()"
     ></div>
-    <main>
+    <main id="main">
+      <div class="actions">
+        <a href="/review.html">Review mistakes →</a
+        ><a href="/classrooms.html">Groups & assignments →</a>
+      </div>
+      <div id="resumeAttempts"></div>
       <p class="practiceNotice">
         Personal practice results · not verified grades. Statistics cover all
         completed attempts; the history lists the latest 30.
@@ -72,6 +78,8 @@
     <script src="/js/lab-content.js"></script>
     <script src="/js/catalog.js"></script>
     <script src="/js/shared.js"></script>
+    <script src="/js/learning.js"></script>
+    <script src="/js/monitoring.js"></script>
     <script src="/js/progress.js"></script>
     <script src="/js/shell.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Groups & assignments · tamareen</title>
+    <link rel="stylesheet" href="/styles/shared.css" />
+    <link rel="stylesheet" href="/styles/learning.css" />
+  </head>
+  <body class="learningPage">
+    <div id="siteHeader"></div>
+    <main id="main">
+      <p class="eyebrow">LEARN TOGETHER</p>
+      <h1>Groups & assignments</h1>
+      <p>
+        Practice activities, not verified grades. Joining a group shares your
+        practice history and completion with its instructor.
+      </p>
+      <p id="classStatus" role="status"></p>
+      <form id="joinGroup" class="learningCard">
+        <h2>Join your class</h2>
+        <label
+          >Group code<input
+            id="joinCode"
+            required
+            maxlength="32"
+            autocomplete="off" /></label
+        ><button>Join group</button>
+      </form>
+      <form id="createGroup" class="learningCard" hidden>
+        <h2>Create a group</h2>
+        <label
+          >Group name<input id="groupName" required maxlength="120" /></label
+        ><button>Create group</button>
+      </form>
+      <section id="healthPanel" class="learningCard" hidden>
+        <h2 id="healthTitle">Site health</h2>
+        <p>
+          Updates every minute while this page is open. Five matching reports in
+          one hour trigger an alert. No code or message content is collected;
+          reports expire after seven days.
+        </p>
+        <div id="healthList"></div>
+      </section>
+      <div id="groups"></div>
+    </main>
+    <div id="siteFooter"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+    <script src="/supabase-client.js"></script>
+    <script src="/js/lab-content.js"></script>
+    <script src="/js/catalog.js"></script>
+    <script src="/js/shared.js"></script>
+    <script src="/js/learning.js"></script>
+    <script src="/js/monitoring.js"></script>
+    <script src="/js/shell.js"></script>
+    <script src="/js/classrooms.js"></script>
+  </body>
+</html>

@@ -1,0 +1,279 @@
+:root {
+  color-scheme: light;
+}
+body {
+  margin: 0;
+  background: #f4f8fb;
+  color: #153b4b;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  line-height: 1.6;
+}
+main {
+  max-width: 1140px;
+  margin: auto;
+  padding: 28px 20px 60px;
+  min-width: 0;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 2.7rem);
+  line-height: 1.2;
+}
+a {
+  color: #005879;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 1px solid #b6cdd7;
+  border-radius: 10px;
+  background: white;
+  color: #123e50;
+  padding: 10px 16px;
+  min-height: 44px;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+input,
+select {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 10px;
+  border: 1px solid #92b4c2;
+  border-radius: 8px;
+  background: white;
+  color: #153b4b;
+}
+label {
+  display: block;
+  margin: 10px 0;
+}
+label > input:not([type="checkbox"]),
+label > select {
+  display: block;
+  width: 100%;
+}
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+fieldset {
+  border: 1px solid #c5d8e0;
+  border-radius: 10px;
+}
+summary {
+  cursor: pointer;
+  min-height: 44px;
+  font-weight: 650;
+  padding: 8px 0;
+}
+.learningCard {
+  display: block;
+  background: white;
+  border: 1px solid #d6e4ea;
+  border-radius: 18px;
+  padding: 24px;
+  margin: 18px 0;
+  box-shadow: 0 6px 20px #0a354608;
+  overflow-wrap: anywhere;
+}
+.learningCard h2 {
+  font-size: 1.25rem;
+  white-space: pre-wrap;
+}
+.actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+.actions > a {
+  padding: 10px 0;
+}
+.eyebrow {
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: #356071;
+  font-weight: 750;
+}
+.assignment {
+  border-top: 1px solid #d6e4ea;
+  padding: 16px 0;
+}
+.exerciseChoices {
+  max-height: 230px;
+  overflow: auto;
+}
+.choice {
+  display: flex;
+  align-items: center;
+}
+.joinCode {
+  font-family: monospace;
+  user-select: all;
+}
+.healthAlert {
+  background: #fff1e3;
+  border-left: 4px solid #a34400;
+  padding: 12px;
+  color: #713100;
+}
+#healthList {
+  white-space: pre-line;
+}
+.skipLink {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: white;
+  z-index: 10000;
+  padding: 12px;
+}
+.skipLink:focus {
+  top: 12px;
+}
+:focus-visible {
+  outline: 3px solid #006b95 !important;
+  outline-offset: 3px !important;
+}
+table {
+  border-collapse: collapse;
+  max-width: 100%;
+  width: 100%;
+}
+th,
+td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #d6e4ea;
+  overflow-wrap: anywhere;
+}
+caption {
+  text-align: left;
+  font-weight: bold;
+  padding: 8px;
+}
+pre,
+textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+  tab-size: 4;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+textarea {
+  font-family: ui-monospace, monospace !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  min-height: 240px;
+  resize: vertical;
+}
+iframe {
+  max-width: 100%;
+}
+.opt {
+  white-space: pre-wrap;
+  min-height: 44px;
+}
+#qtext {
+  white-space: pre-wrap;
+}
+.chartAlternative {
+  margin-top: 16px;
+}
+#draftState {
+  font-size: 0.9rem;
+  color: #294f60;
+}
+.head {
+  flex-wrap: wrap;
+}
+.nav {
+  flex-wrap: wrap;
+}
+.labSupport {
+  margin-top: 16px;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 720px) {
+  main {
+    padding: 20px 12px 40px;
+  }
+  .learningCard {
+    padding: 16px;
+  }
+  .split,
+  .workspace,
+  .labGrid,
+  .editorGrid,
+  .cols,
+  .two,
+  .layout {
+    grid-template-columns: 1fr !important;
+  }
+  .actions {
+    align-items: stretch;
+  }
+  .actions > button {
+    flex: 1;
+  }
+  .brand span {
+    display: none !important;
+  }
+  .row {
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  th,
+  td {
+    padding: 7px;
+    font-size: 0.85rem;
+  }
+  .labSupport .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .chartBox {
+    min-width: 0;
+  }
+  #console {
+    overflow: auto;
+    max-width: 100%;
+  }
+  .foot {
+    grid-template-columns: 1fr !important;
+  }
+  .nav.open {
+    max-height: 70vh;
+    overflow: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+.learningPage header{background:white;border-bottom:1px solid #d6e4ea}.learningPage .head{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 20px}.learningPage .brandwrap{display:flex;align-items:center;gap:10px;text-decoration:none;color:#004f6e}.learningPage .mark{width:44px;height:44px;flex-shrink:0}.learningPage .brandLogo{width:44px;height:44px}.learningPage .brand{font-size:24px;font-weight:800}.learningPage .brand span{display:block;font-size:11px;font-weight:500}.learningPage .nav{display:flex;gap:16px;align-items:center}.learningPage .navlink{text-decoration:none;font-size:14px;font-weight:650}.learningPage .headerActions{display:flex;gap:16px;align-items:center}.learningPage .gh svg{width:22px;height:22px}.learningPage .menuToggle{display:none}.learningPage footer{background:#07394d;color:white}.learningPage .foot{max-width:1140px;margin:auto;padding:30px 20px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:30px}.learningPage .footbrand{display:flex;gap:12px;font-size:24px;font-weight:750}.learningPage .footbrand small{display:block;font-size:12px;font-weight:400}.learningPage .footcol a{display:block;color:#d9edf6;margin:7px 0}.learningPage .credit{font-size:12px;margin-top:10px}
+@media(max-width:720px){.learningPage .head{gap:12px}.learningPage .menuToggle{display:block}.learningPage .nav{display:none;width:100%;order:3}.learningPage .nav.open{display:flex;flex-direction:column;align-items:start;padding:10px 0}.learningPage .gh{display:none}}
+main .card,main .learningCard,main .layout>*{min-width:0}.example,.console{overflow-wrap:anywhere;white-space:pre-wrap!important}.stats,.toolbar{flex-wrap:wrap}main p{overflow-wrap:anywhere}
+@media(max-width:720px){.split,.workspace,.labGrid,.editorGrid,.cols,.two,.layout{grid-template-columns:minmax(0,1fr)!important}.card{max-width:100%;box-sizing:border-box}.actions>*{min-width:0}.console{overflow-x:auto}}
+@media(max-width:720px){.actions>button{flex:1 1 160px;overflow-wrap:anywhere}.actions>label{flex:1 1 140px}}

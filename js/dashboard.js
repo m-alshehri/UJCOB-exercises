@@ -39,7 +39,14 @@ async function load() {
       }))
       .sort((a, b) => a.avg - b.avg);
     mastery.innerHTML = gs.length
-      ? ""
+      ? '<details class="chartAlternative"><summary>Course chart data</summary><table><tr><th>Course</th><th>Average</th><th>Attempts</th></tr>' +
+        gs
+          .map(
+            (x) =>
+              `<tr><th>${Tamareen.escape(x.code)}</th><td>${x.avg}%</td><td>${x.n}</td></tr>`,
+          )
+          .join("") +
+        "</table></details>"
       : "Complete your first quiz to start building your mastery profile.";
     const chartText = "#173746",
       grid = "#dce9ee";
@@ -83,16 +90,10 @@ async function load() {
       cc.parentElement.innerHTML =
         '<div class="empty">Complete your first quiz to see course mastery.</div>';
     const rec = document.getElementById("recommend");
-    if (gs.length && rec) {
+    if (rec) {
       rec.style.display = "block";
-      rec.innerHTML =
-        "<b>Recommended next practice:</b> " +
-        gs[0].code +
-        " · " +
-        Tamareen.escape(gs[0].name) +
-        " — currently your lowest average at " +
-        gs[0].avg +
-        '%. <a href="/" style="color:inherit">Practice now →</a>';
+      rec.textContent =
+        "Complete varied practice questions to build an evidence-based recommendation.";
     }
     const tm = document.getElementById("topicMastery");
     if (rows.length) {
@@ -104,30 +105,33 @@ async function load() {
             client
               .from("attempt_answers")
               .select(
-                "id,is_correct,questions(question,topics(name),courses(code))",
+                "id,question_id,answered_at,is_correct,questions(question,topics(name),courses(code))",
               )
               .in("attempt_id", ids.slice(offset, offset + 100))
               .order("id"),
           )),
         );
       }
-      const tg = {};
-      (ans || []).forEach((a) => {
-        const q = Array.isArray(a.questions) ? a.questions[0] : a.questions;
-        const topic = Array.isArray(q?.topics) ? q.topics[0] : q?.topics;
-        const course = Array.isArray(q?.courses) ? q.courses[0] : q?.courses;
-        const t = topic?.name || "General",
-          code = course?.code || "",
-          k = code + "|" + t;
-        if (!tg[k]) tg[k] = { code, topic: t, ok: 0, n: 0 };
-        tg[k].n++;
-        if (a.is_correct) tg[k].ok++;
-      });
-      const ts = Object.values(tg)
-        .map((x) => ({ ...x, p: Math.round((x.ok / x.n) * 100) }))
-        .sort((a, b) => a.p - b.p);
+      const evidence = Learning.profile(ans);
+      const recommended = Learning.recommendation(evidence);
+      if (rec) rec.textContent = recommended.title + ". " + recommended.text;
+      const ts = evidence.map((t) => ({
+        code: t.code,
+        topic: t.name,
+        p: t.pct,
+        n: t.total,
+        state: t.state,
+      }));
       if (ts.length) {
-        tm.innerHTML = "";
+        tm.innerHTML =
+          '<details class="chartAlternative"><summary>Topic chart data and evidence</summary><table><tr><th>Topic</th><th>Recent accuracy</th><th>Distinct questions</th><th>Evidence</th></tr>' +
+          ts
+            .map(
+              (t) =>
+                `<tr><th>${Tamareen.escape(t.code + " · " + t.topic)}</th><td>${t.p}%</td><td>${t.n}</td><td>${Tamareen.escape(t.state)}</td></tr>`,
+            )
+            .join("") +
+          "</table></details>";
         const top = ts.slice(0, 8);
         new Chart(document.getElementById("topicChart"), {
           type: "bar",
@@ -219,6 +223,19 @@ async function load() {
       byDay[d].push(Number(x.score_percent || 0));
     });
     const days = Object.keys(byDay).slice(-12);
+    const activityText = document.createElement("details");
+    activityText.className = "chartAlternative";
+    activityText.innerHTML =
+      "<summary>Activity chart data</summary>" +
+      days
+        .map(
+          (d) =>
+            `<p>${Tamareen.escape(d)}: ${byDay[d].length} attempts, average ${Math.round(byDay[d].reduce((a, b) => a + b, 0) / byDay[d].length)}%</p>`,
+        )
+        .join("");
+    document
+      .getElementById("activityChart")
+      .parentElement.insertAdjacentElement("afterend", activityText);
     if (days.length)
       new Chart(document.getElementById("activityChart"), {
         data: {
@@ -312,3 +329,5 @@ async function load() {
   }
 }
 load();
+
+Learning.showResume();
