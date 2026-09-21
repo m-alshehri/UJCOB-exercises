@@ -1,0 +1,20 @@
+{
+  "name": "tamareen",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js",
+    "test": "node --test tests/*.test.js",
+    "test:e2e": "playwright test",
+    "format": "prettier --write '*.html' 'js/**/*.js' 'api/**/*.js' 'workers/*.js' 'styles/*.css'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.57.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.1",
+    "prettier": "3.6.2",
+    "@electric-sql/pglite": "0.3.10"
+  }
+}

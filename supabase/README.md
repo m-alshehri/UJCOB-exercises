@@ -1,23 +1,7 @@
-# tamareen database
+# Supabase setup
 
-This folder contains the first database layer for tamareen using Supabase/PostgreSQL.
+Run `setup.sql` as one transaction for a new installation or an upgrade. It includes the current versioned migrations and repeatable question/topic seed. See the root README for release sequencing, environment variables, and Auth redirect configuration.
 
-## Tables
+`schema.sql` contains the complete schema without question seeding. Do not execute `migrations/001_base.sql` alone against an upgraded database because it represents the original direct-write policies. `lab_progress_migration.sql` is retained for historical reference; current setup includes the newer catalogue validation.
 
-- courses — six tamareen courses
-- topics — course topics
-- questions — question bank and explanations
-- resources — course references
-- profiles — optional student profiles linked to Supabase Auth
-- attempts — quiz attempts and scores
-- attempt_answers — answers and mistake history
-
-## Setup
-
-1. Create/open the tamareen Supabase project.
-2. Open **SQL Editor**.
-3. Run `schema.sql`.
-4. Add the Supabase project URL and anon/publishable key to the application configuration.
-5. The next application migration will read questions/resources from Supabase and write completed attempts and answers.
-
-The existing static question bank remains untouched during this database foundation step, so the live practice experience is not replaced until the database-backed client is ready.
+Regenerate SQL after content changes with `node scripts/generate-database.cjs`. Stable question IDs and existing student history are preserved. No production migration is performed by the static build.
