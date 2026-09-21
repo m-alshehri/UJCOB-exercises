@@ -9,6 +9,7 @@ const user = "11111111-1111-4111-8111-111111111111",
 await db.exec(
   `create role authenticated;create schema auth;create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}');create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth,public to authenticated;grant execute on function auth.uid() to authenticated;`,
 );
+await db.exec("create role anon; alter default privileges in schema public grant execute on functions to anon;");
 const setup = (await readFile("supabase/setup.sql", "utf8")).replace(
   "create extension if not exists pgcrypto;",
   "",
@@ -30,6 +31,14 @@ async function asUser(id, fn) {
     await db.exec("reset role");
   }
 }
+test("anonymous default grants cannot execute protected RPCs", async () => {
+  const result = await db.query("select proname, has_function_privilege('anon', oid, 'execute') as anonymous, has_function_privilege('authenticated', oid, 'execute') as signed_in from pg_proc where pronamespace='public'::regnamespace and prosecdef");
+  assert.equal(result.rows.length, 7);
+  for (const row of result.rows) {
+    assert.equal(row.anonymous, false, row.proname);
+    assert.equal(row.signed_in, row.proname !== "sync_student_profile", row.proname);
+  }
+});
 test("setup is repeatable and seed IDs/counts are preserved", async () => {
   const before = (await db.query("select count(*)::int n from questions"))
     .rows[0].n;
