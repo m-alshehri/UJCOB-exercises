@@ -30,12 +30,17 @@
   function draw() {
     const code = select.value,
       rows = Pathways.progress(code, answers),
-      next = rows.find((x) => !x.strong),
+      diagnostic = attempts.find((a) => a.courses?.code === code),
+      next = Pathways.placement(
+        code,
+        answers,
+        diagnostic ? answers.filter((a) => a.attempt_id === diagnostic.id) : [],
+      ),
       e = Tamareen.escape,
       t = I18n.t;
     document.getElementById("diagnosticLink").href =
       "/?course=" + encodeURIComponent(code) + "&diagnostic=1";
-    const diagnostic = attempts.find((a) => a.courses?.code === code);
+
     summary.textContent =
       t("Recommended starting point") +
       ": " +
@@ -46,6 +51,8 @@
         : t("Apply your skills in the lab")) +
       ". " +
       t("Mastery needs 3 distinct recent questions and 70% accuracy.") +
+      " " +
+      t("A diagnostic suggests a starting point; practice confirms mastery.") +
       (diagnostic
         ? " " +
           t("Latest diagnostic") +

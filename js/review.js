@@ -47,11 +47,11 @@
       document.getElementById("reviewCount").textContent =
         shown.length + " questions";
       const btn = document.getElementById("reviewPractice");
-      btn.disabled = !shown.some((a) => a.questions?.is_active);
+      btn.disabled = !shown.some((a) => a.due && a.questions?.is_active);
       btn.onclick = () => {
         const course =
           filter.value ||
-          shown.find((a) => a.questions?.is_active)?.questions.courses.code;
+          shown.find((a) => a.due && a.questions?.is_active)?.questions.courses.code;
         location.href =
           "/?course=" + encodeURIComponent(course) + "&spaced=1";
       };

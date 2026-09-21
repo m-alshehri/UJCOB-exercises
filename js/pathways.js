@@ -135,5 +135,21 @@ window.Pathways = (() => {
       })
       .sort((a, b) => a.dueAt - b.dueAt);
   }
-  return { lessons, progress, diagnostic, schedule };
+  function placement(code, answers, diagnosticAnswers, now = Date.now()) {
+    const rows = progress(code, answers, now),
+      diagnosticRows = progress(code, diagnosticAnswers, now);
+    return (
+      rows.find(
+        (l) =>
+          !l.strong &&
+          !(
+            l.total < 3 &&
+            l.pct === 100 &&
+            diagnosticRows[l.index].total >= 2 &&
+            diagnosticRows[l.index].pct === 100
+          ),
+      ) || null
+    );
+  }
+  return { lessons, progress, diagnostic, schedule, placement };
 })();

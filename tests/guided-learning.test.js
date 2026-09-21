@@ -114,3 +114,11 @@ test("quality uses latest completed answer per learner and labels small samples"
   assert.equal(r.accuracy, 100);
   assert.equal(r.insufficient, true);
 });
+
+test('diagnostic moves the provisional starting point without claiming mastery',()=>{
+ const now=Date.parse('2026-09-22'),xs=[a('2026-09-21',true,'a','variable'),a('2026-09-21',true,'b','int')];
+ assert.equal(P.progress('BCIS 313',xs,now)[0].strong,false);
+ assert.equal(P.placement('BCIS 313',xs,xs,now).index,1);
+ assert.equal(P.placement('BCIS 313',[...xs,a('2026-09-22',false,'c','float')],xs,now).index,0);
+});
+test('a later wrong answer overrides diagnostic placement even with only two distinct questions',()=>{const xs=[a('2026-09-20',true,'a','variable'),a('2026-09-20',true,'b','int')];assert.equal(P.placement('BCIS 313',[...xs,a('2026-09-21',false,'a','variable')],xs,Date.parse('2026-09-22')).index,0);});
