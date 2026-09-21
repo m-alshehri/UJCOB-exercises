@@ -26,7 +26,7 @@ begin
  if d.user_id is null then raise exception 'Draft changed on another device. Load the cloud version before saving again.'; end if;
  return jsonb_build_object('revision',d.revision,'updated_at',d.updated_at);
 end $$;
-revoke all on function public.save_lab_draft(text,text,text,integer) from public;
+revoke all on function public.save_lab_draft(text,text,text,integer) from public, anon;
 grant execute on function public.save_lab_draft(text,text,text,integer) to authenticated;
 
 create table if not exists public.study_groups (
@@ -69,7 +69,7 @@ begin
  delete from public.health_events where created_at<now()-interval '7 days';
  return true;
 end $$;
-revoke all on function public.record_health_event(text,text) from public;
+revoke all on function public.record_health_event(text,text) from public, anon;
 grant execute on function public.record_health_event(text,text) to authenticated;
 notify pgrst, 'reload schema';
 insert into public.lab_exercises(lab_type,exercise_key,course_code,title,legacy_index) values
@@ -77,3 +77,13 @@ insert into public.lab_exercises(lab_type,exercise_key,course_code,title,legacy_
 ('python-lab','project-inventory-planner','BCIS 313','Project: inventory planner',31),
 ('python-lab','project-customer-invoice','BCIS 313','Project: customer invoice',32)
 on conflict(lab_type,exercise_key) do nothing;
+
+-- Supabase default grants can give anon an explicit EXECUTE grant.
+-- Revoking PUBLIC alone does not remove that independent grant.
+revoke execute on function public.consume_tutor_quota() from public, anon;
+revoke execute on function public.finish_practice_attempt(uuid) from public, anon;
+revoke execute on function public.record_health_event(text,text) from public, anon;
+revoke execute on function public.save_lab_draft(text,text,text,integer) from public, anon;
+revoke execute on function public.start_practice_attempt(uuid,uuid,uuid[],text) from public, anon;
+revoke execute on function public.submit_practice_answer(uuid,uuid,text) from public, anon;
+revoke execute on function public.sync_student_profile() from public, anon, authenticated;
