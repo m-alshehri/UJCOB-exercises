@@ -225,7 +225,7 @@ test('cloud drafts restore and hints progress without revealing a complete solut
 });
 test('mobile navigation and learning pages do not overflow at 390px',async({page})=>{
  const {errors}=await setup(page);await page.setViewportSize({width:390,height:844});
- for(const path of ['/projects.html','/review.html','/python-lab.html','/web-lab.html']){await page.goto(path);await expect(page.locator('h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+ for(const path of ['/projects.html','/review.html','/python-lab.html','/web-lab.html']){await page.goto(path);await expect(page.locator('h1')).toBeVisible();expect(await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth,overflow:[...document.querySelectorAll("body *")].filter(e=>e.getBoundingClientRect().right>innerWidth+1).map(e=>({tag:e.tagName,id:e.id,class:e.className,width:e.getBoundingClientRect().width,text:e.textContent.slice(0,70)})).slice(0,15)})),path).toMatchObject({width:390});}
  await page.goto('/projects.html');await page.getByRole('button',{name:'Open navigation',exact:true}).click();await expect(page.getByRole('link',{name:'Groups',exact:true})).toBeVisible();expect(errors).toEqual([]);
 });
 test('instructor can create a group and assign selected exercises through the UI',async({page})=>{

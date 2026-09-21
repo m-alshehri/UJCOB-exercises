@@ -83,6 +83,7 @@
     try {
       const data = await act({ action: "load" });
       $("createGroup").hidden = !data.instructor;
+      if ($("instructorTools")) $("instructorTools").hidden = !data.instructor;
       $("healthPanel").hidden = !data.instructor;
       if (data.instructor) {
         const alerts = data.health.filter((x) => x.alert);
