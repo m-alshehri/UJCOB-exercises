@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Learning paths · tamareen</title>
+    <link rel="stylesheet" href="/styles/shared.css" />
+    <link rel="stylesheet" href="/styles/learning.css" />
+  </head>
+  <body class="learningPage">
+    <div id="siteHeader"></div>
+    <main id="main">
+      <p class="eyebrow">LEARN WITH A PLAN</p>
+      <h1>Learning paths</h1>
+      <p>
+        Start with a short diagnostic, then follow the recommended step. All
+        steps remain available.
+      </p>
+      <label>Course<select id="pathCourse"></select></label>
+      <div class="actions">
+        <a class="primaryLink" id="nextStep">Your next step →</a
+        ><a id="diagnosticLink">Take a diagnostic →</a
+        ><a href="/review.html">Spaced review →</a>
+      </div>
+      <p id="pathSummary" role="status">Loading progress…</p>
+      <div id="pathList"></div>
+    </main>
+    <div id="siteFooter"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+    <script src="/supabase-client.js"></script>
+    <script src="/question-banks.js"></script>
+    <script src="/js/lab-content.js"></script>
+    <script src="/js/catalog.js"></script>
+    <script src="/js/shared.js"></script>
+    <script src="/js/learning.js"></script>
+    <script src="/js/pathways.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script src="/js/monitoring.js"></script>
+    <script src="/js/shell.js"></script>
+    <script src="/js/pathway-page.js"></script>
+  </body>
+</html>

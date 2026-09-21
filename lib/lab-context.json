@@ -1,0 +1,316 @@
+{
+  "python-lab": {
+    "print-a-message": {
+      "title": "Print a message",
+      "task": "Print exactly: Hello, tamareen!"
+    },
+    "arithmetic-total": {
+      "title": "Arithmetic total",
+      "task": "Set price=80 and quantity=3, then print their product."
+    },
+    "calculate-vat": {
+      "title": "Calculate VAT",
+      "task": "Define total_with_vat(price) that returns price plus 15% VAT."
+    },
+    "convert-minutes": {
+      "title": "Convert minutes",
+      "task": "Define hours(minutes) that converts minutes to hours."
+    },
+    "positive-or-negative": {
+      "title": "Positive or negative",
+      "task": "Define sign(n) returning Positive, Negative, or Zero."
+    },
+    "pass-or-fail": {
+      "title": "Pass or fail",
+      "task": "Define result(mark) returning Pass for marks >= 60, otherwise Fail."
+    },
+    "discount-rule": {
+      "title": "Discount rule",
+      "task": "Define discount(total): return 0.10*total if total >= 500, otherwise 0."
+    },
+    "largest-of-three": {
+      "title": "Largest of three",
+      "task": "Define largest(a,b,c) returning the largest value."
+    },
+    "count-1-to-5": {
+      "title": "Count 1 to 5",
+      "task": "Use a loop to print 1 through 5, one per line."
+    },
+    "sum-1-to-10": {
+      "title": "Sum 1 to 10",
+      "task": "Use a loop to calculate and print the sum 1 through 10."
+    },
+    "even-numbers": {
+      "title": "Even numbers",
+      "task": "Define evens(n) returning a list of even numbers from 1 through n."
+    },
+    "factorial": {
+      "title": "Factorial",
+      "task": "Define factorial(n) using iteration."
+    },
+    "revenue": {
+      "title": "Revenue",
+      "task": "Define revenue(price,quantity)."
+    },
+    "profit": {
+      "title": "Profit",
+      "task": "Define profit(revenue,cost) returning revenue minus cost."
+    },
+    "commission": {
+      "title": "Commission",
+      "task": "Define commission(sales,rate=0.05) returning sales × rate."
+    },
+    "clean-customer-name": {
+      "title": "Clean customer name",
+      "task": "Strip outer spaces and convert a name to title case."
+    },
+    "email-domain": {
+      "title": "Email domain",
+      "task": "Define domain(email) returning the part after @."
+    },
+    "count-words": {
+      "title": "Count words",
+      "task": "Define word_count(text) returning number of whitespace-separated words."
+    },
+    "mask-account": {
+      "title": "Mask account",
+      "task": "Define mask(value) keeping only the last 4 characters and replacing earlier characters with *."
+    },
+    "average-sales": {
+      "title": "Average sales",
+      "task": "Return the arithmetic mean of a list."
+    },
+    "highest-sale": {
+      "title": "Highest sale",
+      "task": "Return the largest value in sales."
+    },
+    "above-target": {
+      "title": "Above target",
+      "task": "Return values greater than target."
+    },
+    "remove-duplicates": {
+      "title": "Remove duplicates",
+      "task": "Return unique values while preserving original order."
+    },
+    "order-total": {
+      "title": "Order total",
+      "task": "Multiply price by quantity from a dictionary."
+    },
+    "inventory-value": {
+      "title": "Inventory value",
+      "task": "Given {product: {price,qty}}, return total inventory value."
+    },
+    "top-seller": {
+      "title": "Top seller",
+      "task": "Given {name:sales}, return the name with highest sales."
+    },
+    "sales-summary": {
+      "title": "Sales summary",
+      "task": "Return a dictionary with total and average for a sales list."
+    },
+    "frequency-table": {
+      "title": "Frequency table",
+      "task": "Return a dictionary counting each value in a list."
+    },
+    "customer-spend": {
+      "title": "Customer spend",
+      "task": "Given a list of (customer,amount) tuples, aggregate total spend by customer."
+    },
+    "moving-average": {
+      "title": "Moving average",
+      "task": "Return averages of each consecutive window of size k."
+    },
+    "project-sales-dashboard": {
+      "title": "Project: sales dashboard",
+      "task": "Define sales_report(rows). Each row has region, amount and status. Include only status=\"paid\"; return a dictionary of total amount per region. Empty input returns {}."
+    },
+    "project-inventory-planner": {
+      "title": "Project: inventory planner",
+      "task": "Define reorder(items). Each item has sku, stock and target (nonnegative integers). Return a dictionary mapping only understocked SKUs to target-stock. SKUs are unique."
+    },
+    "project-customer-invoice": {
+      "title": "Project: customer invoice",
+      "task": "Define invoice(lines). Each line has price and quantity (nonnegative numbers). Return {\"subtotal\": sum(price*quantity), \"discount\":10% of subtotal if subtotal>=500 else 0, \"total\":subtotal-discount}. Round all returned values to 2 decimals."
+    }
+  },
+  "sql-lab": {
+    "all-customers": {
+      "title": "All customers",
+      "task": "Return every column and row from Customers."
+    },
+    "customer-names": {
+      "title": "Customer names",
+      "task": "Return only Name from Customers ordered alphabetically."
+    },
+    "product-catalog": {
+      "title": "Product catalog",
+      "task": "Return ProductName and Price ordered by ProductName."
+    },
+    "jeddah-customers": {
+      "title": "Jeddah customers",
+      "task": "Return Name for customers in Jeddah, ordered by Name."
+    },
+    "expensive-products": {
+      "title": "Expensive products",
+      "task": "Return ProductName and Price where Price > 100, highest first."
+    },
+    "price-range": {
+      "title": "Price range",
+      "task": "Return ProductName and Price where Price is between 75 and 200 inclusive, ordered by Price."
+    },
+    "name-begins-with-s": {
+      "title": "Name begins with S",
+      "task": "Return customers whose Name begins with S."
+    },
+    "count-customers": {
+      "title": "Count customers",
+      "task": "Return COUNT(*) as TotalCustomers."
+    },
+    "average-price": {
+      "title": "Average price",
+      "task": "Return AVG(Price) as AveragePrice."
+    },
+    "maximum-price": {
+      "title": "Maximum price",
+      "task": "Return MAX(Price) as MaxPrice."
+    },
+    "total-quantity-sold": {
+      "title": "Total quantity sold",
+      "task": "Return SUM(Quantity) as TotalQuantity from OrderItems."
+    },
+    "customers-per-city": {
+      "title": "Customers per city",
+      "task": "Return City and COUNT(*) as CustomerCount, ordered by City."
+    },
+    "products-per-category": {
+      "title": "Products per category",
+      "task": "Return Category and product count as ProductCount, ordered by Category."
+    },
+    "categories-above-average-100": {
+      "title": "Categories above average 100",
+      "task": "Return Category and AVG(Price) as AvgPrice only for categories with average price > 100, ordered by Category."
+    },
+    "orders-and-customers": {
+      "title": "Orders and customers",
+      "task": "Return OrderID and customer Name for every order, ordered by OrderID."
+    },
+    "order-product-details": {
+      "title": "Order product details",
+      "task": "Return OrderID, ProductName, Quantity ordered by OrderID then ProductName."
+    },
+    "customer-order-dates": {
+      "title": "Customer order dates",
+      "task": "Return customer Name, OrderID and OrderDate ordered by OrderID."
+    },
+    "order-line-value": {
+      "title": "Order line value",
+      "task": "Return OrderID, ProductName, and Quantity*Price as LineTotal, ordered by OrderID then ProductName."
+    },
+    "above-average-price": {
+      "title": "Above average price",
+      "task": "Return ProductName and Price for products above overall average price, ordered by Price."
+    },
+    "customers-with-orders": {
+      "title": "Customers with orders",
+      "task": "Return Name of customers who have at least one order, ordered by Name."
+    },
+    "most-expensive-products": {
+      "title": "Most expensive products",
+      "task": "Return ProductName and Price for product(s) matching the maximum price."
+    },
+    "unique-cities": {
+      "title": "Unique cities",
+      "task": "Return distinct City values ordered alphabetically."
+    },
+    "unique-categories": {
+      "title": "Unique categories",
+      "task": "Return distinct Category values ordered alphabetically."
+    },
+    "orders-per-customer": {
+      "title": "Orders per customer",
+      "task": "Return Name and number of orders as OrderCount for customers who have orders, ordered by Name."
+    },
+    "revenue-by-product": {
+      "title": "Revenue by product",
+      "task": "Return ProductName and SUM(Quantity*Price) as Revenue for sold products, ordered by Revenue descending."
+    },
+    "customers-without-orders": {
+      "title": "Customers without orders",
+      "task": "Return Name of customers with no orders, ordered by Name."
+    },
+    "insert-customer": {
+      "title": "Insert customer",
+      "task": "Insert CustomerID 6, Nora, Jeddah."
+    },
+    "update-price": {
+      "title": "Update price",
+      "task": "Change ProductID 2 price to 150."
+    },
+    "delete-customer": {
+      "title": "Delete customer",
+      "task": "Delete CustomerID 5."
+    },
+    "customer-total-spend": {
+      "title": "Customer total spend",
+      "task": "Return Name and SUM(Quantity*Price) as TotalSpend for customers with purchases, ordered by TotalSpend descending."
+    }
+  },
+  "web-lab": {
+    "build-a-heading": {
+      "title": "Build a heading",
+      "task": "Create an H1 heading containing the text Welcome to Tamareen."
+    },
+    "style-a-button": {
+      "title": "Style a button",
+      "task": "Create a button and use CSS to give it padding and a border-radius."
+    },
+    "create-a-link": {
+      "title": "Create a link",
+      "task": "Add a hyperlink to https://tamareen.online with the visible text Tamareen."
+    },
+    "javascript-interaction": {
+      "title": "JavaScript interaction",
+      "task": "Create a button that changes the paragraph text when clicked."
+    },
+    "responsive-layout": {
+      "title": "Responsive layout",
+      "task": "Create a CSS media query for screens up to 600px wide."
+    }
+  },
+  "erp-lab": {
+    "order-to-cash-flow": {},
+    "procure-to-pay-flow": {},
+    "shared-master-data": {},
+    "transaction-impact": {},
+    "fit-vs-customization": {},
+    "change-management": {},
+    "erp-vs-siloed-systems": {},
+    "module-connection": {},
+    "process-bottleneck": {},
+    "go-live-readiness": {}
+  },
+  "bi-lab": {
+    "from-data-to-decision": {},
+    "choose-a-kpi": {},
+    "trend-visualization": {},
+    "category-comparison": {},
+    "historical-analysis": {},
+    "dimension-or-measure": {},
+    "descriptive-analytics": {},
+    "predictive-question": {},
+    "executive-dashboard": {},
+    "drill-down": {}
+  },
+  "analytics-lab": {
+    "missing-values": {},
+    "train-test-separation": {},
+    "central-tendency": {},
+    "correlation": {},
+    "classification-task": {},
+    "regression-task": {},
+    "confusion-matrix": {},
+    "overfitting": {},
+    "optimization-decision": {},
+    "business-understanding": {}
+  }
+}

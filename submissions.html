@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Project submissions · tamareen</title>
+    <link rel="stylesheet" href="/styles/shared.css" />
+    <link rel="stylesheet" href="/styles/learning.css" />
+  </head>
+  <body class="learningPage">
+    <div id="siteHeader"></div>
+    <main id="main">
+      <h1>Project submissions</h1>
+      <p>
+        Save a personal submission or share it with your group instructor. Each
+        resubmission keeps the previous version and feedback.
+      </p>
+      <details class="learningCard">
+        <summary>Assessment rubric</summary>
+        <p>
+          Each criterion is scored 0–4: 0 missing, 1 beginning, 2 partial, 3
+          proficient, 4 complete.
+        </p>
+        <ul>
+          <li>
+            Correctness: meets the input/output contract and handles boundaries.
+          </li>
+          <li>
+            Clarity: readable structure, meaningful names and a clear
+            explanation.
+          </li>
+          <li>Testing: examples cover typical, empty and boundary cases.</li>
+        </ul>
+        <p>
+          Instructor feedback supports learning; these are not official grades.
+        </p>
+      </details>
+      <p id="submissionStatus" role="status">Loading…</p>
+      <form id="submissionForm" class="learningCard" hidden>
+        <label
+          >Project<select id="submissionProject">
+            <option value="project-sales-dashboard">Sales dashboard</option>
+            <option value="project-inventory-planner">Inventory planner</option>
+            <option value="project-customer-invoice">Customer invoice</option>
+          </select></label
+        ><label
+          >Share with<select id="submissionGroup">
+            <option value="">Personal only</option>
+          </select></label
+        ><button type="button" id="loadProjectDraft">Load cloud draft</button
+        ><label
+          >Your code<textarea
+            id="submissionCode"
+            class="codeEditor"
+            required
+            maxlength="100000"
+            dir="ltr"
+          ></textarea></label
+        ><label
+          >Explain your approach and tests<textarea
+            id="submissionReflection"
+            required
+            maxlength="2000"
+          ></textarea></label
+        ><button type="submit">Submit new version</button>
+      </form>
+      <h2>Submission history</h2>
+      <label
+        >Show<select id="submissionFilter">
+          <option value="all">All submissions</option>
+          <option value="mine">My submissions</option>
+          <option value="review">Awaiting my feedback</option>
+        </select></label
+      >
+      <div id="submissionList"></div>
+    </main>
+    <div id="siteFooter"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+    <script src="/supabase-client.js"></script>
+    <script src="/question-banks.js"></script>
+    <script src="/js/lab-content.js"></script>
+    <script src="/js/catalog.js"></script>
+    <script src="/js/shared.js"></script>
+    <script src="/js/learning.js"></script>
+    <script src="/js/pathways.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script src="/js/monitoring.js"></script>
+    <script src="/js/shell.js"></script>
+    <script src="/js/submissions.js"></script>
+  </body>
+</html>

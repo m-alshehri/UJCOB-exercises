@@ -1,3 +1,4 @@
+import "./lab-context.js";
 import { mkdir, cp, readdir, rm, readFile } from "node:fs/promises";
 import vm from "node:vm";
 await rm("dist", { recursive: true, force: true });

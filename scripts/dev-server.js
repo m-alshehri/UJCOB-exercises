@@ -36,7 +36,7 @@ http
           res.end(JSON.stringify(data));
         };
         const name = path.split("/").at(-1);
-        if (!["tutor", "instructor-analytics", "classrooms"].includes(name)) {
+        if (!["tutor", "instructor-analytics", "classrooms", "learning-admin"].includes(name)) {
           res.statusCode = 404;
           return res.end();
         }

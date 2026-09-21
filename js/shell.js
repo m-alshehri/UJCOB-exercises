@@ -101,3 +101,5 @@ document.querySelectorAll("canvas").forEach((c) => {
   c.setAttribute("role", "img");
   c.setAttribute("aria-label", "Chart. Equivalent data is listed below.");
 });
+
+for(const nav of document.querySelectorAll('.head>.nav')){for(const [href,text] of [['/pathways.html','Learning paths'],['/submissions.html','Submissions']]){const a=document.createElement('a');a.href=href;a.className='navlink';a.textContent=text;a.onclick=closeMobileNav;nav.append(a);}}
