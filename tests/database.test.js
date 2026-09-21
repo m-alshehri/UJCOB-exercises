@@ -9,7 +9,7 @@ const user = "11111111-1111-4111-8111-111111111111",
 await db.exec(
   `create role authenticated;create schema auth;create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}');create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth,public to authenticated;grant execute on function auth.uid() to authenticated;`,
 );
-await db.exec("create role anon; alter default privileges in schema public grant execute on functions to anon;");
+await db.exec("create role anon; create role service_role bypassrls; alter default privileges in schema public grant execute on functions to anon;");
 const setup = (await readFile("supabase/setup.sql", "utf8")).replace(
   "create extension if not exists pgcrypto;",
   "",
@@ -33,7 +33,7 @@ async function asUser(id, fn) {
 }
 test("anonymous default grants cannot execute protected RPCs", async () => {
   const result = await db.query("select proname, has_function_privilege('anon', oid, 'execute') as anonymous, has_function_privilege('authenticated', oid, 'execute') as signed_in from pg_proc where pronamespace='public'::regnamespace and prosecdef");
-  assert.equal(result.rows.length, 7);
+  assert.equal(result.rows.length, 8);
   for (const row of result.rows) {
     assert.equal(row.anonymous, false, row.proname);
     assert.equal(row.signed_in, row.proname !== "sync_student_profile", row.proname);
@@ -223,3 +223,27 @@ test("health events accept only defined categories and cap per-user ingestion", 
   });
 });
 test.after(() => db.close());
+
+test('content publish preserves old question versions and stale drafts are rejected',async()=>{
+ const q=first;const draft='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+ const payload={course:(await db.query('select code from courses where id=$1',[q.course_id])).rows[0].code,topic:'Content test',question:'New version?',correct:'Yes',wrong:['A','B','C'],explanation:'Reason',kind:'application',rationales:{Yes:'yes',A:'a',B:'b',C:'c'}};
+ await assert.rejects(asUser(user,()=>db.query('select manage_question_draft($1,0,$2,$3,false,$4)',[draft,JSON.stringify(payload),user,q.id])),/permission denied/i);
+ await db.query('select manage_question_draft($1,0,$2,$3,false,$4)',[draft,JSON.stringify(payload),user,q.id]);
+ await assert.rejects(db.query('select manage_question_draft($1,0,$2,$3,true,$4)',[draft,JSON.stringify(payload),user,q.id]),/Draft changed/);
+ const published=(await db.query('select manage_question_draft($1,1,$2,$3,true,$4) result',[draft,JSON.stringify(payload),user,q.id])).rows[0].result;
+ assert.notEqual(published.question_id,q.id);assert.equal((await db.query('select is_active from questions where id=$1',[q.id])).rows[0].is_active,false);
+ assert.equal((await db.query('select count(*)::int n from content_versions where draft_id=$1',[draft])).rows[0].n,3);
+ await asUser(user,async()=>{assert.equal((await db.query('select id from questions where id=$1',[q.id])).rows.length,1);assert.equal((await db.query('select * from content_drafts')).rows.length,0);});
+});
+test('project submissions enforce membership, keep immutable versions, and hide other students work',async()=>{
+ const group='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',id='ffffffff-ffff-4fff-8fff-ffffffffffff';
+ await db.query('insert into study_groups(id,owner_id,name) values($1,$2,$3)',[group,other,'Class']);
+ await assert.rejects(db.query('select submit_learning_project($1,$2,$3,$4,$5,$6)',[id,user,group,'project-inventory-planner','code','tests']),/Join the group/);
+ await db.query('insert into group_members(group_id,user_id) values($1,$2)',[group,user]);
+ const args=[id,user,group,'project-inventory-planner','code','tests'];const save=()=>db.query('select submit_learning_project($1,$2,$3,$4,$5,$6) result',args);
+ assert.equal((await save()).rows[0].result.version,1);assert.equal((await save()).rows[0].result.version,1);
+ args[0]='dddddddd-dddd-4ddd-8ddd-cccccccccccc';args[4]='new code';assert.equal((await save()).rows[0].result.version,2);
+ await db.query('insert into project_feedback(submission_id,instructor_id,feedback,correctness,clarity,testing) values($1,$2,$3,3,2,1)',[id,other,'Improve edge cases']);
+ await asUser(user,async()=>{assert.equal((await db.query('select * from project_submissions')).rows.length,2);assert.equal((await db.query('select * from project_feedback')).rows.length,1);assert.equal((await db.query('update project_submissions set code=$1 returning id',['overwrite'])).rows.length,0);});
+ await asUser(other,async()=>{assert.equal((await db.query('select * from project_submissions')).rows.length,0);assert.equal((await db.query('select * from project_feedback')).rows.length,0);await assert.rejects(db.query('select submit_learning_project($1,$2,$3,$4,$5,$6)',args),/permission denied/i);});
+});

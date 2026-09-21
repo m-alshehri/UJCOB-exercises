@@ -277,3 +277,11 @@ iframe {
 main .card,main .learningCard,main .layout>*{min-width:0}.example,.console{overflow-wrap:anywhere;white-space:pre-wrap!important}.stats,.toolbar{flex-wrap:wrap}main p{overflow-wrap:anywhere}
 @media(max-width:720px){.split,.workspace,.labGrid,.editorGrid,.cols,.two,.layout{grid-template-columns:minmax(0,1fr)!important}.card{max-width:100%;box-sizing:border-box}.actions>*{min-width:0}.console{overflow-x:auto}}
 @media(max-width:720px){.actions>button{flex:1 1 160px;overflow-wrap:anywhere}.actions>label{flex:1 1 140px}}
+.primaryLink{display:inline-block;background:#005b79;color:white;border-radius:10px;padding:12px 20px!important;text-decoration:none;font-weight:700}
+#languageToggle{font:inherit;padding:7px 12px;background:white;color:#004f6e;border:1px solid #9bbdca;border-radius:8px;min-height:40px;cursor:pointer}
+html[dir=rtl] body{text-align:right}html[dir=rtl] th,html[dir=rtl] td,html[dir=rtl] caption{text-align:right}html[dir=rtl] .eyebrow{letter-spacing:0}html[dir=rtl] input[type=checkbox]{margin-right:0;margin-left:10px}
+pre,code,.codeEditor,#editor,#code,#console,.console,#termText,.example{direction:ltr!important;text-align:left!important;unicode-bidi:plaintext}
+#submissionForm textarea,#questionForm textarea{width:100%;min-height:100px;font-family:inherit!important}#submissionCode{min-height:280px!important;font-family:ui-monospace,monospace!important}#questionReport textarea{width:100%;min-height:90px;font-family:inherit!important}.learningCard form textarea{width:100%;min-height:100px}
+#pathList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px}#pathList .learningCard{margin:0}#pathSummary{padding:20px;border-inline-start:4px solid #1687a6;background:#e8f5fa;border-radius:8px}
+.labSupport,.labSupport+section{box-sizing:border-box;max-width:100%;min-width:0}.labSupport+section label,.labSupport+section select,.labSupport+section input{min-width:0;max-width:100%;box-sizing:border-box}
+@media(max-width:720px){header .head{flex-wrap:wrap!important;gap:10px}.headerActions{margin-inline-start:auto;flex-shrink:0}html[dir=rtl] .head>.nav a{text-align:start}}

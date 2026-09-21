@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Content studio · tamareen</title>
+    <link rel="stylesheet" href="/styles/shared.css" />
+    <link rel="stylesheet" href="/styles/learning.css" />
+  </head>
+  <body class="learningPage">
+    <div id="siteHeader"></div>
+    <main id="main">
+      <h1>Content studio</h1>
+      <p>
+        Draft, preview and publish questions. Publishing a revision preserves
+        the previous question and answer history.
+      </p>
+      <p id="studioStatus" role="status">Loading…</p>
+      <section id="studio" hidden>
+        <div class="actions">
+          <button id="newQuestion">New question</button
+          ><a href="/question-quality.html">Question quality →</a>
+        </div>
+        <label>Find a question<input id="questionSearch" type="search" /></label
+        ><label
+          >Existing question<select id="existingQuestion">
+            <option value="">Choose a question</option>
+          </select></label
+        ><button id="editQuestion">Edit selected question</button
+        ><label
+          >Saved drafts<select id="draftSelect">
+            <option value="">Choose a draft</option>
+          </select></label
+        >
+        <form id="questionForm" class="learningCard">
+          <label>Course<select id="editCourse" required></select></label
+          ><label>Topic<input id="editTopic" required maxlength="120" /></label
+          ><label
+            >Question<textarea
+              id="editText"
+              required
+              maxlength="4000"
+            ></textarea></label
+          ><label
+            >Correct answer<input
+              id="editCorrect"
+              required
+              maxlength="1000" /></label
+          ><label
+            >Correct answer explanation<textarea
+              id="rationale0"
+              required
+              maxlength="2000"
+            ></textarea></label
+          ><label
+            >Incorrect option 1<input
+              id="wrong1"
+              required
+              maxlength="1000" /></label
+          ><label
+            >Option 1 explanation<textarea
+              id="rationale1"
+              required
+              maxlength="2000"
+            ></textarea></label
+          ><label
+            >Incorrect option 2<input
+              id="wrong2"
+              required
+              maxlength="1000" /></label
+          ><label
+            >Option 2 explanation<textarea
+              id="rationale2"
+              required
+              maxlength="2000"
+            ></textarea></label
+          ><label
+            >Incorrect option 3<input
+              id="wrong3"
+              required
+              maxlength="1000" /></label
+          ><label
+            >Option 3 explanation<textarea
+              id="rationale3"
+              required
+              maxlength="2000"
+            ></textarea></label
+          ><label
+            >Explanation<textarea
+              id="editExplanation"
+              required
+              maxlength="4000"
+            ></textarea></label
+          ><label
+            >Question type<select id="editKind">
+              <option value="recall">Recall</option>
+              <option value="application">Application</option>
+              <option value="code">Code</option>
+              <option value="debugging">Debugging</option>
+            </select></label
+          >
+          <div class="actions">
+            <button type="button" id="previewQuestion">Preview</button
+            ><button type="submit">Save draft</button
+            ><button type="button" id="publishQuestion">
+              Publish question
+            </button>
+          </div>
+        </form>
+        <section id="questionPreview" class="learningCard" hidden></section>
+        <h2>Revision history</h2>
+        <div id="versionList"></div>
+      </section>
+    </main>
+    <div id="siteFooter"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+    <script src="/supabase-client.js"></script>
+    <script src="/question-banks.js"></script>
+    <script src="/js/lab-content.js"></script>
+    <script src="/js/catalog.js"></script>
+    <script src="/js/shared.js"></script>
+    <script src="/js/learning.js"></script>
+    <script src="/js/pathways.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script src="/js/monitoring.js"></script>
+    <script src="/js/shell.js"></script>
+    <script src="/js/content-studio.js"></script>
+  </body>
+</html>

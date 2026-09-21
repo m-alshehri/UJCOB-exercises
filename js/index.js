@@ -38,6 +38,7 @@ let active = "",
   attemptStart = 0,
   attemptId = null,
   quizMode = "practice",
+  quizPurpose = "practice",
   examTimerId = null,
   examSeconds = Math.max(
     0,
@@ -150,11 +151,11 @@ function makeQ(q) {
     topic: q.topic || "General",
   };
 }
-const QUESTION_CACHE_TTL = 30 * 60 * 1000,
+const QUESTION_CACHE_TTL = 60 * 1000,
   questionMemoryCache = {};
 let courseMapPromise = null;
 function questionCacheKey(c) {
-  return "tamareen:qcache:v3:" + c.replace(/\s+/g, "_");
+  return "tamareen:qcache:v4:" + c.replace(/\s+/g, "_");
 }
 function readQuestionCache(c) {
   if (
@@ -203,9 +204,9 @@ async function getCourseMap() {
     });
   return courseMapPromise;
 }
-async function loadQuestionsFromSupabase(c) {
+async function loadQuestionsFromSupabase(c, fresh = false) {
   const cached = readQuestionCache(c);
-  if (cached?.length) return cached;
+  if (!fresh && cached?.length) return cached;
   try {
     const courseMap = await getCourseMap(),
       courseId = courseMap[c];
@@ -322,6 +323,7 @@ async function startQuiz(
     const session = await Tamareen.session(true);
     active = c;
     quizMode = mode;
+    quizPurpose = qp.has("diagnostic") ? "diagnostic" : qp.has("stage") ? "path" : qp.has("spaced") ? "review" : "practice";
     attemptId = null;
     attemptStart = Date.now();
     if (push)
@@ -342,11 +344,20 @@ async function startQuiz(
     $("card").style.display = "block";
     $("qtext").textContent = "Loading questions…";
     $("opts").innerHTML = "";
-    const dbQuestions = await loadQuestionsFromSupabase(c);
+    const dbQuestions = await loadQuestionsFromSupabase(c, true);
     if (generation !== quizGeneration) return;
     const source = dbQuestions?.length ? dbQuestions : COURSES[c].questions;
     let pool = topic ? source.filter((q) => q.topic === topic) : source;
     if (!pool.length) pool = source;
+    if (qp.has("stage")) {
+      const lesson = Pathways.lessons(c)[Number(qp.get("stage"))];
+      if (!lesson) throw new Error("Invalid learning step");
+      pool = pool.filter(q => lesson.topics.includes(q.topic));
+    }
+    if (qp.has("spaced")) {
+      const due = new Set(Pathways.schedule(await Learning.history(c)).filter(a=>a.due).map(a=>a.question_id));
+      pool = pool.filter(q=>due.has(q.id));
+    }
     if (qp.get("reviewQuestion"))
       pool = pool.filter((q) => q.id === qp.get("reviewQuestion"));
     if (qp.has("mistakes")) {
@@ -357,7 +368,7 @@ async function startQuiz(
       );
       pool = pool.filter((q) => ids.has(q.id));
     }
-    const picked =
+    const picked = quizPurpose === "diagnostic" ? Pathways.diagnostic(pool,c) :
       adaptive && mode === "practice"
         ? buildAdaptiveSet(pool, await getAdaptiveProfile(c, session))
         : Learning.mix(pool);
@@ -377,6 +388,7 @@ async function startQuiz(
           }),
         );
         attemptId = id;
+        if (quizPurpose !== "practice") await Tamareen.checked(Tamareen.client().rpc("tag_practice_attempt", {p_attempt:id,p_purpose:quizPurpose}));
         attemptStart = started.started_at
           ? new Date(started.started_at).getTime()
           : Date.now();
@@ -408,6 +420,7 @@ function renderQ() {
   locked = false;
   const q = questions[idx],
     total = questions.length;
+  if ($("reportStatus")) {$("reportStatus").textContent="";$("reportNote").value="";$("questionReport").open=false;}
   const tt = $("tutorText");
   if (tt) {
     tt.style.display = "none";
@@ -419,7 +432,7 @@ function renderQ() {
   if (tm) tm.innerHTML = "";
   tutorHistory = [];
   const tutor = $("tutor");
-  if (tutor) tutor.style.display = quizMode === "practice" ? "block" : "none";
+  if (tutor) tutor.style.display = quizMode === "practice" && quizPurpose !== "diagnostic" ? "block" : "none";
   $("qno").textContent = `QUESTION ${idx + 1} OF ${total}`;
   $("qtext").textContent = q.q;
   $("opts").innerHTML = q.options
@@ -433,7 +446,7 @@ function renderQ() {
   $("next").style.display = "none";
   $("progress").textContent = `Question ${idx + 1} of ${questions.length}`;
   $("scoreNow").textContent =
-    quizMode === "exam" ? "Score shown at completion" : `Score: ${score}`;
+    quizMode === "exam" || quizPurpose === "diagnostic" ? "Score shown at completion" : `Score: ${score}`;
   $("bar").style.width = `${(idx / questions.length) * 100}%`;
 }
 function startExamTimer() {
@@ -509,6 +522,7 @@ async function callTutor(kind, message = "") {
         answered: locked,
         message,
         history: tutorHistory.slice(-6),
+        language: I18n.lang,
       }),
     });
     const data = await r.json();
@@ -573,7 +587,7 @@ async function checkAns() {
       score = result.correct_answers ?? score;
       Tamareen.status("Answer saved.", "success");
     } else if (correct) score++;
-    if (quizMode === "practice") {
+    if (quizMode === "practice" && quizPurpose !== "diagnostic") {
       const els = [...document.querySelectorAll(".opt")];
       els[q.answer].classList.add("good");
       if (!correct) els[selected].classList.add("bad");
@@ -643,6 +657,8 @@ async function finish(timedOut = false) {
         (timedOut ? "Time is up. " : "") +
         `You scored ${p}%. Personal practice result, not a verified grade.`;
       await showAdaptiveRecommendation();
+      let link = $("pathResult"); if (!link) {link=document.createElement("a");link.id="pathResult";$("result").append(link);}
+      link.href="/pathways.html?course="+encodeURIComponent(active);link.textContent=I18n.t("Your next step")+" →";
     } catch (e) {
       finishPromise = null;
       Tamareen.report?.("quiz_save");
@@ -924,7 +940,7 @@ async function resumeAttempt(id) {
     const a = await Tamareen.checked(
       Tamareen.client()
         .from("attempts")
-        .select("id,mode,started_at,completed_at,question_ids,courses(code)")
+        .select("id,mode,purpose,started_at,completed_at,question_ids,courses(code)")
         .eq("id", id)
         .single(),
     );
@@ -966,6 +982,7 @@ async function resumeAttempt(id) {
     });
     active = modeCourse = a.courses.code;
     quizMode = a.mode;
+    quizPurpose = a.purpose || "practice";
     attemptId = a.id;
     attemptStart = new Date(a.started_at).getTime();
     finishPromise = null;
@@ -1002,3 +1019,7 @@ async function resumeAttempt(id) {
   }
 }
 Learning.showResume();
+
+// Students can report an unclear question without leaving the attempt.
+const reportPanel=document.createElement('details');reportPanel.id='questionReport';reportPanel.innerHTML='<summary>Report a question</summary><label>Reason<select id="reportReason"><option value="unclear">Unclear wording</option><option value="incorrect">Incorrect answer</option><option value="other">Other</option></select></label><label>Notes<textarea id="reportNote" maxlength="1000"></textarea></label><button type="button" id="reportSend">Send report</button><p id="reportStatus" role="status"></p>';$("card").append(reportPanel);
+$("reportSend").onclick=async()=>{const q=questions[idx];if(!q?.id)return;const btn=$("reportSend");btn.disabled=true;try{await Tamareen.api('/api/learning-admin',{action:'report',questionId:q.id,reason:$("reportReason").value,note:$("reportNote").value});$("reportStatus").textContent=I18n.t('Report saved. Thank you.');}catch(e){$("reportStatus").textContent=e.message;}finally{btn.disabled=false;}};

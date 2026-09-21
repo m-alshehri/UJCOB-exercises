@@ -11,5 +11,6 @@ const base=await readFile('supabase/setup.sql','utf8');
 const marker='-- Learning experience upgrade';
 const original=base.split(marker)[0].replace(/\s*notify pgrst, 'reload schema';\s*commit;\s*$/,'');
 const upgrade=await readFile('supabase/migrations/004_learning_experience.sql','utf8');
-await writeFile('supabase/learning_upgrade.sql','begin;\n'+upgrade+'\n'+sql+"\nnotify pgrst, 'reload schema';\ncommit;\n");
-await writeFile('supabase/setup.sql',original+'\n'+marker+'\n'+upgrade+'\n'+sql+"\nnotify pgrst, 'reload schema';\ncommit;\n");
+const guided=await readFile('supabase/migrations/20260921213225_guided_learning.sql','utf8');
+await writeFile('supabase/learning_upgrade.sql','begin;\n'+upgrade+'\n'+sql+'\n'+guided+"\nnotify pgrst, 'reload schema';\ncommit;\n");
+await writeFile('supabase/setup.sql',original+'\n'+marker+'\n'+upgrade+'\n'+sql+'\n'+guided+"\nnotify pgrst, 'reload schema';\ncommit;\n");
