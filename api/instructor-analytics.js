@@ -1,3 +1,4 @@
+import { logRequest } from "../lib/server.js";
 import { createClient } from "@supabase/supabase-js";
 import { all } from "../lib/server.js";
 
@@ -5,6 +6,7 @@ function esc(v) {
   return String(v ?? "").slice(0, 500);
 }
 export default async function handler(req, res) {
+  logRequest(req, res, "instructor-analytics");
   if (req.method !== "GET")
     return res.status(405).json({ error: "Method not allowed" });
   res.setHeader("Cache-Control", "no-store");

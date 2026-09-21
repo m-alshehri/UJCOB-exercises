@@ -33,11 +33,11 @@ async function asUser(id, fn) {
 test("setup is repeatable and seed IDs/counts are preserved", async () => {
   const before = (await db.query("select count(*)::int n from questions"))
     .rows[0].n;
-  assert.equal(before, 600);
+  assert.equal(before, 636);
   await db.exec(setup);
   assert.equal(
     (await db.query("select count(*)::int n from questions")).rows[0].n,
-    600,
+    636,
   );
   assert.equal(
     (
@@ -149,5 +149,68 @@ test("exam deadline is enforced by the database", async () => {
       /Time is up/,
     ),
   );
+});
+test("cloud drafts enforce owner access and optimistic concurrency", async () => {
+  await asUser(user, async () => {
+    const first = (
+      await db.query(
+        "select save_lab_draft('python-lab','print-a-message','print(1)',0) result",
+      )
+    ).rows[0].result;
+    assert.equal(first.revision, 1);
+    await db.query(
+      "select save_lab_draft('python-lab','print-a-message','print(2)',1)",
+    );
+    await assert.rejects(
+      db.query(
+        "select save_lab_draft('python-lab','print-a-message','stale',1)",
+      ),
+      /another device/,
+    );
+    assert.equal(
+      (await db.query("select code from lab_drafts")).rows[0].code,
+      "print(2)",
+    );
+  });
+  await asUser(other, async () => {
+    assert.equal((await db.query("select * from lab_drafts")).rows.length, 0);
+  });
+});
+test("classrooms and monitoring cannot be read or written directly by students", async () => {
+  await asUser(user, async () => {
+    for (const table of [
+      "study_groups",
+      "study_assignments",
+      "group_members",
+      "health_events",
+    ])
+      assert.equal((await db.query("select * from " + table)).rows.length, 0);
+    await assert.rejects(
+      db.query(
+        "insert into study_groups(owner_id,name) values($1,'Forbidden')",
+        [user],
+      ),
+      /row-level security/,
+    );
+  });
+});
+test("health events accept only defined categories and cap per-user ingestion", async () => {
+  await asUser(user, async () => {
+    await assert.rejects(
+      db.query("select record_health_event('secret-message','/')"),
+      /check constraint/,
+    );
+    for (let i = 0; i < 10; i++)
+      assert.equal(
+        (await db.query("select record_health_event('quiz_save','/') ok"))
+          .rows[0].ok,
+        true,
+      );
+    assert.equal(
+      (await db.query("select record_health_event('quiz_save','/') ok")).rows[0]
+        .ok,
+      false,
+    );
+  });
 });
 test.after(() => db.close());

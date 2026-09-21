@@ -1,0 +1,626 @@
+{
+  "BCIS 313": [
+    [
+      "arithmetic expression",
+      "A store sells 3 items at SAR 80 each with a 10% discount. Which expression gives the final total?",
+      "3 * 80 * 0.90",
+      [
+        "3 * 80 * 0.10",
+        "3 * (80 - 10)",
+        "3 + 80 * 0.90"
+      ],
+      "Apply the discount to the subtotal: 240 × 0.90 = 216.",
+      [
+        "This calculates only the discount amount, SAR 24.",
+        "This subtracts SAR 10 per item rather than 10%.",
+        "This adds quantity to a price instead of multiplying."
+      ],
+      "application"
+    ],
+    [
+      "for loop",
+      "What is printed?\ntotal = 0\nfor sale in [10, 20, 30]:\n    total += sale\nprint(total)",
+      "60",
+      [
+        "30",
+        "0",
+        "10"
+      ],
+      "The accumulator adds all three sales: 10 + 20 + 30.",
+      [
+        "30 is the last sale, not the accumulated total.",
+        "The loop updates total on every iteration.",
+        "10 includes only the first iteration."
+      ],
+      "code"
+    ],
+    [
+      "if statement",
+      "A free-delivery rule applies to orders of SAR 200 or more. Which condition correctly includes an order of exactly SAR 200?",
+      "total >= 200",
+      [
+        "total > 200",
+        "total == 200",
+        "total <= 200"
+      ],
+      "Greater than or equal includes the boundary and every larger total.",
+      [
+        "This excludes the boundary value 200.",
+        "This excludes qualifying totals above 200.",
+        "This includes smaller totals that do not qualify."
+      ],
+      "debugging"
+    ],
+    [
+      "dictionary",
+      "stock = {'pen': 4}. The key 'book' might be absent. How can you safely read its stock as zero when absent?",
+      "stock.get('book', 0)",
+      [
+        "stock['book']",
+        "stock.get('book')",
+        "stock[0]"
+      ],
+      "dict.get accepts a default value when a key is missing.",
+      [
+        "Direct lookup raises KeyError when book is absent.",
+        "Without a default, get returns None rather than zero.",
+        "0 is treated as a dictionary key, not a position."
+      ],
+      "code"
+    ],
+    [
+      "function",
+      "Why does this function return None?\ndef revenue(price, quantity):\n    price * quantity",
+      "It needs return price * quantity",
+      [
+        "Multiplication cannot be used in a function",
+        "The function must print before returning",
+        "The parameters must be global variables"
+      ],
+      "Evaluating an expression alone does not return its value; use return.",
+      [
+        "Multiplication works normally inside a function.",
+        "Printing and returning are independent operations.",
+        "Parameters provide the needed local values."
+      ],
+      "debugging"
+    ],
+    [
+      "list",
+      "A report must preserve the original sales order. Which code creates a sorted copy?",
+      "ordered = sorted(sales)",
+      [
+        "ordered = sales.sort()",
+        "ordered = sales.reverse()",
+        "ordered = sales"
+      ],
+      "sorted returns a new list and leaves sales unchanged.",
+      [
+        "sort mutates sales and returns None.",
+        "reverse mutates sales and does not sort it.",
+        "This creates another reference to the same unsorted list."
+      ],
+      "application"
+    ]
+  ],
+  "BCIS 311": [
+    [
+      "JOIN",
+      "Customers(id, name) includes customers with no orders. Which join keeps every customer in the report?",
+      "Customers LEFT JOIN Orders ON Customers.id = Orders.customer_id",
+      [
+        "Customers INNER JOIN Orders ON Customers.id = Orders.customer_id",
+        "Customers CROSS JOIN Orders",
+        "Orders LEFT JOIN Customers ON Customers.id = Orders.customer_id"
+      ],
+      "A left join preserves every row from Customers, adding NULLs where no order matches.",
+      [
+        "An inner join drops customers with no matching order.",
+        "A cross join produces unrelated combinations.",
+        "This preserves orders, not customers without orders."
+      ],
+      "application"
+    ],
+    [
+      "WHERE",
+      "Which query finds rows where shipped_at is missing?",
+      "SELECT * FROM Orders WHERE shipped_at IS NULL",
+      [
+        "SELECT * FROM Orders WHERE shipped_at = NULL",
+        "SELECT * FROM Orders WHERE shipped_at = ''",
+        "SELECT * FROM Orders WHERE shipped_at IS NOT NULL"
+      ],
+      "SQL tests for missing values with IS NULL.",
+      [
+        "Equality with NULL does not evaluate to true.",
+        "An empty string is not a SQL NULL.",
+        "This selects the opposite set: rows with a value."
+      ],
+      "debugging"
+    ],
+    [
+      "GROUP BY",
+      "Which query returns departments whose total salary exceeds 100000?",
+      "SELECT department FROM Staff GROUP BY department HAVING SUM(salary) > 100000",
+      [
+        "SELECT department FROM Staff WHERE SUM(salary) > 100000 GROUP BY department",
+        "SELECT department FROM Staff WHERE salary > 100000",
+        "SELECT department FROM Staff ORDER BY salary DESC"
+      ],
+      "HAVING filters aggregated groups after GROUP BY.",
+      [
+        "WHERE filters input rows and cannot perform this aggregate-group filter.",
+        "This checks individual salaries rather than each department total.",
+        "Sorting does not filter by an aggregate total."
+      ],
+      "application"
+    ],
+    [
+      "foreign key",
+      "An order refers to customer 999, but no such customer exists. Which constraint should reject it?",
+      "Foreign key from Orders.customer_id to Customers.id",
+      [
+        "Primary key on Orders.id",
+        "NOT NULL on Orders.customer_id",
+        "UNIQUE on Orders.total"
+      ],
+      "The foreign key requires the referenced customer to exist.",
+      [
+        "This prevents duplicate order IDs, not orphan customer references.",
+        "999 is not NULL, so NOT NULL alone accepts it.",
+        "Unique totals do not validate customer relationships."
+      ],
+      "application"
+    ],
+    [
+      "UPDATE",
+      "What is the main error in UPDATE Products SET price = 50 when only product 7 should change?",
+      "It needs WHERE id = 7",
+      [
+        "UPDATE can change only one row by default",
+        "SET must be replaced with SELECT",
+        "The table must first be dropped"
+      ],
+      "Without a WHERE condition, every product row is updated.",
+      [
+        "UPDATE affects all qualifying rows, including every row without WHERE.",
+        "SET is the correct clause for assigning values.",
+        "Dropping the table destroys it and is unrelated to the change."
+      ],
+      "debugging"
+    ],
+    [
+      "many-to-many relationship",
+      "Each student can take many courses and each course has many students. Which design fits?",
+      "Enrollment(student_id, course_id) with foreign keys and a unique pair",
+      [
+        "One course_id column in Students",
+        "A comma-separated course list in Students",
+        "One student_id column in Courses"
+      ],
+      "An enrollment table represents each student-course relationship once.",
+      [
+        "A single course_id limits each student to one course.",
+        "A comma-separated list makes constraints and joins difficult.",
+        "A single student_id limits a course to one student."
+      ],
+      "application"
+    ]
+  ],
+  "BCIS 317": [
+    [
+      "semantic HTML",
+      "A control submits a form. Which HTML element provides native button keyboard behavior?",
+      "<button type=\"submit\">Save</button>",
+      [
+        "<div onclick=\"save()\">Save</div>",
+        "<span>Save</span>",
+        "<h2>Save</h2>"
+      ],
+      "A native button supports focus, keyboard activation and form semantics.",
+      [
+        "A clickable div needs additional keyboard and accessibility handling.",
+        "A span has no built-in action.",
+        "A heading describes a section rather than an action."
+      ],
+      "application"
+    ],
+    [
+      "CSS box model",
+      "With content-box sizing, width:200px, padding:10px and border:2px solid, what is the total horizontal border-box width?",
+      "224px",
+      [
+        "200px",
+        "212px",
+        "220px"
+      ],
+      "Add left and right padding (20px) and borders (4px) to 200px.",
+      [
+        "200px is only the content width under content-box sizing.",
+        "Both sides must be counted, not one.",
+        "220px includes padding but omits the borders."
+      ],
+      "application"
+    ],
+    [
+      "DOM",
+      "A customer name comes from a text field. Which assignment displays it as text without interpreting HTML?",
+      "element.textContent = name",
+      [
+        "element.innerHTML = name",
+        "document.write(name)",
+        "eval(name)"
+      ],
+      "textContent inserts literal text instead of parsing markup.",
+      [
+        "innerHTML parses markup and can introduce injection risks.",
+        "document.write parses HTML and can replace the document.",
+        "eval executes JavaScript rather than displaying plain text."
+      ],
+      "code"
+    ],
+    [
+      "responsive design",
+      "Which rule applies only when the viewport is at most 600px wide?",
+      "@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }",
+      [
+        "@media (min-width: 600px) { .grid { grid-template-columns: 1fr; } }",
+        ".grid { width: 600px; }",
+        "@media print { .grid { display: none; } }"
+      ],
+      "max-width matches viewports at or below the specified width.",
+      [
+        "min-width matches the opposite range.",
+        "A fixed element width does not conditionally match the viewport.",
+        "The print media query targets printing rather than narrow screens."
+      ],
+      "application"
+    ],
+    [
+      "JavaScript",
+      "What does this expression evaluate to?\n'5' + 2",
+      "'52'",
+      [
+        "7",
+        "'7'",
+        "10"
+      ],
+      "With a string operand, + performs string concatenation here.",
+      [
+        "Numeric addition would require converting '5' to a number.",
+        "Concatenation joins the original values; it does not add them first.",
+        "No multiplication is performed."
+      ],
+      "code"
+    ],
+    [
+      "accessibility",
+      "A form input has id=\"email\". Which label association is correct?",
+      "<label for=\"email\">Email</label>",
+      [
+        "<label for=\"name\">Email</label>",
+        "<p>Email</p>",
+        "<label id=\"email\">Email</label>"
+      ],
+      "The label's for attribute must match the input's id.",
+      [
+        "The for value points to a different input ID.",
+        "Nearby paragraph text does not programmatically label the input.",
+        "A label id does not associate it with the input."
+      ],
+      "application"
+    ]
+  ],
+  "BCIS 324": [
+    [
+      "shared database",
+      "Sales accepts an order using yesterday's stock export. Warehouse reports that the item has sold out. What best addresses the information gap?",
+      "Use a shared, timely inventory record across sales and warehouse",
+      [
+        "Create separate stock spreadsheets for each salesperson",
+        "Refresh stock once at year end",
+        "Remove inventory checks"
+      ],
+      "Shared inventory visibility reduces decisions based on inconsistent stock copies.",
+      [
+        "More separate copies increase inconsistency.",
+        "An annual refresh cannot support current availability decisions.",
+        "Removing checks hides shortages rather than addressing them."
+      ],
+      "application"
+    ],
+    [
+      "procure-to-pay",
+      "An invoice arrives for 100 units, but only 80 were received. What should the team do before payment?",
+      "Investigate the mismatch between purchase order, receipt and invoice",
+      [
+        "Pay the invoice without checking",
+        "Change the receipt to 100 without evidence",
+        "Delete the purchase order"
+      ],
+      "Matching the documents identifies discrepancies that need resolution before payment.",
+      [
+        "Payment without verification may pay for undelivered goods.",
+        "Changing records without evidence hides the discrepancy.",
+        "Deleting the order removes needed evidence."
+      ],
+      "application"
+    ],
+    [
+      "master data",
+      "Two departments created different IDs for the same supplier. What is the strongest corrective action?",
+      "Reconcile duplicate supplier records and define an owner for master data",
+      [
+        "Keep duplicates and rely on memory",
+        "Create a third supplier ID",
+        "Disable supplier reporting"
+      ],
+      "Reconciliation plus ownership addresses both the existing duplicate and its recurrence.",
+      [
+        "Memory is not a reliable control across departments.",
+        "Another ID adds further duplication.",
+        "Removing reports does not repair the underlying records."
+      ],
+      "application"
+    ],
+    [
+      "change management",
+      "A new ERP workflow is correct, but staff continue using spreadsheets. Which response best supports adoption?",
+      "Provide role-based training, explain the workflow and gather user feedback",
+      [
+        "Assume installation alone guarantees adoption",
+        "Add more mandatory fields without explanation",
+        "Stop all communication about the system"
+      ],
+      "Adoption depends on understanding, practical training and addressing user concerns.",
+      [
+        "Technical installation does not ensure changed working habits.",
+        "Unexplained friction may further discourage use.",
+        "Less communication makes the transition harder."
+      ],
+      "application"
+    ],
+    [
+      "segregation of duties",
+      "One employee creates a supplier, approves its invoices and releases payment. Which change reduces control risk?",
+      "Separate supplier maintenance, invoice approval and payment authorization",
+      [
+        "Give the employee a second account",
+        "Hide the payment log",
+        "Remove approval limits"
+      ],
+      "Independent roles reduce the opportunity for one person to authorize an entire improper transaction.",
+      [
+        "Two accounts held by one person do not create independent review.",
+        "Hiding logs reduces accountability.",
+        "Removing limits weakens rather than strengthens control."
+      ],
+      "application"
+    ],
+    [
+      "implementation",
+      "An ERP cutover is tomorrow and opening balances have not been reconciled. What is the best next step?",
+      "Resolve and verify balance differences before approving cutover",
+      [
+        "Approve cutover because the date is fixed",
+        "Delete the old balances",
+        "Let users discover discrepancies later"
+      ],
+      "Reliable opening balances are necessary for a controlled transition.",
+      [
+        "A schedule does not establish data correctness.",
+        "Deleting source balances prevents reconciliation.",
+        "Unverified balances shift preventable errors into operations."
+      ],
+      "application"
+    ]
+  ],
+  "BCIS 411": [
+    [
+      "KPI",
+      "A support team wants to reduce resolution delays. Which metric most directly measures that objective?",
+      "Median time from ticket creation to resolution",
+      [
+        "Number of dashboard colors",
+        "Total number of employees",
+        "Number of charts published"
+      ],
+      "Elapsed resolution time measures the delay the team wants to reduce.",
+      [
+        "Visual styling does not measure resolution delay.",
+        "Headcount may influence capacity but is not the delay itself.",
+        "Chart production measures reporting activity, not support outcomes."
+      ],
+      "application"
+    ],
+    [
+      "data visualization",
+      "A dashboard compares sales across five regions. Which chart makes their magnitudes easy to compare?",
+      "Bar chart with a common zero baseline",
+      [
+        "A separate pie chart for each region",
+        "A 3D decorative sphere",
+        "A line chart with regions randomly reordered every day"
+      ],
+      "Bars sharing a baseline make category magnitudes straightforward to compare.",
+      [
+        "Separate pies lack a common comparable scale.",
+        "Decoration does not encode the comparison clearly.",
+        "Random category order makes comparison unstable and lines imply sequence."
+      ],
+      "application"
+    ],
+    [
+      "data warehouse",
+      "Sales revenue is counted twice after joining orders to order lines. What should be checked first?",
+      "The grain of each table and whether order totals repeat per line",
+      [
+        "The dashboard background color",
+        "The number of user passwords",
+        "The screen brightness"
+      ],
+      "An order-level total repeated across line-level rows is double-counted when summed.",
+      [
+        "Appearance does not alter aggregation grain.",
+        "Passwords do not explain duplicated revenue rows.",
+        "Screen settings do not change the data calculation."
+      ],
+      "debugging"
+    ],
+    [
+      "ETL",
+      "A source changes date formatting from DD/MM/YYYY to MM/DD/YYYY. What should a pipeline do?",
+      "Validate and explicitly parse the expected source date format",
+      [
+        "Treat every date as plain text forever",
+        "Silently guess each date format",
+        "Drop all dates without reporting it"
+      ],
+      "Explicit parsing and validation prevent ambiguous dates from being silently misinterpreted.",
+      [
+        "Plain text prevents reliable date operations and leaves ambiguity unresolved.",
+        "Guessing can swap month and day without detection.",
+        "Silent removal loses information and hides the issue."
+      ],
+      "application"
+    ],
+    [
+      "dashboard",
+      "A KPI reports 120% of target. Actual sales are 600. What was the target?",
+      "500",
+      [
+        "720",
+        "120",
+        "600"
+      ],
+      "Actual ÷ target = 1.2, so target = 600 ÷ 1.2 = 500.",
+      [
+        "720 multiplies actual by 1.2 instead of solving for the target.",
+        "120 is the percentage number, not the monetary target.",
+        "A target of 600 would yield 100%."
+      ],
+      "application"
+    ],
+    [
+      "data quality",
+      "Two reports show different monthly totals because one includes cancelled orders. What should be agreed first?",
+      "A shared business definition of included revenue transactions",
+      [
+        "Which report has the nicer layout",
+        "A random adjustment to make totals equal",
+        "A policy to stop comparing reports"
+      ],
+      "Consistent inclusion rules are needed before two totals can be meaningfully compared.",
+      [
+        "Layout does not resolve different business definitions.",
+        "An arbitrary adjustment conceals the reason for the difference.",
+        "Avoiding comparison leaves the inconsistency unresolved."
+      ],
+      "application"
+    ]
+  ],
+  "BCIS 421": [
+    [
+      "mean",
+      "Sales values are 10, 10, 10 and 90. What is their mean?",
+      "30",
+      [
+        "10",
+        "90",
+        "120"
+      ],
+      "The total is 120; divide by four observations to obtain 30.",
+      [
+        "10 is the median and mode here, not the mean.",
+        "90 is the maximum. It does not answer the requested calculation.",
+        "120 is the sum before division."
+      ],
+      "application"
+    ],
+    [
+      "median",
+      "For delivery times 2, 3, 3, 4 and 100 days, which summary is less distorted by the extreme delay?",
+      "Median: 3 days",
+      [
+        "Mean: 22.4 days",
+        "Maximum: 100 days",
+        "Sum: 112 days"
+      ],
+      "The median is the middle ordered value and is less sensitive to one extreme value.",
+      [
+        "The extreme delay pulls the mean well above most observations.",
+        "The maximum describes only the most extreme case.",
+        "The sum is not a typical per-delivery duration."
+      ],
+      "application"
+    ],
+    [
+      "test set",
+      "A model's settings were repeatedly chosen based on test-set scores. What is the problem?",
+      "The test set influenced development and no longer provides an untouched final evaluation",
+      [
+        "Test data must always train the model",
+        "More test-set tuning guarantees generalization",
+        "A high test score proves causation"
+      ],
+      "Repeated tuning against the test set leaks evaluation information into development.",
+      [
+        "Training on test data defeats its independent evaluation role.",
+        "Repeated tuning can overfit the test set.",
+        "Predictive performance does not establish a causal relationship."
+      ],
+      "application"
+    ],
+    [
+      "classification",
+      "Only 1% of transactions are fraud. A model predicts every transaction as non-fraud. Which statement is correct?",
+      "It has 99% accuracy but detects none of the fraud cases",
+      [
+        "It detects 99% of fraud",
+        "Its accuracy is 1%",
+        "It has perfect fraud recall"
+      ],
+      "The majority class creates high accuracy, while fraud recall is zero.",
+      [
+        "Overall accuracy is not the same as fraud detection rate.",
+        "It correctly predicts the 99% non-fraud majority.",
+        "It misses every fraud case, so recall is zero."
+      ],
+      "application"
+    ],
+    [
+      "overfitting",
+      "A model achieves 99% training accuracy and 62% validation accuracy. What is a reasonable concern?",
+      "It may be overfitting the training data",
+      [
+        "It must generalize perfectly",
+        "Validation accuracy should be ignored",
+        "The validation labels should be replaced with model predictions"
+      ],
+      "A large training-validation gap suggests the model may have learned training-specific patterns.",
+      [
+        "The validation result contradicts perfect generalization.",
+        "Validation performance helps assess unseen-data behavior.",
+        "Replacing labels would invalidate evaluation."
+      ],
+      "application"
+    ],
+    [
+      "missing values",
+      "Income is missing for 20% of rows. Why is replacing every missing value with zero risky?",
+      "Zero income is a real value and can bias the analysis if missingness means unknown",
+      [
+        "Zero is always the correct imputation",
+        "Missing values are necessarily fraudulent",
+        "Replacing values cannot affect a mean"
+      ],
+      "Choose a justified missing-data strategy; unknown income is not automatically zero income.",
+      [
+        "The appropriate strategy depends on context and the missingness mechanism.",
+        "Missingness alone does not establish fraud.",
+        "Adding zeros changes both summaries and model inputs."
+      ],
+      "application"
+    ]
+  ]
+}

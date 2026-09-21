@@ -1,6 +1,11 @@
-let running=false;
+let running = false;
 const E = LAB_CONTENT["python-lab"];
-let i = 0,
+let i = Math.max(
+    0,
+    E.findIndex(
+      (q) => q.id === new URLSearchParams(location.search).get("exercise"),
+    ),
+  ),
   py = null,
   topicFilter = "All",
   levelFilter = "All",
@@ -44,7 +49,7 @@ function visible() {
 function draw() {
   let q = E[i];
   const has = visible().length > 0;
-  document.getElementById("run").disabled = running||!has;
+  document.getElementById("run").disabled = running || !has;
   if (!has) {
     document.getElementById("desc").textContent =
       "No exercises match these filters. Choose another topic or level.";
@@ -60,6 +65,7 @@ function draw() {
   $("editor").value = readDraft(i, q[5]);
   $("console").textContent = "Ready.";
   $("feedback").className = "feedback";
+  window.refreshLabSupport?.();
   let ts = ["All", ...new Set(E.map((q) => q[0]))];
   $("topics").innerHTML = ts
     .map(
@@ -131,9 +137,11 @@ function resetCode() {
   $("editor").value = E[i][5];
   $("console").textContent = "Ready.";
   $("feedback").className = "feedback";
+  window.refreshLabSupport?.();
 }
 async function runCode() {
-  if(running||!visible().length)return;running=true;
+  if (running || !visible().length) return;
+  running = true;
   const button = $("run"),
     exercise = i;
   button.disabled = true;
@@ -164,7 +172,8 @@ async function runCode() {
     $("feedback").className = "feedback bad";
     $("feedback").textContent = "Check your code and try again.";
   } finally {
-    running=false;button.disabled = !visible().length;
+    running = false;
+    button.disabled = !visible().length;
   }
 }
 draw();

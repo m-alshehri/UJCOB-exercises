@@ -1,5 +1,7 @@
+import { logRequest } from "../lib/server.js";
 import { authenticate } from "../lib/server.js";
 export default async function handler(req, res) {
+  logRequest(req, res, "tutor");
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method not allowed" });
   res.setHeader("Cache-Control", "no-store");
@@ -35,11 +37,9 @@ export default async function handler(req, res) {
       attempt.mode !== "practice" ||
       !attempt.question_ids.includes(questionId)
     )
-      return res
-        .status(403)
-        .json({
-          error: "Tutor help is available for your practice questions only.",
-        });
+      return res.status(403).json({
+        error: "Tutor help is available for your practice questions only.",
+      });
     const { data: question, error: qe } = await client
       .from("questions")
       .select(
@@ -55,23 +55,19 @@ export default async function handler(req, res) {
       .eq("question_id", questionId);
     if (answerError) throw answerError;
     if (!process.env.OPENAI_API_KEY)
-      return res
-        .status(503)
-        .json({
-          error: "Tutor is not configured yet. Practice remains available.",
-        });
+      return res.status(503).json({
+        error: "Tutor is not configured yet. Practice remains available.",
+      });
     const { data: allowed, error: quotaError } = await client.rpc(
       "consume_tutor_quota",
     );
     if (quotaError) throw quotaError;
     if (!allowed) {
       res.setHeader("Retry-After", "60");
-      return res
-        .status(429)
-        .json({
-          error:
-            "Tutor limit reached. Try later (6 requests per minute, 60 per day).",
-        });
+      return res.status(429).json({
+        error:
+          "Tutor limit reached. Try later (6 requests per minute, 60 per day).",
+      });
     }
     const submitted = answers?.length > 0;
     const instructions =
@@ -125,12 +121,10 @@ export default async function handler(req, res) {
         "No response returned.",
     });
   } catch (e) {
-    return res
-      .status(e.status || 503)
-      .json({
-        error: e.status
-          ? e.message
-          : "Tutor is temporarily unavailable. Please try later.",
-      });
+    return res.status(e.status || 503).json({
+      error: e.status
+        ? e.message
+        : "Tutor is temporarily unavailable. Please try later.",
+    });
   }
 }

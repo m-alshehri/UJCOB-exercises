@@ -39,7 +39,10 @@ let active = "",
   attemptId = null,
   quizMode = "practice",
   examTimerId = null,
-  examSeconds = 600;
+  examSeconds = Math.max(
+    0,
+    Math.ceil((attemptStart + 600000 - Date.now()) / 1000),
+  );
 function renderGrid() {
   $("grid").innerHTML = Object.entries(COURSES)
     .map(
@@ -143,6 +146,7 @@ function makeQ(q) {
     options,
     answer: options.indexOf(q.c),
     explain: q.e,
+    rationales: q.rationales || {},
     topic: q.topic || "General",
   };
 }
@@ -150,10 +154,14 @@ const QUESTION_CACHE_TTL = 30 * 60 * 1000,
   questionMemoryCache = {};
 let courseMapPromise = null;
 function questionCacheKey(c) {
-  return "tamareen:qcache:v2:" + c.replace(/\s+/g, "_");
+  return "tamareen:qcache:v3:" + c.replace(/\s+/g, "_");
 }
 function readQuestionCache(c) {
-  if (questionMemoryCache[c] && Date.now()-questionMemoryCache[c].savedAt < QUESTION_CACHE_TTL) return questionMemoryCache[c].data;
+  if (
+    questionMemoryCache[c] &&
+    Date.now() - questionMemoryCache[c].savedAt < QUESTION_CACHE_TTL
+  )
+    return questionMemoryCache[c].data;
   try {
     const raw = sessionStorage.getItem(questionCacheKey(c));
     if (!raw) return null;
@@ -169,7 +177,7 @@ function readQuestionCache(c) {
   }
 }
 function writeQuestionCache(c, data) {
-  questionMemoryCache[c] = {savedAt:Date.now(),data};
+  questionMemoryCache[c] = { savedAt: Date.now(), data };
   try {
     sessionStorage.setItem(
       questionCacheKey(c),
@@ -205,7 +213,7 @@ async function loadQuestionsFromSupabase(c) {
     const { data, error } = await window.supabaseClient
       .from("questions")
       .select(
-        "id,question,correct_answer,wrong_answers,explanation,topics(name)",
+        "id,question,correct_answer,wrong_answers,explanation,option_explanations,question_kind,topics(name)",
       )
       .eq("course_id", courseId)
       .eq("is_active", true);
@@ -217,6 +225,8 @@ async function loadQuestionsFromSupabase(c) {
           c: x.correct_answer,
           w: Array.isArray(x.wrong_answers) ? x.wrong_answers : [],
           e: x.explanation || "",
+          rationales: x.option_explanations || {},
+          kind: x.question_kind,
           topic: x.topics?.name || "General",
         }))
       : null;
@@ -254,80 +264,11 @@ async function ensureSession() {
     return null;
   }
 }
-async function getAdaptiveProfile(courseCode, session) {
-  try {
-    if (!session || !window.supabaseClient) return null;
-    const { data: crow } = await window.supabaseClient
-      .from("courses")
-      .select("id")
-      .eq("code", courseCode)
-      .single();
-    if (!crow) return null;
-    const { data: ats } = await window.supabaseClient
-      .from("attempts")
-      .select("id")
-      .eq("user_id", session.user.id)
-      .eq("course_id", crow.id)
-      .eq("mode", "practice")
-      .not("completed_at", "is", null)
-      .order("completed_at", { ascending: false })
-      .limit(30);
-    const ids = (ats || []).map((a) => a.id);
-    if (!ids.length) return null;
-    const { data: ans } = await window.supabaseClient
-      .from("attempt_answers")
-      .select("is_correct,questions(topic_id,topics(name))")
-      .in("attempt_id", ids);
-    const map = {};
-    (ans || []).forEach((a) => {
-      const name = a.questions?.topics?.name || "General";
-      if (!map[name]) map[name] = { correct: 0, total: 0 };
-      map[name].total++;
-      if (a.is_correct) map[name].correct++;
-    });
-    const ranked = Object.entries(map)
-      .map(([name, v]) => ({
-        name,
-        ...v,
-        pct: Math.round((v.correct / v.total) * 100),
-      }))
-      .sort((a, b) => a.pct - b.pct || b.total - a.total);
-    return ranked.length ? ranked : null;
-  } catch (e) {
-    console.warn("Adaptive profile unavailable.", e);
-    return null;
-  }
+async function getAdaptiveProfile(courseCode) {
+  return Learning.profile(await Learning.history(courseCode));
 }
 function buildAdaptiveSet(source, profile) {
-  if (!profile?.length || !source.some((q) => q.topic && q.topic !== "General"))
-    return shuffle(source).slice(0, Math.min(10, source.length));
-  const weak = profile.slice(0, Math.min(2, profile.length)).map((x) => x.name),
-    mid = profile.slice(2, Math.min(5, profile.length)).map((x) => x.name),
-    strong = profile
-      .slice()
-      .sort((a, b) => b.pct - a.pct)
-      .slice(0, 2)
-      .map((x) => x.name);
-  const take = (names, n, used) =>
-    shuffle(
-      source.filter((q) => names.includes(q.topic) && !used.has(q.q)),
-    ).slice(0, n);
-  const used = new Set(),
-    out = [];
-  [
-    [weak, 5],
-    [mid, 3],
-    [strong, 2],
-  ].forEach(([names, n]) =>
-    take(names, n, used).forEach((q) => {
-      used.add(q.q);
-      out.push(q);
-    }),
-  );
-  shuffle(source.filter((q) => !used.has(q.q)))
-    .slice(0, 10 - out.length)
-    .forEach((q) => out.push(q));
-  return shuffle(out).slice(0, Math.min(10, out.length));
+  return Learning.select(source, profile);
 }
 async function showAdaptiveRecommendation() {
   const box = $("adaptiveRec");
@@ -342,13 +283,19 @@ async function showAdaptiveRecommendation() {
       box.classList.remove("show");
       return;
     }
-    const weak = profile[0];
-    $("adaptiveTitle").textContent = "Focus next on " + weak.name;
-    $("adaptiveText").textContent =
-      "Based on your recent practice, this is currently your weakest topic. Tamareen will weight your next 10-question session toward weaker areas while keeping some review questions.";
-    $("adaptiveBar").style.width = Math.max(4, weak.pct) + "%";
-    $("adaptiveMastery").textContent = "Mastery: " + weak.pct + "%";
-    $("adaptiveMix").textContent = "5 weak · 3 developing · 2 review";
+    const recommendation = Learning.recommendation(profile);
+    $("adaptiveTitle").textContent = recommendation.title;
+    $("adaptiveText").textContent = recommendation.text;
+    $("adaptiveBar").style.width = (recommendation.topic?.pct || 0) + "%";
+    $("adaptiveMastery").textContent = recommendation.topic
+      ? "Recent weighted accuracy: " +
+        recommendation.topic.pct +
+        "% · " +
+        recommendation.topic.total +
+        " distinct questions"
+      : "More practice builds confidence";
+    $("adaptiveMix").textContent =
+      "Varied practice · recent evidence · no verified grade";
     $("adaptiveBtn").onclick = () =>
       startQuiz(active, "practice", "", true, true);
     box.classList.add("show");
@@ -400,10 +347,20 @@ async function startQuiz(
     const source = dbQuestions?.length ? dbQuestions : COURSES[c].questions;
     let pool = topic ? source.filter((q) => q.topic === topic) : source;
     if (!pool.length) pool = source;
+    if (qp.get("reviewQuestion"))
+      pool = pool.filter((q) => q.id === qp.get("reviewQuestion"));
+    if (qp.has("mistakes")) {
+      const ids = new Set(
+        Learning.mistakes(await Learning.history(c))
+          .filter((x) => x.due)
+          .map((x) => x.question_id),
+      );
+      pool = pool.filter((q) => ids.has(q.id));
+    }
     const picked =
       adaptive && mode === "practice"
         ? buildAdaptiveSet(pool, await getAdaptiveProfile(c, session))
-        : shuffle(pool).slice(0, 10);
+        : Learning.mix(pool);
     if (!picked.length)
       throw new Error("No questions are available for this course.");
     questions = picked.map(makeQ);
@@ -411,7 +368,7 @@ async function startQuiz(
     if (questions.every((q) => q.id)) {
       const id = crypto.randomUUID();
       try {
-        await Tamareen.checked(
+        const started = await Tamareen.checked(
           Tamareen.client().rpc("start_practice_attempt", {
             p_id: id,
             p_course: (await getCourseMap())[c],
@@ -420,6 +377,10 @@ async function startQuiz(
           }),
         );
         attemptId = id;
+        attemptStart = started.started_at
+          ? new Date(started.started_at).getTime()
+          : Date.now();
+        history.replaceState({}, "", "/?resume=" + id);
         Tamareen.status(
           "Progress saving is connected. Personal practice, not a verified grade.",
         );
@@ -483,12 +444,18 @@ function startExamTimer() {
     el.style.display = "none";
     return;
   }
-  examSeconds = 600;
+  examSeconds = Math.max(
+    0,
+    Math.ceil((attemptStart + 600000 - Date.now()) / 1000),
+  );
   el.style.display = "block";
   el.classList.remove("urgent");
   updateExamTimer();
   examTimerId = setInterval(() => {
-    examSeconds=Math.max(0,Math.ceil((attemptStart+600000-Date.now())/1000));
+    examSeconds = Math.max(
+      0,
+      Math.ceil((attemptStart + 600000 - Date.now()) / 1000),
+    );
     updateExamTimer();
     if (examSeconds <= 0) {
       clearInterval(examTimerId);
@@ -552,6 +519,7 @@ async function callTutor(kind, message = "") {
     tutorHistory.push({ role: "assistant", content: answer });
     return answer;
   } catch (e) {
+    Tamareen.report?.("tutor_error");
     box.textContent =
       "AI Tutor is not available yet. Please try again shortly.";
   } finally {
@@ -584,7 +552,7 @@ function pick(i, el) {
 }
 async function checkAns() {
   if (locked || selected === null || finishPromise) return;
-  const generation=quizGeneration;
+  const generation = quizGeneration;
   locked = true;
   const button = $("check");
   button.disabled = true;
@@ -600,7 +568,7 @@ async function checkAns() {
           p_answer: choice,
         }),
       );
-      if(generation!==quizGeneration||finishPromise)return;
+      if (generation !== quizGeneration || finishPromise) return;
       correct = result.is_correct;
       score = result.correct_answers ?? score;
       Tamareen.status("Answer saved.", "success");
@@ -612,19 +580,35 @@ async function checkAns() {
       $("feed").className = "feed " + (correct ? "good" : "bad");
       $("feed").textContent =
         (correct ? "Correct! " : "Incorrect. ") + q.explain;
+      const details = document.createElement("details");
+      details.innerHTML =
+        "<summary>Why each option is right or wrong</summary>";
+      for (const option of q.options) {
+        const p = document.createElement("p");
+        p.textContent =
+          option +
+          ": " +
+          (q.rationales[option] ||
+            (option === q.options[q.answer]
+              ? q.explain
+              : "This does not match the concept tested. " + q.explain));
+        details.append(p);
+      }
+      $("feed").append(details);
       $("scoreNow").textContent = `Score: ${score}`;
     }
     $("check").style.display = "none";
     $("next").style.display = "inline-block";
   } catch (e) {
     locked = false;
+    Tamareen.report?.("quiz_save");
     Tamareen.status("Answer was not saved. " + e.message, "error", checkAns);
   } finally {
     button.disabled = false;
   }
 }
 function nextQ() {
-  if(!locked||finishPromise)return;
+  if (!locked || finishPromise) return;
   idx++;
   idx < questions.length ? renderQ() : finish();
 }
@@ -661,6 +645,7 @@ async function finish(timedOut = false) {
       await showAdaptiveRecommendation();
     } catch (e) {
       finishPromise = null;
+      Tamareen.report?.("quiz_save");
       Tamareen.status("Completion was not saved. " + e.message, "error", () =>
         finish(timedOut),
       );
@@ -720,7 +705,8 @@ const qp = new URLSearchParams(location.search),
   qc = qp.get("course"),
   qt = qp.get("topic"),
   qm = qp.get("mode");
-if (qc && COURSES[qc]) {
+if (qp.has("resume")) resumeAttempt(qp.get("resume"));
+else if (qc && COURSES[qc]) {
   const wanted = qm === "exam" ? "exam" : "practice";
   requireAuth(location.pathname + location.search).then((ok) => {
     if (ok) startQuiz(qc, wanted, qt || "", false);
@@ -931,3 +917,88 @@ setInterval(() => {
     r.style.transform = "translateY(0)";
   }, 230);
 }, 1900);
+
+async function resumeAttempt(id) {
+  try {
+    await Tamareen.session(true);
+    const a = await Tamareen.checked(
+      Tamareen.client()
+        .from("attempts")
+        .select("id,mode,started_at,completed_at,question_ids,courses(code)")
+        .eq("id", id)
+        .single(),
+    );
+    if (a.completed_at)
+      throw new Error(
+        "This attempt is complete. View My Progress for the result.",
+      );
+    if (!a.question_ids.length)
+      throw new Error(
+        "This older attempt cannot be resumed. Start a new practice session.",
+      );
+    const rows = await Tamareen.checked(
+      Tamareen.client()
+        .from("questions")
+        .select(
+          "id,question,correct_answer,wrong_answers,explanation,option_explanations,topics(name)",
+        )
+        .in("id", a.question_ids),
+    );
+    const answers = await Tamareen.checked(
+      Tamareen.client()
+        .from("attempt_answers")
+        .select("question_id,is_correct,selected_answer")
+        .eq("attempt_id", a.id),
+    );
+    const byId = new Map(rows.map((q) => [q.id, q]));
+    questions = a.question_ids.map((id) => {
+      const q = byId.get(id);
+      if (!q) throw new Error("A question is unavailable.");
+      return makeQ({
+        id: q.id,
+        q: q.question,
+        c: q.correct_answer,
+        w: q.wrong_answers,
+        e: q.explanation,
+        rationales: q.option_explanations,
+        topic: q.topics?.name,
+      });
+    });
+    active = modeCourse = a.courses.code;
+    quizMode = a.mode;
+    attemptId = a.id;
+    attemptStart = new Date(a.started_at).getTime();
+    finishPromise = null;
+    score = answers.filter((a) => a.is_correct).length;
+    idx = questions.findIndex(
+      (q) => !answers.some((a) => a.question_id === q.id),
+    );
+    hideAll();
+    $("quiz").style.display = "block";
+    $("title").textContent =
+      active +
+      " · " +
+      COURSES[active].name +
+      " · " +
+      (quizMode === "exam" ? "Mock Exam" : "Practice Mode");
+    $("result").style.display = "none";
+    $("card").style.display = "block";
+    if (
+      idx < 0 ||
+      (quizMode === "exam" && Date.now() >= attemptStart + 600000)
+    ) {
+      idx = questions.length - 1;
+      await finish(quizMode === "exam");
+      return;
+    }
+    startExamTimer();
+    renderQ();
+    Tamareen.status(
+      "Attempt resumed. Submitted answers and the original exam deadline are preserved.",
+      "success",
+    );
+  } catch (err) {
+    Tamareen.status(err.message, "error");
+  }
+}
+Learning.showResume();
