@@ -1479,3 +1479,4 @@ textarea {
 .homepage #home .course {display:flex;flex-direction:column}
 .homepage #home .courseSummary {font-size:14px;line-height:1.8;color:#536f7d;margin:0 0 18px;flex:1}
 .homepage #home .courseExplore {display:block;color:#004f6e;margin-top:18px;font-size:13px;font-weight:650}
+@media(max-width:760px){.homepage main{padding-inline:20px!important}}
