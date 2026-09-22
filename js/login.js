@@ -67,7 +67,7 @@ async function submitAuth() {
         "If this email has an account, a reset link will arrive shortly.";
     } else if (current === "recovery") {
       await Tamareen.checked(c.auth.updateUser({ password }));
-      location.href = "/dashboard.html";
+      location.href = "/today.html";
     } else if (current === "signup") {
       const data = await Tamareen.checked(
         c.auth.signUp({

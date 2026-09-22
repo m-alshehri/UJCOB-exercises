@@ -8,6 +8,7 @@ export default defineConfig({
     headless: true,
     launchOptions: { executablePath: process.env.CHROME_PATH },
     screenshot: "only-on-failure",
+    trace: "retain-on-failure",
   },
   webServer: {
     command: "node scripts/dev-server.js",

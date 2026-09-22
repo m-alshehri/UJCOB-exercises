@@ -10,7 +10,7 @@ window.Tamareen = (() => {
     window.supabaseClient = instance;
     return instance;
   }
-  function internalPath(value, fallback = "/dashboard.html") {
+  function internalPath(value, fallback = "/today.html") {
     try {
       const url = new URL(value || fallback, location.origin);
       return url.origin === location.origin && !String(value).includes("\\")

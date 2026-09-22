@@ -1,6 +1,7 @@
 import "./lab-context.js";
-import { mkdir, cp, readdir, rm, readFile } from "node:fs/promises";
+import { mkdir, cp, readdir, rm, readFile, writeFile } from "node:fs/promises";
 import vm from "node:vm";
+await writeFile("js/project-catalog.js", "// Generated from assets/projects.json by scripts/build.js.\nwindow.PROJECTS = " + await readFile("assets/projects.json", "utf8") + ";\n");
 await rm("dist", { recursive: true, force: true });
 await mkdir("dist");
 for (const item of await readdir("."))

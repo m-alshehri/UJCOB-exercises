@@ -32,7 +32,7 @@
     const form = document.createElement("form");
     form.className = "learningCard";
     form.innerHTML =
-      '<h3>Assign practice</h3><label>Title<input name="title" required maxlength="160"></label><label>Course<select name="course"></select></label><label>Type<select name="kind"><option value="practice">One practice quiz</option><option value="lab">Selected lab exercises</option></select></label><fieldset><legend>Exercises</legend><div class="exerciseChoices"></div></fieldset><label>Due date (your local time, optional)<input name="due" type="datetime-local"></label><button>Assign to group</button>';
+      '<h3>Assign practice</h3><label>Title<input name="title" required maxlength="160"></label><label>Course<select name="course"></select></label><label>Type<select name="kind"><option value="practice">One practice quiz</option><option value="lab">Selected lab exercises</option><option value="project">Project submission</option></select></label><fieldset><legend>Exercises</legend><div class="exerciseChoices"></div></fieldset><label>Due date (your local time, optional)<input name="due" type="datetime-local"></label><button>Assign to group</button>';
     const fields = form.elements;
     for (const [type, lab] of Object.entries(LAB_CATALOG))
       fields.course.add(new Option(lab.code, lab.code));
@@ -40,11 +40,11 @@
       const [type, lab] = Object.entries(LAB_CATALOG).find(
         ([, l]) => l.code === fields.course.value,
       );
-      form.querySelector("fieldset").hidden = fields.kind.value !== "lab";
-      form.querySelector(".exerciseChoices").innerHTML = lab.exercises
+      form.querySelector("fieldset").hidden = fields.kind.value === "practice";
+      form.querySelector(".exerciseChoices").innerHTML = (fields.kind.value === "project" ? PROJECTS.filter(p=>p.course===fields.course.value) : lab.exercises)
         .map(
           (x) =>
-            `<label class="choice"><input type="checkbox" name="exercise" value="${esc(x.id)}">${esc(x.title)}</label>`,
+            `<label class="choice"><input type="${fields.kind.value === "project" ? "radio" : "checkbox"}" name="exercise" value="${esc(x.id)}">${esc(x.title)}</label>`,
         )
         .join("");
     }
@@ -132,12 +132,13 @@
         for (const a of g.assignments) {
           const section = document.createElement("article");
           section.className = "assignment";
+          section.id="assignment-"+a.id;
           section.innerHTML = `<h3>${esc(a.title)}</h3><p>${esc(a.courses.code)} · ${esc(a.kind)} ${a.due_at ? "· Due " + esc(new Date(a.due_at).toLocaleString()) : ""}</p>`;
           if (!g.owned) {
             const link = document.createElement("a");
             link.href =
-              a.kind === "practice"
-                ? "/?course=" + encodeURIComponent(a.courses.code)
+              a.kind === "project" ? "/submissions.html?assignment="+a.id+"&exercise="+a.exercise_keys[0] : a.kind === "practice"
+                ? "/?course=" + encodeURIComponent(a.courses.code) + "&mode=practice"
                 : LAB_CATALOG[a.lab_type]?.url || "/";
             link.textContent = "Open practice →";
             section.append(link);
@@ -158,11 +159,11 @@
             a.progress
               .map(
                 (p) =>
-                  `<tr><th scope="row">${esc(p.name)}</th><td>${esc(p.label)}</td><td>${p.done ? "Complete" : a.due_at && Date.now() > new Date(a.due_at) ? "Overdue" : "In progress"}</td></tr>`,
+                  `<tr><th scope="row">${esc(p.name)}</th><td>${esc(I18n.t(p.label))}</td><td>${p.state ? I18n.t(p.label) : p.done ? "Complete" : a.due_at && Date.now() > new Date(a.due_at) ? "Overdue" : "In progress"}</td></tr>`,
               )
               .join("") +
             "</tbody>";
-          section.append(table);
+          const scroll=document.createElement("div");scroll.className="tableScroll";scroll.tabIndex=0;scroll.setAttribute("role","region");scroll.setAttribute("aria-label",I18n.t("Practice completion"));scroll.append(table);section.append(scroll);
           card.append(section);
         }
         if (!g.assignments.length) card.append("No assignments yet.");

@@ -89,6 +89,7 @@ async function setup(page, { signedIn = true, failSave = false } = {}) {
       });
     },
   );
+  await page.route("**/api/journey", r=>r.fulfill({json:{instructor:false,events:[],userId:uid}}));
   return { writes, errors };
 }
 test("public routes load, keyboard course selection and auth redirect work", async ({
@@ -250,4 +251,35 @@ test('project submission includes selected group and immutable snapshot and disp
 });
 test('new learning screens fit a narrow Arabic viewport',async({page})=>{
  await setup(page);await page.setViewportSize({width:390,height:844});await page.addInitScript(()=>localStorage.setItem('tamareen:language','ar'));await page.route('**/api/learning-admin',r=>r.fulfill({json:{instructor:false,userId:uid,groups:[],owned:[],submissions:[],feedback:[],courses:[{code:'BCIS 313',name:'Python'}],drafts:[],questions:[],versions:[]}}));for(const route of ['/pathways.html','/content-studio.html','/question-quality.html','/submissions.html']){await page.goto(route);await expect(page.locator('html')).toHaveAttribute('dir','rtl');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+});
+
+test('all six courses have project briefs and mobile navigation reaches every learning area',async({page})=>{
+ const {errors}=await setup(page);await page.setViewportSize({width:360,height:800});await page.goto('/projects.html');await expect(page.locator('#projectList article')).toHaveCount(8);
+ for(const code of ['BCIS 313','BCIS 311','BCIS 317','BCIS 324','BCIS 411','BCIS 421']){await page.locator('#projectCourse').selectOption(code);await expect(page.locator('#projectList')).toContainText(code);await expect(page.locator('#projectList')).toContainText('Deliverables');}
+ await page.locator('#menuToggle').click();await expect(page.locator('#primaryNavigation [aria-current=page]')).toHaveText('Projects');await expect(page.locator('#primaryNavigation a')).toHaveCount(11);await expect(page.locator('[data-instructor-link]')).toHaveCount(0);await page.locator('#primaryNavigation a').first().focus();await page.keyboard.press('Escape');await expect(page.locator('#menuToggle')).toBeFocused();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect(errors).toEqual([]);
+});
+test('today prioritizes approaching deadlines and renders review and resume without inflating progress',async({page})=>{
+ const {errors}=await setup(page);await page.route('**/api/classrooms',r=>r.fulfill({json:{groups:[{name:'A',owned:false,assignments:[{id:'assignment1',title:'Submit SQL report',kind:'project',exercise_keys:['project-sales-sql'],courses:{code:'BCIS 311'},due_at:new Date(Date.now()+3600000).toISOString(),progress:[{done:false,label:'Not started'}]}]}]}}));
+ await page.route('**/rest/v1/attempts?**',r=>r.fulfill({json:new URL(r.request().url()).searchParams.get('completed_at')==='is.null'?[{id:'resume1',started_at:new Date().toISOString()}]:[]}));
+ await page.goto('/today.html');await expect(page.locator('.primaryAction')).toHaveAttribute('href','/submissions.html?assignment=assignment1&exercise=project-sales-sql');await expect(page.locator('#todayContent')).toContainText('Continue your practice');await expect(page.locator('#todayContent')).toContainText('0 questions ready for review');expect(errors).toEqual([]);
+});
+test('notification read receipt persists after reload and keeps action link',async({page})=>{
+ const {errors}=await setup(page);let read=false;
+ await page.route('**/api/journey',r=>r.fulfill({json:r.request().postDataJSON().action==='role'?{instructor:false}:{userId:uid,events:[{key:'feedback:test',kind:'needs_revision',project:'project-sales-sql',at:new Date().toISOString(),href:'/submissions.html#submission-s1',read}]}}));
+ await page.route('**/rest/v1/notification_reads?**',r=>{expect(r.request().postDataJSON()[0].user_id).toBe(uid);read=true;return r.fulfill({json:null});});
+ await page.goto('/notifications.html');await expect(page.locator('#notificationList')).toContainText('Revision requested');await page.getByRole('button',{name:'Mark as read',exact:true}).click();await expect(page.locator('.notificationUnread')).toHaveCount(0);await page.reload();await expect(page.locator('#notificationList')).toContainText('Read');await expect(page.locator('#notificationList a')).toHaveAttribute('href','/submissions.html#submission-s1');expect(errors).toEqual([]);
+});
+test('assigned project locks its scope, restores local work, saves a cloud draft and submits assignment id',async({page})=>{
+ const {errors}=await setup(page);const sent=[];let drafts=[];
+ await page.route('**/api/learning-admin',r=>{const b=r.request().postDataJSON();sent.push(b);if(b.action==='draft')drafts=[{assignment_id:'a',code:b.code,reflection:b.reflection,revision:b.revision+1}];return r.fulfill({json:b.action==='load'?{userId:uid,groups:[{id:'g',name:'G'}],owned:[],submissions:[],feedback:[],drafts,assignments:[{id:'a',title:'SQL task',group_id:'g',exercise_keys:['project-sales-sql']}]}:b.action==='draft'?{draft:drafts[0]}:{submission:{id:b.id}}});});
+ await page.goto('/submissions.html?assignment=a');await expect(page.locator('#submissionProject')).toHaveValue('project-sales-sql');await expect(page.locator('#submissionProject')).toBeDisabled();await page.locator('#submissionCode').fill('SELECT 1;');await page.locator('#submissionReflection').fill('Tested rows');await page.reload();await expect(page.locator('#submissionCode')).toHaveValue('SELECT 1;');await page.locator('#saveAssignmentDraft').click();await expect(page.locator('#submissionDraftStatus')).toHaveText('Cloud draft saved.');await page.getByRole('button',{name:'Submit new version'}).click();await expect(page.locator('#submissionStatus')).toHaveText('Submission saved.');expect(sent.find(s=>s.action==='submit').assignmentId).toBe('a');expect(errors).toEqual([]);
+});
+test('lab offline edits survive reload and conflicting cloud work is not silently overwritten',async({page})=>{
+ const {errors,writes}=await setup(page);await page.route('**/rest/v1/lab_drafts?**',r=>r.fulfill({json:[{code:'print("cloud")',revision:2}]}));
+ await page.goto('/python-lab.html');await expect(page.locator('#editor')).toHaveValue('print("cloud")');await page.evaluate(()=>window.dispatchEvent(new Event('offline')));await page.locator('#editor').fill('print("my local work")');
+ await page.route('**/rest/v1/lab_drafts?**',r=>r.fulfill({json:[{code:'print("other device")',revision:3}]}));await page.reload();await expect(page.locator('#editor')).toHaveValue('print("my local work")');await expect(page.locator('#draftKeep')).toBeVisible();await expect(page.locator('#draftState')).toContainText('Cloud draft differs');await page.waitForTimeout(1700);expect(writes.filter(w=>w.path.endsWith('save_lab_draft'))).toHaveLength(0);expect(errors).toEqual([]);
+});
+test('new journey pages fit Arabic mobile and expose no instructor controls to students',async({page})=>{
+ const {errors}=await setup(page);await page.setViewportSize({width:360,height:800});await page.addInitScript(()=>localStorage.setItem('tamareen:language','ar'));await page.route('**/api/classrooms',r=>r.fulfill({json:{groups:[]}}));
+ for(const path of ['/today.html','/notifications.html','/labs.html','/projects.html']){await page.goto(path);await expect(page.locator('html')).toHaveAttribute('dir','rtl');await expect(page.locator('h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),path).toBe(true);await expect(page.locator('[data-instructor-link]')).toHaveCount(0);}expect(errors).toEqual([]);
 });

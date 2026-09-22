@@ -103,3 +103,40 @@ document.querySelectorAll("canvas").forEach((c) => {
 });
 
 for(const nav of document.querySelectorAll('.head>.nav')){for(const [href,text] of [['/pathways.html','Learning paths'],['/submissions.html','Submissions']]){const a=document.createElement('a');a.href=href;a.className='navlink';a.textContent=text;a.onclick=closeMobileNav;nav.append(a);}}
+
+// One navigation definition for every legacy and shared-shell page.
+(() => {
+  const links = [['/today.html','My learning today'],['/','Courses'],['/pathways.html','Learning paths'],['/labs.html','Labs'],['/projects.html','Projects'],['/dashboard.html','My Progress'],['/review.html','Review mistakes'],['/classrooms.html','Groups'],['/submissions.html','Submissions'],['/notifications.html','Notifications'],['/resources.html','Resources']];
+  const nav = document.querySelector('.head>.nav');
+  if (!nav) return;
+  nav.id = 'primaryNavigation'; nav.setAttribute('aria-label','Main navigation');
+  nav.replaceChildren();
+  function add(href, text) {
+    const a = document.createElement('a'); a.href=href; a.textContent=text; a.className='navlink';
+    a.addEventListener('click',closeMobileNav); nav.append(a); return a;
+  }
+  links.forEach(([href,text])=>add(href,text));
+  function mark() {
+    for (const a of nav.querySelectorAll('a')) {
+      const active = a.getAttribute('href') === location.pathname || (a.getAttribute('href')==='/' && (location.pathname==='/index.html' || location.pathname.startsWith('/courses/'))) || (a.getAttribute('href')==='/labs.html' && /-lab\.html$/.test(location.pathname));
+      if(active) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    }
+  }
+  mark(); window.addEventListener('popstate',mark);
+  document.getElementById('menuToggle')?.setAttribute('aria-controls',nav.id);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape' && document.activeElement?.closest('#primaryNavigation')) document.getElementById('menuToggle')?.focus();});
+  const main=document.querySelector('main'); if(main){main.id ||= 'main';main.tabIndex=-1;}
+  let roleVersion=0;
+  async function roleLinks() {
+    const version=++roleVersion;
+    nav.querySelectorAll('[data-instructor-link]').forEach(a=>a.remove());
+    try {
+      if(!await Tamareen.session())return;
+      const data=await Tamareen.api('/api/journey',{action:'role'});
+      if(version!==roleVersion)return;
+      if(data.instructor) for(const [href,label] of [['/instructor.html','Instructor dashboard'],['/content-studio.html','Content studio'],['/question-quality.html','Question quality']]) add(href,label).dataset.instructorLink='true';
+      mark();
+    } catch { /* The individual pages still enforce server-side permissions. */ }
+  }
+  roleLinks(); Tamareen.client().auth.onAuthStateChange(()=>setTimeout(roleLinks,0));
+})();
