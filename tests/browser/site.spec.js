@@ -550,6 +550,9 @@ test("project submission includes selected group and immutable snapshot and disp
   await expect(page.locator("#submissionForm")).toBeVisible();
   await page.locator("#submissionGroup").selectOption("g");
   await page.locator("#submissionCode").fill("def reorder(items): return {}");
+  await expect(page.locator("#submissionDraftStatus")).toHaveText(
+    "Saved on this device.",
+  );
   await page.locator("#submissionReflection").fill("I tested the empty case.");
   await page.getByRole("button", { name: "Submit new version" }).click();
   await expect(page.locator("#submissionStatus")).toHaveText(

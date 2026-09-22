@@ -206,7 +206,13 @@
   function queueDraft() {
     const p = payload(),
       key = context;
-    if (!p.assignmentId || draftConflict) return;
+    if (!p.assignmentId) return;
+    if (draftConflict) {
+      draftStatus(
+        "Draft changed on another device. Load the cloud draft before saving.",
+      );
+      return;
+    }
     saveQueue = saveQueue.then(async () => {
       if (key !== context) return;
       draftStatus("Saving draft…");
@@ -244,7 +250,14 @@
   }
   function edit() {
     const saved = store();
-    if (saved) draftStatus("Saved on this device. Cloud saving pending.");
+    if (saved)
+      draftStatus(
+        draftConflict
+          ? "Draft changed on another device. Load the cloud draft before saving."
+          : $("submissionAssignment").value
+            ? "Saved on this device. Cloud saving pending."
+            : "Saved on this device.",
+      );
     clearTimeout(draftTimer);
     if ($("submissionAssignment").value && navigator.onLine)
       draftTimer = setTimeout(queueDraft, 1500);
@@ -276,7 +289,12 @@
     if (!draftConflict) queueDraft();
   });
   window.addEventListener("offline", () => {
-    if (store()) draftStatus("Saved on this device. Reconnect to sync.");
+    if (store())
+      draftStatus(
+        $("submissionAssignment").value
+          ? "Saved on this device. Reconnect to sync."
+          : "Saved on this device.",
+      );
   });
   $("loadProjectDraft").onclick = async () => {
     try {

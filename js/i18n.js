@@ -1,5 +1,6 @@
 window.I18n = (() => {
   const dictionary = {
+    "Saved on this device.": "تم الحفظ على هذا الجهاز.",
     "Completion queued on this device. Reconnect to sync.": "حُفظ الإنجاز مؤقتًا على هذا الجهاز. ستتم المزامنة عند عودة الاتصال.",
     "My learning today": "تعلمي اليوم",
     "Labs": "المختبرات",
