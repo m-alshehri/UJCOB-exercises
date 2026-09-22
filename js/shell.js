@@ -34,11 +34,9 @@ function toggleMobileNav() {
 document
   .querySelectorAll(".head>.nav a")
   .forEach((a) => a.addEventListener("click", closeMobileNav));
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeMobileNav();
-});
+
 window.addEventListener("resize", () => {
-  if (innerWidth > 720) closeMobileNav();
+  if (innerWidth > 960) closeMobileNav();
 });
 async function syncHeader() {
   try {
@@ -46,6 +44,9 @@ async function syncHeader() {
     const b = document.getElementById("authHeader");
     if (!b) return;
     b.textContent = session ? "Logout" : "Login";
+    const accountLabel = document.getElementById("accountLabel");
+    if (accountLabel)
+      accountLabel.textContent = session ? "Account" : "Sign in";
     if (b.tagName === "A") b.href = session ? "#" : "/login.html";
     b.onclick = async (e) => {
       e.preventDefault();
@@ -102,41 +103,231 @@ document.querySelectorAll("canvas").forEach((c) => {
   c.setAttribute("aria-label", "Chart. Equivalent data is listed below.");
 });
 
-for(const nav of document.querySelectorAll('.head>.nav')){for(const [href,text] of [['/pathways.html','Learning paths'],['/submissions.html','Submissions']]){const a=document.createElement('a');a.href=href;a.className='navlink';a.textContent=text;a.onclick=closeMobileNav;nav.append(a);}}
-
-// One navigation definition for every legacy and shared-shell page.
+// Accessible disclosure navigation shared by legacy and shared-shell pages.
 (() => {
-  const links = [['/today.html','My learning today'],['/','Courses'],['/pathways.html','Learning paths'],['/labs.html','Labs'],['/projects.html','Projects'],['/dashboard.html','My Progress'],['/review.html','Review mistakes'],['/classrooms.html','Groups'],['/submissions.html','Submissions'],['/notifications.html','Notifications'],['/resources.html','Resources']];
-  const nav = document.querySelector('.head>.nav');
-  if (!nav) return;
-  nav.id = 'primaryNavigation'; nav.setAttribute('aria-label','Main navigation');
+  const nav = document.querySelector(".head>.nav");
+  const actions = document.querySelector(".headerActions");
+  if (!nav || !actions) return;
+  const style = document.createElement("link");
+  style.rel = "stylesheet";
+  style.href = "/styles/navigation.css";
+  document.head.append(style);
+  document.querySelector("header").classList.add("siteNavigation");
+  nav.id = "primaryNavigation";
+  nav.setAttribute("aria-label", "Main navigation");
   nav.replaceChildren();
-  function add(href, text) {
-    const a = document.createElement('a'); a.href=href; a.textContent=text; a.className='navlink';
-    a.addEventListener('click',closeMobileNav); nav.append(a); return a;
+  const groups = [
+    [
+      "learn",
+      "Learn",
+      [
+        ["/", "Courses", "Practice and assessments"],
+        ["/pathways.html", "Learning paths", "Step-by-step learning"],
+        ["/labs.html", "Labs", "Hands-on practice"],
+        ["/projects.html", "Projects", "Course projects"],
+        ["/resources.html", "Resources", "References and resources"],
+      ],
+    ],
+    [
+      "follow",
+      "My learning",
+      [
+        ["/today.html", "My learning today", "Your next activity"],
+        ["/dashboard.html", "My Progress", "Results and skills"],
+        ["/review.html", "Review mistakes", "Questions to revisit"],
+      ],
+    ],
+    [
+      "classroom",
+      "Classroom",
+      [
+        ["/classrooms.html", "Groups & assignments", "Groups and deadlines"],
+        ["/submissions.html", "Submissions & feedback", "Work and feedback"],
+      ],
+    ],
+  ];
+  function disclosure(id, label, container) {
+    const group = document.createElement("div");
+    group.className = "navigationGroup";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "navigationTrigger";
+    button.id = id + "Trigger";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", id + "Panel");
+    const text = document.createElement("span");
+    text.textContent = label;
+    button.append(text);
+    const arrow = document.createElement("span");
+    arrow.className = "navigationChevron";
+    arrow.textContent = "⌄";
+    arrow.setAttribute("aria-hidden", "true");
+    button.append(arrow);
+    const panel = document.createElement("div");
+    panel.id = id + "Panel";
+    panel.className = "navigationPanel";
+    panel.hidden = true;
+    group.append(button, panel);
+    container.append(group);
+    button.addEventListener("click", () => {
+      const open = panel.hidden;
+      closeDisclosures();
+      if (open) {
+        panel.hidden = false;
+        button.setAttribute("aria-expanded", "true");
+      }
+    });
+    return { group, button, panel, text };
   }
-  links.forEach(([href,text])=>add(href,text));
-  function mark() {
-    for (const a of nav.querySelectorAll('a')) {
-      const active = a.getAttribute('href') === location.pathname || (a.getAttribute('href')==='/' && (location.pathname==='/index.html' || location.pathname.startsWith('/courses/'))) || (a.getAttribute('href')==='/labs.html' && /-lab\.html$/.test(location.pathname));
-      if(active) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+  function addGroup([id, label, links], instructor = false) {
+    const group = disclosure(id, label, nav);
+    if (instructor) group.group.dataset.instructorGroup = "true";
+    for (const [href, title, description] of links) {
+      const a = document.createElement("a");
+      a.href = href;
+      a.className = "navlink";
+      if (instructor) a.dataset.instructorLink = "true";
+      const strong = document.createElement("strong");
+      strong.textContent = title;
+      a.append(strong);
+      if (description) {
+        const small = document.createElement("small");
+        small.textContent = description;
+        a.append(small);
+      }
+      a.addEventListener("click", () => {
+        closeDisclosures();
+        closeMobileNav();
+      });
+      group.panel.append(a);
+    }
+    return group;
+  }
+  function closeDisclosures() {
+    for (const button of document.querySelectorAll(".navigationTrigger")) {
+      button.setAttribute("aria-expanded", "false");
+      document.getElementById(button.getAttribute("aria-controls")).hidden =
+        true;
     }
   }
-  mark(); window.addEventListener('popstate',mark);
-  document.getElementById('menuToggle')?.setAttribute('aria-controls',nav.id);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape' && document.activeElement?.closest('#primaryNavigation')) document.getElementById('menuToggle')?.focus();});
-  const main=document.querySelector('main'); if(main){main.id ||= 'main';main.tabIndex=-1;}
-  let roleVersion=0;
-  async function roleLinks() {
-    const version=++roleVersion;
-    nav.querySelectorAll('[data-instructor-link]').forEach(a=>a.remove());
-    try {
-      if(!await Tamareen.session())return;
-      const data=await Tamareen.api('/api/journey',{action:'role'});
-      if(version!==roleVersion)return;
-      if(data.instructor) for(const [href,label] of [['/instructor.html','Instructor dashboard'],['/content-studio.html','Content studio'],['/question-quality.html','Question quality']]) add(href,label).dataset.instructorLink='true';
-      mark();
-    } catch { /* The individual pages still enforce server-side permissions. */ }
+  groups.forEach((g) => addGroup(g));
+  const account = disclosure("account", "Sign in", actions);
+  account.group.classList.add("accountNavigation");
+  account.text.id = "accountLabel";
+  const auth = document.getElementById("authHeader");
+  if (auth) {
+    auth.className = "navlink";
+    account.panel.append(auth);
   }
-  roleLinks(); Tamareen.client().auth.onAuthStateChange(()=>setTimeout(roleLinks,0));
+  const github = document.querySelector(".headerActions .gh");
+  if (github) {
+    github.className = "navlink githubLink";
+    github.textContent = "GitHub ↗";
+    github.setAttribute("aria-label", "GitHub repository");
+    account.panel.append(github);
+  }
+  const bell = document.createElement("a");
+  bell.href = "/notifications.html";
+  bell.className = "notificationLink";
+  bell.setAttribute("aria-label", "Notifications");
+  bell.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>';
+  actions.prepend(bell);
+  const toggle = document.getElementById("menuToggle");
+  toggle?.setAttribute("aria-controls", nav.id);
+  if (toggle) actions.append(toggle);
+  function mark() {
+    for (const a of nav.querySelectorAll("a")) {
+      const href = a.getAttribute("href"),
+        path = location.pathname;
+      const active =
+        href === path ||
+        (href === "/" &&
+          (path === "/index.html" || path.startsWith("/courses/"))) ||
+        (href === "/labs.html" && /-lab\.html$/.test(path));
+      if (active) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    }
+    for (const group of nav.querySelectorAll(".navigationGroup"))
+      group
+        .querySelector("button")
+        .classList.toggle(
+          "hasCurrentPage",
+          !!group.querySelector("[aria-current=page]"),
+        );
+  }
+  mark();
+  window.addEventListener("popstate", mark);
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".navigationGroup")) closeDisclosures();
+  });
+  document.addEventListener("focusin", (e) => {
+    if (!e.target.closest(".navigationGroup")) closeDisclosures();
+  });
+  document.addEventListener("keydown", (e) => {
+    const group = document.activeElement?.closest(".navigationGroup");
+    if (e.key === "Escape") {
+      const open = group?.querySelector(
+        ".navigationTrigger[aria-expanded=true]",
+      );
+      if (open) {
+        e.preventDefault();
+        closeDisclosures();
+        open.focus();
+      } else if (nav.classList.contains("open")) {
+        closeDisclosures();
+        closeMobileNav();
+        toggle?.focus();
+      } else closeDisclosures();
+    }
+    if (
+      e.key === "ArrowDown" &&
+      document.activeElement?.matches(".navigationTrigger")
+    ) {
+      e.preventDefault();
+      const button = document.activeElement;
+      closeDisclosures();
+      button.setAttribute("aria-expanded", "true");
+      const panel = document.getElementById(
+        button.getAttribute("aria-controls"),
+      );
+      panel.hidden = false;
+      panel.querySelector("a,button")?.focus();
+    }
+  });
+  window.addEventListener("resize", closeDisclosures);
+  toggle?.addEventListener("click", closeDisclosures);
+  const main = document.querySelector("main");
+  if (main) {
+    main.id ||= "main";
+    main.tabIndex = -1;
+  }
+  let roleVersion = 0;
+  async function roleLinks() {
+    const version = ++roleVersion;
+    nav.querySelector("[data-instructor-group]")?.remove();
+    try {
+      if (!(await Tamareen.session())) return;
+      const data = await Tamareen.api("/api/journey", { action: "role" });
+      if (version !== roleVersion) return;
+      if (data.instructor)
+        addGroup(
+          [
+            "teach",
+            "Teaching",
+            [
+              ["/instructor.html", "Instructor dashboard"],
+              ["/content-studio.html", "Content studio"],
+              ["/question-quality.html", "Question quality"],
+            ],
+          ],
+          true,
+        );
+      mark();
+    } catch {
+      /* Destination pages enforce their own server-side permissions. */
+    }
+  }
+  roleLinks();
+  Tamareen.client().auth.onAuthStateChange(() => setTimeout(roleLinks, 0));
 })();

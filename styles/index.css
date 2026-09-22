@@ -1426,3 +1426,56 @@ textarea {
     z-index: 1007 !important;
   }
 }
+
+/* Approved homepage composition: quiet surfaces, complete course grid and clear steps. */
+.homepage {background:#f4f8fb;color:#153b4b}
+.homepage .stripe {display:none}
+.homepage main {max-width:1200px;padding:0 36px 52px}
+.homepage .practiceNotice {text-align:center;background:#eaf5fa;margin:0 -36px;padding:10px 20px;font-size:12px}
+.homepage #home .hero {width:100%;margin:0;padding:64px 0;min-height:0;grid-template-columns:1.15fr 1fr;gap:36px;background:transparent;color:#153b4b;box-shadow:none;overflow:visible}
+.homepage #home .hero::before,.homepage #home .hero::after {display:none}
+.homepage #home .heroCopy {margin:0;max-width:none;min-width:0}
+.homepage #home .eyebrow {color:#004f6e;font-size:12px;letter-spacing:.4px}
+.homepage #home .hero h1 {font-size:clamp(32px,4.4vw,50px);line-height:1.35;color:#004f6e;letter-spacing:-.7px}
+.homepage #home .rotator {color:inherit;min-width:0}
+.homepage #home .hero p {color:#536f7d;font-size:16px;line-height:1.9;margin:18px 0 24px}
+.homepage #home .heroActions button {min-height:46px;padding:12px 18px;font-size:14px;font-weight:650;border-radius:10px}
+.homepage #home .heroPri,.homepage #home .homeCta button {background:#005879;color:#fff}
+.homepage #home .heroSec {background:#fff;border:1px solid #d7e5ec;color:#153b4b}
+.homepage #home .terminal {margin:0;background:#fff;border:1px solid #d7e5ec;border-radius:16px;box-shadow:0 16px 40px #123c5020;min-width:0;display:block!important}
+.homepage #home .termbar {direction:ltr;background:#eaf5fa;color:#536f7d;justify-content:space-between;padding:13px 18px;font-size:12px;border:0}
+.homepage #home .term {padding:24px 18px;margin:0;font-size:13px!important;line-height:2!important;white-space:pre-wrap;color:#153b4b;min-height:0;background:#fff;overflow-wrap:anywhere}
+.homepage #home .term code {font:inherit;background:none;color:inherit}
+.homepage #home .terminalCaption {border-top:1px solid #d7e5ec;padding:16px 18px;color:#004f6e;font-size:13px}
+.homepage #home .section {margin:48px 0 24px;gap:16px;flex-wrap:wrap}
+.homepage #home h2 {font-size:28px;line-height:1.4;color:#004f6e}
+.homepage #home .section span {font-size:14px;line-height:1.8}
+.homepage #home .grid {grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.homepage #home .course {padding:24px;border:1px solid #d7e5ec;border-radius:14px;box-shadow:none;min-width:0;background:#fff}
+.homepage #home .course:hover {background:#eaf5fa;transform:none;border-color:#004f6e}
+.homepage #home .course h3 {font-size:18px;line-height:1.6;min-height:58px;color:#153b4b}
+.homepage #home .course .meta {font-size:13px;line-height:1.8}
+.homepage #home .benefits {margin:0;gap:28px}
+.homepage #home .benefit {padding:20px 0;background:transparent;border:0;box-shadow:none;border-radius:0;transform:none}
+.homepage #home .benefit::before,.homepage #home .benefit::after {display:none}
+.homepage #home .benefit p {font-size:14px;line-height:1.9;color:#536f7d}
+.homepage #home .benefit.active {padding-bottom:20px}
+.homepage #home .works {margin-top:36px;padding:30px 0;background:#fff}
+.homepage #home .worksHead {text-align:start;justify-content:flex-start;margin:0 0 28px}
+.homepage #home .workSteps {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;border:0;border-radius:0;padding:0;background:none;align-items:start}
+.homepage #home .workSteps em {display:none}
+.homepage #home .workStep i {display:block;width:auto;height:auto;padding-bottom:14px;border-bottom:2px solid #d7e5ec;border-radius:0;background:none;color:#004f6e}
+.homepage #home .workStep b {font-size:18px;line-height:1.5}
+.homepage #home .workStep span {font-size:13px;line-height:1.8}
+.homepage #home .homeCta {margin-top:48px;padding:44px 24px;display:flex;flex-direction:column;text-align:center;background:#eaf5fa;color:#004f6e;border-radius:14px}
+.homepage #home .homeCta p {color:#536f7d;font-size:15px;line-height:1.8}
+.homepage #home .homeCta button {min-height:46px;padding:12px 22px;font-weight:650}
+.homepage footer {background:#fff;color:#153b4b;border-top:1px solid #d7e5ec}
+.homepage footer .footcol a,.homepage footer .credit,.homepage footer small {color:#536f7d}
+.homepage footer h4 {color:#004f6e}
+.homepage #coursesSection,.homepage #howItWorks {scroll-margin-top:24px}
+@media(max-width:760px){.homepage main{padding:0 20px 36px}.homepage .practiceNotice{margin-inline:-20px}.homepage #home .hero{grid-template-columns:1fr;padding:36px 0;gap:28px}.homepage #home .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.homepage #home .workSteps{grid-template-columns:repeat(2,minmax(0,1fr))}.homepage #home .benefits{grid-template-columns:1fr;gap:4px}.homepage #home .course h3{min-height:0}}
+@media(max-width:440px){.homepage #home .grid{grid-template-columns:1fr}.homepage #home .hero h1{font-size:36px}.homepage #home h2{font-size:26px}.homepage #home .workSteps{gap:18px}}
+.homepage #home .course {display:flex;flex-direction:column}
+.homepage #home .courseSummary {font-size:14px;line-height:1.8;color:#536f7d;margin:0 0 18px;flex:1}
+.homepage #home .courseExplore {display:block;color:#004f6e;margin-top:18px;font-size:13px;font-weight:650}

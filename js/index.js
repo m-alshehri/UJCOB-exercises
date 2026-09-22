@@ -44,11 +44,19 @@ let active = "",
     0,
     Math.ceil((attemptStart + 600000 - Date.now()) / 1000),
   );
+const courseSummaries = {
+  "BCIS 313": "Build programming foundations and solve business problems with Python.",
+  "BCIS 324": "Explore business processes and their integration through ERP systems.",
+  "BCIS 317": "Turn your ideas into interactive web pages.",
+  "BCIS 411": "Turn data into insights that support business decisions.",
+  "BCIS 421": "Analyze business data and draw actionable conclusions.",
+  "BCIS 311": "Design databases and practice SQL queries.",
+};
 function renderGrid() {
   $("grid").innerHTML = Object.entries(COURSES)
     .map(
       ([c, v]) =>
-        `<div class="course" onclick="chooseCourse('${c}')"><div class="courseTop"><div class="courseIcon">${ICONS[c] || "&lt;/&gt;"}</div><div class="code">${c}</div></div><h3>${v.name}</h3><div class="meta">${c === "BCIS 313" ? "Python · MCQ + Coding" : c === "BCIS 311" ? "SQL · MCQ + Coding" : c === "BCIS 324" ? "ERP systems" : c === "BCIS 317" ? "HTML · CSS · JavaScript · MCQ + Coding" : c === "BCIS 411" ? "Power BI · Business intelligence" : c === "BCIS 421" ? "Excel · Google Sheets · Analytics" : "Interactive practice"}</div></div>`,
+        `<div class="course" onclick="chooseCourse('${c}')"><div class="courseTop"><div class="courseIcon">${ICONS[c] || "&lt;/&gt;"}</div><div class="code">${c}</div></div><h3>${v.name}</h3><p class="courseSummary">${courseSummaries[c]}</p><div class="meta">${c === "BCIS 313" ? "Python · MCQ + Coding" : c === "BCIS 311" ? "SQL · MCQ + Coding" : c === "BCIS 324" ? "ERP systems" : c === "BCIS 317" ? "HTML · CSS · JavaScript · MCQ + Coding" : c === "BCIS 411" ? "Power BI · Business intelligence" : c === "BCIS 421" ? "Excel · Google Sheets · Analytics" : "Interactive practice"}</div><span class="courseExplore">Explore course →</span></div>`,
     )
     .join("");
 }
@@ -865,40 +873,6 @@ Tamareen.session()
     if (s) loadContinueLearning(s.user.id);
   })
   .catch(() => {});
-const termLines = [
-  "$ tamareen start",
-  "> loading practice environment...",
-  "> choose a course",
-  "> solve. run. learn.",
-];
-let termLine = 0,
-  termChar = 0,
-  termTimer = null;
-function typeTerminal() {
-  const el = $("termText");
-  if (!el) return;
-  if (termLine >= termLines.length) {
-    termTimer = setTimeout(() => {
-      el.innerHTML = "";
-      termLine = 0;
-      termChar = 0;
-      typeTerminal();
-    }, 2000);
-    return;
-  }
-  const line = termLines[termLine];
-  if (termChar < line.length) {
-    const ch = line.charAt(termChar++);
-    el.appendChild(document.createTextNode(ch));
-    termTimer = setTimeout(typeTerminal, 42);
-  } else {
-    el.appendChild(document.createElement("br"));
-    termLine++;
-    termChar = 0;
-    termTimer = setTimeout(typeTerminal, 180);
-  }
-}
-typeTerminal();
 document.querySelectorAll(".benefit").forEach((card) => {
   const toggle = () => {
     const opening = !card.classList.contains("active");
@@ -919,20 +893,6 @@ document.querySelectorAll(".benefit").forEach((card) => {
     }
   });
 });
-const words = ["Practice.", "Code.", "Analyze.", "Experiment.", "Improve."];
-let wi = 0;
-setInterval(() => {
-  let r = $("rotator");
-  if (!r) return;
-  r.style.opacity = 0;
-  r.style.transform = "translateY(5px)";
-  setTimeout(() => {
-    wi = (wi + 1) % words.length;
-    r.textContent = words[wi];
-    r.style.opacity = 1;
-    r.style.transform = "translateY(0)";
-  }, 230);
-}, 1900);
 
 async function resumeAttempt(id) {
   try {

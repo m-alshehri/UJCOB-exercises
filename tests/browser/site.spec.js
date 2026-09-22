@@ -378,9 +378,8 @@ test("mobile navigation and learning pages do not overflow at 390px", async ({
   await page
     .getByRole("button", { name: "Open navigation", exact: true })
     .click();
-  await expect(
-    page.getByRole("link", { name: "Groups", exact: true }),
-  ).toBeVisible();
+  await page.locator("#classroomTrigger").click();
+  await expect(page.locator("#classroomPanel a").first()).toBeVisible();
   expect(errors).toEqual([]);
 });
 test("instructor can create a group and assign selected exercises through the UI", async ({
@@ -622,12 +621,13 @@ test("all six courses have project briefs and mobile navigation reaches every le
     await expect(page.locator("#projectList")).toContainText("Deliverables");
   }
   await page.locator("#menuToggle").click();
-  await expect(
-    page.locator("#primaryNavigation [aria-current=page]"),
-  ).toHaveText("Projects");
-  await expect(page.locator("#primaryNavigation a")).toHaveCount(11);
+  await page.locator("#learnTrigger").click();
+  await expect(page.locator("#primaryNavigation [aria-current=page] strong")).toHaveText("Projects");
+  await expect(page.locator("#primaryNavigation a")).toHaveCount(10);
   await expect(page.locator("[data-instructor-link]")).toHaveCount(0);
   await page.locator("#primaryNavigation a").first().focus();
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#learnTrigger")).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.locator("#menuToggle")).toBeFocused();
   expect(
@@ -909,4 +909,44 @@ test("assignment drafts preserve conflicting local work across edits and reloads
   expect(writes).toBe(0);
   await page.locator("#restoreAssignmentDraft").click();
   await expect(page.locator("#submissionCode")).toHaveValue("new cloud");
+});
+
+test('grouped header keeps language and GitHub accessible and supports keyboard dismissal', async ({page})=>{
+  const {errors}=await setup(page,{signedIn:false});
+  await page.goto('/');
+  await expect(page.locator('#learnPanel')).toBeHidden();
+  await page.locator('#learnTrigger').focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#learnPanel a').first()).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#learnTrigger')).toBeFocused();
+  await expect(page.locator('#learnPanel')).toBeHidden();
+  await page.locator('#accountTrigger').click();
+  await expect(page.locator('#accountPanel .githubLink')).toHaveAttribute('href','https://github.com/m-alshehri/UJCOB-exercises');
+  await expect(page.locator('#authHeader')).toBeVisible();
+  await page.locator('#languageToggle').click();
+  await expect(page.locator('html')).toHaveAttribute('dir','rtl');
+  await expect(page.locator('#learnTrigger')).toContainText('التعلّم');
+  for(const width of [320,360,760,1024]){
+    await page.setViewportSize({width,height:800});
+    await expect(page.locator('#languageToggle')).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  }
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang','ar');
+  expect(errors).toEqual([]);
+});
+test('instructor links are grouped and stay translated after role loading',async({page})=>{
+  const {errors}=await setup(page);
+  await page.addInitScript(()=>localStorage.setItem('tamareen:language','ar'));
+  await page.route('**/api/journey',r=>r.fulfill({json:{instructor:true}}));
+  await page.goto('/');
+  await expect(page.locator('#teachTrigger')).toContainText('أدوات المدرّس');
+  await page.locator('#teachTrigger').click();
+  await expect(page.locator('#teachPanel [data-instructor-link]')).toHaveCount(3);
+  await expect(page.locator('#teachPanel')).toContainText('إدارة المحتوى');
+  await page.locator('#accountTrigger').click();
+  await expect(page.locator('#teachPanel')).toBeHidden();
+  await expect(page.locator('#authHeader')).toContainText('تسجيل الخروج');
+  expect(errors).toEqual([]);
 });
