@@ -6,8 +6,10 @@ window.LabProgress = class {
     this.solved = new Set();
     this.ready = this.init();
     this.pending = new Map();
-    this.ready.then(ok=>{if(ok)this.flush();});
-    window.addEventListener('online',()=>this.flush());
+    this.ready.then((ok) => {
+      if (ok) this.flush().catch(() => {});
+    });
+    window.addEventListener("online", () => this.flush().catch(() => {}));
   }
   async init() {
     try {
@@ -54,24 +56,49 @@ window.LabProgress = class {
     this.pending.set(index, action);
     return action;
   }
-  key(){return 'tamareen:pending-progress:'+this.user?.id+':'+this.lab;}
-  queued(){try{return JSON.parse(localStorage.getItem(this.key())||'[]');}catch{return [];}}
-  remember(index,remove=false){if(!this.user)return false;try{const keys=new Set(this.queued());const id=this.exercises[index].id;remove?keys.delete(id):keys.add(id);localStorage.setItem(this.key(),JSON.stringify([...keys]));return true;}catch{return false;}}
-  async flush(){
-    if(!this.user)return;
-    const session=await Tamareen.session();if(session?.user.id!==this.user.id)return;
-    for(const key of this.queued()){const index=this.exercises.findIndex(e=>e.id===key);if(index>=0)await this.save(index);}
+  key() {
+    return "tamareen:pending-progress:" + this.user?.id + ":" + this.lab;
+  }
+  queued() {
+    try {
+      return JSON.parse(localStorage.getItem(this.key()) || "[]");
+    } catch {
+      return [];
+    }
+  }
+  remember(index, remove = false) {
+    if (!this.user) return false;
+    try {
+      const keys = new Set(this.queued());
+      const id = this.exercises[index].id;
+      remove ? keys.delete(id) : keys.add(id);
+      localStorage.setItem(this.key(), JSON.stringify([...keys]));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  async flush() {
+    if (!this.user) return;
+    const session = await Tamareen.session();
+    if (session?.user.id !== this.user.id) return;
+    for (const key of this.queued()) {
+      const index = this.exercises.findIndex((e) => e.id === key);
+      if (index >= 0) await this.save(index);
+    }
   }
   async persist(index) {
-    let buffered=false;
+    let buffered = false;
     try {
-      buffered=this.remember(index);
+      buffered = this.remember(index);
       if (!(await this.ready)) {
         this.ready = this.init();
         if (!(await this.ready)) throw new Error("Reconnect and try again.");
       }
-      buffered=this.remember(index);
-      const session=await Tamareen.session();if(session?.user.id!==this.user.id)throw new Error("Sign in with the same account to save this result.");
+      buffered = this.remember(index);
+      const session = await Tamareen.session();
+      if (session?.user.id !== this.user.id)
+        throw new Error("Sign in with the same account to save this result.");
       const exercise = this.exercises[index];
       Tamareen.status("Saving completion…");
       await Tamareen.checked(
@@ -88,14 +115,17 @@ window.LabProgress = class {
           { onConflict: "user_id,course_id,lab_type,exercise_key" },
         ),
       );
-      this.remember(index,true);
+      this.remember(index, true);
       this.solved.add(index);
+      window.updateSolved?.();
       Tamareen.status("Completion saved.", "success");
       return true;
     } catch (e) {
       Tamareen.report?.("progress_save");
       Tamareen.status(
-        (buffered ? "Completion queued on this device. Reconnect to sync. " : "Your check passed, but completion was not saved. ") + e.message,
+        (buffered
+          ? "Completion queued on this device. Reconnect to sync. "
+          : "Your check passed, but completion was not saved. ") + e.message,
         "error",
         () => this.save(index),
       );

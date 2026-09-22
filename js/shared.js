@@ -94,7 +94,10 @@ window.Tamareen = (() => {
       body: JSON.stringify(body),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Request failed.");
+    if (!response.ok) {
+      if (response.status >= 500) window.Tamareen?.report?.("page_error");
+      throw new Error(data.error || "Request failed.");
+    }
     return data;
   }
   return {
