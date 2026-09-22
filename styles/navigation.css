@@ -1,0 +1,262 @@
+/* Shared disclosure header; scoped overrides keep legacy page styles isolated. */
+header.siteNavigation {
+  position: relative;
+  z-index: 30;
+  background: #fff;
+  border-bottom: 1px solid #d7e5ec;
+  backdrop-filter: none;
+}
+.siteNavigation .head {
+  max-width: 1200px;
+  padding: 16px 24px;
+  flex-wrap: wrap !important;
+  gap: 14px !important;
+}
+.siteNavigation .brandwrap {
+  gap: 8px;
+  flex-shrink: 0;
+  direction: ltr;
+}
+.siteNavigation .brand {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.siteNavigation .brand span {
+  display: none !important;
+}
+.siteNavigation .mark,
+.siteNavigation .brandLogo {
+  width: 34px;
+  height: 34px;
+}
+header.siteNavigation .head > .nav {
+  display: flex !important;
+  order: 0;
+  width: auto !important;
+  flex: 1;
+  gap: 2px !important;
+  padding: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+  box-shadow: none;
+  align-items: center !important;
+  flex-wrap: wrap;
+  z-index: auto !important;
+}
+.siteNavigation .navigationGroup {
+  position: relative;
+}
+.siteNavigation .navigationTrigger {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  color: #153b4b;
+  padding: 10px 12px;
+  min-height: 44px;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.siteNavigation .navigationTrigger:hover,
+.siteNavigation .navigationTrigger[aria-expanded="true"],
+.siteNavigation .navigationTrigger.hasCurrentPage {
+  background: #eaf5fa;
+  color: #004f6e;
+}
+.siteNavigation .navigationChevron {
+  color: #536f7d;
+  transition: transform 0.15s;
+}
+.siteNavigation .navigationTrigger[aria-expanded="true"] .navigationChevron {
+  transform: rotate(180deg);
+}
+.siteNavigation .navigationPanel {
+  position: absolute;
+  inset-inline-start: 0;
+  top: calc(100% + 8px);
+  width: 280px;
+  max-width: calc(100vw - 32px);
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #d7e5ec;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px #123c5020;
+  z-index: 50;
+}
+header.siteNavigation .navigationPanel .navlink {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #153b4b;
+  text-decoration: none;
+  text-align: start;
+  font-size: 14px;
+  white-space: normal;
+}
+.siteNavigation .navlink strong {
+  font-weight: 650;
+  font-size: 14px;
+}
+.siteNavigation .navlink small {
+  font-size: 12px;
+  color: #536f7d;
+  line-height: 1.5;
+  font-weight: 400;
+}
+header.siteNavigation .navigationPanel .navlink:hover,
+header.siteNavigation .navigationPanel .navlink[aria-current="page"] {
+  background: #eaf5fa;
+  color: #004f6e;
+}
+header.siteNavigation .headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+  flex-shrink: 0;
+}
+.siteNavigation #languageToggle {
+  order: -1;
+  display: block !important;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  background: transparent;
+  border: 0;
+  font-size: 13px;
+  font-weight: 650;
+  color: #004f6e;
+}
+.siteNavigation .notificationLink {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 9px;
+  color: #004f6e;
+}
+.siteNavigation .notificationLink:hover {
+  background: #eaf5fa;
+}
+.siteNavigation .notificationLink svg {
+  width: 20px;
+  height: 20px;
+}
+.siteNavigation .accountNavigation .navigationTrigger {
+  border: 1px solid #d7e5ec;
+}
+.siteNavigation .accountNavigation .navigationPanel {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  width: 210px;
+}
+header.siteNavigation .head .menuToggle {
+  display: none !important;
+  position: static;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: #004f6e;
+  font-size: 22px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+@media (max-width: 960px) {
+  .siteNavigation .head {
+    padding: 12px 16px;
+    gap: 8px !important;
+  }
+  header.siteNavigation .head > .nav {
+    display: none !important;
+    order: 3;
+    width: 100% !important;
+    flex-basis: 100%;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  header.siteNavigation .head > .nav.open {
+    display: flex !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .siteNavigation .nav .navigationTrigger {
+    width: 100%;
+    justify-content: space-between;
+    text-align: start;
+  }
+  .siteNavigation .nav .navigationPanel {
+    position: static;
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: none;
+    background: #f4f8fb;
+    margin: 4px 0 8px;
+  }
+  header.siteNavigation .head .menuToggle {
+    display: block !important;
+  }
+  .drawerBackdrop {
+    display: none !important;
+  }
+  body.drawerOpen {
+    overflow: auto !important;
+  }
+}
+@media (max-width: 440px) {
+  .siteNavigation .head {
+    padding: 10px 12px;
+    gap: 4px !important;
+  }
+  .siteNavigation .brand {
+    font-size: 19px;
+  }
+  .siteNavigation .mark,
+  .siteNavigation .brandLogo {
+    width: 26px;
+    height: 28px;
+  }
+  .siteNavigation .brandwrap {
+    gap: 4px;
+  }
+  .siteNavigation .navigationTrigger {
+    padding: 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+  .siteNavigation #languageToggle {
+    padding: 6px;
+    font-size: 12px;
+  }
+  .siteNavigation .headerActions {
+    gap: 0 !important;
+  }
+  .siteNavigation .notificationLink,
+  header.siteNavigation .head .menuToggle {
+    min-width: 36px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .siteNavigation .navigationChevron {
+    transition: none;
+  }
+}

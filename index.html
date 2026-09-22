@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/styles/shared.css" />
     <link rel="stylesheet" href="/styles/learning.css" />
   </head>
-  <body>
+  <body class="homepage">
     <div class="stripe"></div>
     <div id="siteHeader"></div>
     <div
@@ -40,19 +40,28 @@
                 Start practicing →</button
               ><button
                 class="heroSec"
-                onclick="document.getElementById('liveDemo').scrollIntoView({behavior:'smooth',block:'center'})"
+                onclick="document.getElementById('howItWorks').scrollIntoView({behavior:'smooth'})"
               >
-                See it in action
+                How Tamareen works
               </button>
             </div>
           </div>
           <div class="terminal" id="liveDemo">
             <div class="termbar">
-              <span class="dot"></span><span class="dot"></span
-              ><span class="dot"></span>
+              <span>$ tamareen</span><span>Python · BCIS313</span>
             </div>
-            <div class="term">
-              <span id="termText"></span><span class="cursor"></span>
+            <pre class="term"><code># Calculate total revenue
+prices = [120, 85, 200]
+quantity = [3, 2, 1]
+
+revenue = sum(
+    p * q for p, q
+    in zip(prices, quantity)
+)
+print(revenue)
+&gt; 730</code></pre>
+            <div class="terminalCaption">
+              Learn the concept. Try it. Understand the result.
             </div>
           </div>
         </div>
@@ -112,7 +121,7 @@
             </div>
           </div>
         </div>
-        <div class="works">
+        <div class="works" id="howItWorks">
           <div class="section worksHead">
             <div>
               <h2>How Tamareen works</h2>
