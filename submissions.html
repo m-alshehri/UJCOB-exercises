@@ -37,6 +37,8 @@
       </details>
       <p id="submissionStatus" role="status">Loading…</p>
       <form id="submissionForm" class="learningCard" hidden>
+        <label>Assignment<select id="submissionAssignment"><option value="">Independent project</option></select></label>
+        <p id="assignmentDetails"></p>
         <label
           >Project<select id="submissionProject">
             <option value="project-sales-dashboard">Sales dashboard</option>
@@ -49,7 +51,7 @@
           </select></label
         ><button type="button" id="loadProjectDraft">Load cloud draft</button
         ><label
-          >Your code<textarea
+          >Your work (code or report)<textarea
             id="submissionCode"
             class="codeEditor"
             required
@@ -62,7 +64,7 @@
             required
             maxlength="2000"
           ></textarea></label
-        ><button type="submit">Submit new version</button>
+        ><p id="submissionDraftStatus" role="status"></p><div class="actions"><button type="button" id="saveAssignmentDraft">Save assignment draft</button><button type="button" id="restoreAssignmentDraft">Load assignment draft</button><button type="submit">Submit new version</button></div>
       </form>
       <h2>Submission history</h2>
       <label
@@ -80,6 +82,7 @@
     <script src="/question-banks.js"></script>
     <script src="/js/lab-content.js"></script>
     <script src="/js/catalog.js"></script>
+    <script src="/js/project-catalog.js"></script>
     <script src="/js/shared.js"></script>
     <script src="/js/learning.js"></script>
     <script src="/js/pathways.js"></script>

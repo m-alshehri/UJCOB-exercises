@@ -60,3 +60,13 @@ test('lab tutor uses server exercise context, Arabic guidance and the existing q
  globalThis.fetch=async(input,init)=>{const url=new URL(typeof input==='string'?input:input.url);let value;if(url.pathname.includes('/auth/'))value={id:'11111111-1111-4111-8111-111111111111',email:'student@example.test'};else if(url.pathname.endsWith('consume_tutor_quota'))value=true;else{paid++;const body=JSON.parse(init.body);assert.match(body.instructions,/Respond in Arabic/);assert.match(body.instructions,/Never provide the complete solution/);assert.match(body.input[0].content,/inventory planner/);value={output_text:'Test hint'};}return new Response(JSON.stringify(value),{status:200,headers:{'Content-Type':'application/json'}});};
  try{let r=response();await tutor({method:'POST',headers:{authorization:'Bearer test'},body:{kind:'hint',lab:'python-lab',exercise:'project-inventory-planner',code:'pass',result:'FAIL',level:2,language:'ar'}},r);assert.equal(r.code,200);assert.equal(r.body.answer,'Test hint');r=response();await tutor({method:'POST',headers:{authorization:'Bearer test'},body:{kind:'hint',lab:'python-lab',exercise:'not-real'}},r);assert.equal(r.code,400);assert.equal(paid,1);}finally{globalThis.fetch=original;if(previous===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=previous;}
 });
+
+test('journey never returns roles or notifications without a verified session',async()=>{
+ const {default:handler}=await import('../api/journey.js');
+ for(const action of ['role','notifications']){const r=response();await handler({method:'POST',headers:{},body:{action}},r);assert.equal(r.code,401);assert.equal(r.headers['Cache-Control'],'no-store');}
+});
+test('journey uses server allowlist rather than user metadata for instructor links',async()=>{
+ const {default:handler}=await import('../api/journey.js'),original=globalThis.fetch;
+ globalThis.fetch=async()=>new Response(JSON.stringify({id:'u',email:'unlisted@example.test',user_metadata:{role:'instructor'}}),{status:200,headers:{'Content-Type':'application/json'}});
+ try{const r=response();await handler({method:'POST',headers:{authorization:'Bearer test'},body:{action:'role'}},r);assert.equal(r.code,200);assert.equal(r.body.instructor,false);}finally{globalThis.fetch=original;}
+});

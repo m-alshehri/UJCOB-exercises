@@ -18,7 +18,8 @@ async function setup(page, { signedIn = true, failSave = false } = {}) {
   if (signedIn)
     await page.addInitScript(
       ({ uid }) =>
-        window===window.top && localStorage.setItem(
+        window === window.top &&
+        localStorage.setItem(
           "sb-ulueevjobheawtnqgupf-auth-token",
           JSON.stringify({
             access_token: "test-token",
@@ -89,6 +90,9 @@ async function setup(page, { signedIn = true, failSave = false } = {}) {
       });
     },
   );
+  await page.route("**/api/journey", (r) =>
+    r.fulfill({ json: { instructor: false, events: [], userId: uid } }),
+  );
   return { writes, errors };
 }
 test("public routes load, keyboard course selection and auth redirect work", async ({
@@ -148,11 +152,28 @@ test("failed lab save never claims completion was saved", async ({ page }) => {
       exact: true,
     })
     .click();
-  await expect(page.locator("#saveStatus")).toContainText("not saved");
+  await expect(page.locator("#saveStatus")).toContainText(
+    "queued on this device",
+  );
   await expect(page.locator("#done")).toHaveText("0");
   await expect(
     page.getByRole("button", { name: "Retry saving" }),
   ).toBeVisible();
+  await page.route("**/rest/v1/lab_progress?**", (r) =>
+    r.fulfill({ json: r.request().method() === "POST" ? null : [] }),
+  );
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  await expect(page.locator("#saveStatus")).toContainText("Completion saved.");
+  await expect(page.locator("#done")).toHaveText("1");
+  expect(
+    await page.evaluate(() =>
+      JSON.parse(
+        localStorage.getItem(
+          "tamareen:pending-progress:11111111-1111-4111-8111-111111111111:erp-lab",
+        ),
+      ),
+    ),
+  ).toEqual([]);
 });
 test("Python executes in a worker without clearing the solution", async ({
   page,
@@ -202,52 +223,690 @@ test("resources header reflects the session; dashboard handles no history", asyn
   await expect(page.locator("#list")).toContainText("No completed attempts");
   expect(errors).toEqual([]);
 });
-test('Web Lab checks JavaScript interaction and mobile layout behavior',async({page})=>{const {errors}=await setup(page);await page.goto('/web-lab.html');for(let n=0;n<3;n++)await page.getByRole('button',{name:'Next exercise',exact:true}).click();await page.locator('#code').fill('<p id="message">Ready</p><button onclick="document.getElementById(\'message\').textContent=\'Changed\'">Change</button>');await page.getByRole('button',{name:'Check task',exact:true}).click();await expect(page.locator('#status')).toContainText('Correct!');await page.getByRole('button',{name:'Next exercise',exact:true}).click();await page.locator('#code').fill('<style>.container{display:grid;grid-template-columns:1fr 1fr}@media(max-width:600px){.container{grid-template-columns:1fr}}</style><div class="container"><div>One</div><div>Two</div></div>');await page.getByRole('button',{name:'Check task',exact:true}).click();await expect(page.locator('#status')).toContainText('Correct!');expect(errors).toEqual([]);});
-
-test('resume restores an existing attempt without creating another or resetting the clock',async({page})=>{
- const {writes,errors}=await setup(page);const aid='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
- await page.route('**/rest/v1/attempts?**',r=>r.fulfill({json:{id:aid,mode:'exam',started_at:new Date(Date.now()-120000).toISOString(),completed_at:null,question_ids:[qid],courses:{code:'BCIS 313'}}}));
- await page.goto('/?resume='+aid);await expect(page.locator('#qtext')).toHaveText('Which value is correct?');await expect(page.locator('#examTimer')).toContainText(/Time left: [78]:/);
- expect(writes.filter(w=>w.path.endsWith('start_practice_attempt'))).toHaveLength(0);expect(errors).toEqual([]);
-});
-test('review page shows wrong answer, explanation and a targeted practice link',async({page})=>{
- const {errors}=await setup(page);
- await page.route('**/rest/v1/attempts?**',r=>r.fulfill({json:[{id:'a',courses:{code:'BCIS 313'}}]}));
- await page.route('**/rest/v1/attempt_answers?**',r=>r.fulfill({json:[{id:'answer',question_id:qid,is_correct:false,selected_answer:'Wrong one',answered_at:new Date().toISOString(),questions:{id:qid,question:'Review this question',correct_answer:'Correct option',explanation:'A clear explanation',is_active:true,topics:{name:'Basics'},courses:{code:'BCIS 313'},option_explanations:{'Wrong one':'Why it fails'}}}]}));
- await page.goto('/review.html');await expect(page.locator('#reviewList')).toContainText('Wrong one');await page.getByText('Review answer and explanation',{exact:true}).click();await expect(page.locator('#reviewList')).toContainText('Why it fails');await expect(page.getByRole('link',{name:'Practice this question again →'})).toHaveAttribute('href',new RegExp('reviewQuestion='+qid));expect(errors).toEqual([]);
-});
-test('cloud drafts restore and hints progress without revealing a complete solution',async({page})=>{
- const {errors,writes}=await setup(page);
- await page.route('**/rest/v1/lab_drafts?**',r=>r.fulfill({json:[{code:'print("cloud draft")',revision:3}]}));
- await page.goto('/python-lab.html');await expect(page.locator('#editor')).toHaveValue('print("cloud draft")');
- for(let n=0;n<3;n++)await page.getByRole('button',{name:'Show next hint',exact:true}).click();await expect(page.locator('#hintList li')).toHaveCount(3);await expect(page.locator('#hintNext')).toBeDisabled();
- await page.locator('#editor').fill('print("edited")');await page.getByRole('button',{name:'Save cloud draft',exact:true}).click();await expect(page.locator('#draftState')).toContainText('Cloud draft saved');expect(writes.find(w=>w.path.endsWith('save_lab_draft')).body.p_revision).toBe(3);expect(errors).toEqual([]);
-});
-test('mobile navigation and learning pages do not overflow at 390px',async({page})=>{
- const {errors}=await setup(page);await page.setViewportSize({width:390,height:844});
- for(const path of ['/projects.html','/review.html','/python-lab.html','/web-lab.html']){await page.goto(path);await expect(page.locator('h1')).toBeVisible();expect(await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth,overflow:[...document.querySelectorAll("body *")].filter(e=>e.getBoundingClientRect().right>innerWidth+1).map(e=>({tag:e.tagName,id:e.id,class:e.className,width:e.getBoundingClientRect().width,text:e.textContent.slice(0,70)})).slice(0,15)})),path).toMatchObject({width:390});}
- await page.goto('/projects.html');await page.getByRole('button',{name:'Open navigation',exact:true}).click();await expect(page.getByRole('link',{name:'Groups',exact:true})).toBeVisible();expect(errors).toEqual([]);
-});
-test('instructor can create a group and assign selected exercises through the UI',async({page})=>{
- const {errors}=await setup(page);const requests=[];let created=false;
- await page.route('**/api/classrooms',r=>{const b=r.request().postDataJSON();requests.push(b);if(b.action==='createGroup')created=true;return r.fulfill({json:b.action==='load'?{instructor:true,health:[{kind:'quiz_save',page:'/',count:5,alert:true}],groups:created?[{id:'g',name:'Section A',join_code:'a'.repeat(32),owned:true,members:0,assignments:[],topics:[]}]:[]}:{ok:true}});});
- await page.goto('/classrooms.html');await page.locator('#groupName').fill('Section A');await page.getByRole('button',{name:'Create group',exact:true}).click();await expect(page.locator('#groups')).toContainText('Section A');await page.getByText('Create assignment',{exact:true}).click();await page.locator('input[name=title]').fill('Basics practice');await page.locator('select[name=kind]').selectOption('lab');await page.locator('input[name=exercise]').first().check();await page.getByRole('button',{name:'Assign to group',exact:true}).click();await expect.poll(()=>requests.some(x=>x.action==='assign'&&x.exercises.length===1)).toBe(true);await expect(page.locator('#healthTitle')).toContainText('Attention');expect(errors).toEqual([]);
+test("Web Lab checks JavaScript interaction and mobile layout behavior", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.goto("/web-lab.html");
+  for (let n = 0; n < 3; n++)
+    await page
+      .getByRole("button", { name: "Next exercise", exact: true })
+      .click();
+  await page
+    .locator("#code")
+    .fill(
+      "<p id=\"message\">Ready</p><button onclick=\"document.getElementById('message').textContent='Changed'\">Change</button>",
+    );
+  await page.getByRole("button", { name: "Check task", exact: true }).click();
+  await expect(page.locator("#status")).toContainText("Correct!");
+  await page
+    .getByRole("button", { name: "Next exercise", exact: true })
+    .click();
+  await page
+    .locator("#code")
+    .fill(
+      '<style>.container{display:grid;grid-template-columns:1fr 1fr}@media(max-width:600px){.container{grid-template-columns:1fr}}</style><div class="container"><div>One</div><div>Two</div></div>',
+    );
+  await page.getByRole("button", { name: "Check task", exact: true }).click();
+  await expect(page.locator("#status")).toContainText("Correct!");
+  expect(errors).toEqual([]);
 });
 
-test('learning paths show the next step and language choice survives reload',async({page})=>{
- const {errors}=await setup(page);await page.goto('/pathways.html');await expect(page.locator('#pathList article')).toHaveCount(5);await expect(page.locator('#nextStep')).toHaveAttribute('href',/stage=0/);await page.locator('#languageToggle').click();await expect(page.locator('html')).toHaveAttribute('dir','rtl');await expect(page.locator('h1')).toHaveText('مسارات التعلم');await page.reload();await expect(page.locator('html')).toHaveAttribute('lang','ar');await page.goto('/python-lab.html');await expect(page.locator('#editor')).toHaveCSS('direction','ltr');await expect(page.locator('#labTutorSend')).toHaveText('اطلب إرشادًا');expect(errors).toEqual([]);
+test("resume restores an existing attempt without creating another or resetting the clock", async ({
+  page,
+}) => {
+  const { writes, errors } = await setup(page);
+  const aid = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  await page.route("**/rest/v1/attempts?**", (r) =>
+    r.fulfill({
+      json: {
+        id: aid,
+        mode: "exam",
+        started_at: new Date(Date.now() - 120000).toISOString(),
+        completed_at: null,
+        question_ids: [qid],
+        courses: { code: "BCIS 313" },
+      },
+    }),
+  );
+  await page.goto("/?resume=" + aid);
+  await expect(page.locator("#qtext")).toHaveText("Which value is correct?");
+  await expect(page.locator("#examTimer")).toContainText(/Time left: [78]:/);
+  expect(
+    writes.filter((w) => w.path.endsWith("start_practice_attempt")),
+  ).toHaveLength(0);
+  expect(errors).toEqual([]);
 });
-test('diagnostic tags the attempt and withholds hints and answer feedback',async({page})=>{
- const {writes,errors}=await setup(page);await page.route('**/rest/v1/questions?**',r=>r.fulfill({json:[{id:qid,question:'Diagnostic question',correct_answer:'Correct option',wrong_answers:['A','B','C'],explanation:'Explain later',topics:{name:'Python interpreter'}}]}));
- await page.goto('/?course=BCIS%20313&diagnostic=1');await expect(page.locator('#qtext')).toHaveText('Diagnostic question');await expect(page.locator('#tutor')).toBeHidden();await page.getByRole('button',{name:/Correct option/}).click();await page.locator('#check').click();await expect(page.locator('#next')).toBeVisible();await expect(page.locator('#feed')).not.toContainText('Explain later');expect(writes.find(w=>w.path.endsWith('tag_practice_attempt')).body.p_purpose).toBe('diagnostic');await page.locator('#next').click();await expect(page.locator('#pathResult')).toBeVisible();expect(errors).toEqual([]);
+test("review page shows wrong answer, explanation and a targeted practice link", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.route("**/rest/v1/attempts?**", (r) =>
+    r.fulfill({ json: [{ id: "a", courses: { code: "BCIS 313" } }] }),
+  );
+  await page.route("**/rest/v1/attempt_answers?**", (r) =>
+    r.fulfill({
+      json: [
+        {
+          id: "answer",
+          question_id: qid,
+          is_correct: false,
+          selected_answer: "Wrong one",
+          answered_at: new Date().toISOString(),
+          questions: {
+            id: qid,
+            question: "Review this question",
+            correct_answer: "Correct option",
+            explanation: "A clear explanation",
+            is_active: true,
+            topics: { name: "Basics" },
+            courses: { code: "BCIS 313" },
+            option_explanations: { "Wrong one": "Why it fails" },
+          },
+        },
+      ],
+    }),
+  );
+  await page.goto("/review.html");
+  await expect(page.locator("#reviewList")).toContainText("Wrong one");
+  await page
+    .getByText("Review answer and explanation", { exact: true })
+    .click();
+  await expect(page.locator("#reviewList")).toContainText("Why it fails");
+  await expect(
+    page.getByRole("link", { name: "Practice this question again →" }),
+  ).toHaveAttribute("href", new RegExp("reviewQuestion=" + qid));
+  expect(errors).toEqual([]);
 });
-test('content studio previews safe text and sends a validated four-option draft',async({page})=>{
- const {errors}=await setup(page);const requests=[];await page.route('**/api/learning-admin',r=>{const b=r.request().postDataJSON();requests.push(b);return r.fulfill({json:b.action==='content'?{courses:[{code:'BCIS 313',name:'Python'}],drafts:[],questions:[],versions:[]}:{draft:{id:b.id,revision:1,question_id:null}}});});
- await page.goto('/content-studio.html');await expect(page.locator('#studio')).toBeVisible();await page.locator('#editTopic').fill('variable');await page.locator('#editText').fill('<img src=x onerror=alert(1)> is text');await page.locator('#editCorrect').fill('A');await page.locator('#editExplanation').fill('Because');for(let i=1;i<=3;i++)await page.locator('#wrong'+i).fill('Option '+i);for(let i=0;i<=3;i++)await page.locator('#rationale'+i).fill('Explanation '+i);await page.locator('#previewQuestion').click();await expect(page.locator('#questionPreview img')).toHaveCount(0);await page.getByRole('button',{name:'Save draft',exact:true}).click();await expect(page.locator('#studioStatus')).toHaveText('Draft saved.');const b=requests.find(x=>x.action==='saveQuestion');expect(b.publish).toBe(false);expect(Object.keys(b.payload.rationales)).toHaveLength(4);expect(errors).toEqual([]);
+test("cloud drafts restore and hints progress without revealing a complete solution", async ({
+  page,
+}) => {
+  const { errors, writes } = await setup(page);
+  await page.route("**/rest/v1/lab_drafts?**", (r) =>
+    r.fulfill({ json: [{ code: 'print("cloud draft")', revision: 3 }] }),
+  );
+  await page.goto("/python-lab.html");
+  await expect(page.locator("#editor")).toHaveValue('print("cloud draft")');
+  for (let n = 0; n < 3; n++)
+    await page
+      .getByRole("button", { name: "Show next hint", exact: true })
+      .click();
+  await expect(page.locator("#hintList li")).toHaveCount(3);
+  await expect(page.locator("#hintNext")).toBeDisabled();
+  await page.locator("#editor").fill('print("edited")');
+  await page
+    .getByRole("button", { name: "Save cloud draft", exact: true })
+    .click();
+  await expect(page.locator("#draftState")).toContainText("Cloud draft saved");
+  expect(
+    writes.find((w) => w.path.endsWith("save_lab_draft")).body.p_revision,
+  ).toBe(3);
+  expect(errors).toEqual([]);
 });
-test('project submission includes selected group and immutable snapshot and displays feedback',async({page})=>{
- const {errors}=await setup(page),sent=[];await page.route('**/api/learning-admin',r=>{const b=r.request().postDataJSON();sent.push(b);return r.fulfill({json:b.action==='load'?{instructor:false,userId:uid,groups:[{id:'g',name:'Group'}],owned:[],submissions:[],feedback:[]}:{submission:{id:b.id}}});});await page.goto('/submissions.html');await expect(page.locator('#submissionForm')).toBeVisible();await page.locator('#submissionGroup').selectOption('g');await page.locator('#submissionCode').fill('def reorder(items): return {}');await page.locator('#submissionReflection').fill('I tested the empty case.');await page.getByRole('button',{name:'Submit new version'}).click();await expect(page.locator('#submissionStatus')).toHaveText('Submission saved.');const b=sent.find(x=>x.action==='submit');expect(b.groupId).toBe('g');expect(b.code).toContain('def reorder');expect(b.id).toMatch(/^[a-f0-9-]{36}$/);expect(errors).toEqual([]);
+test("mobile navigation and learning pages do not overflow at 390px", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of [
+    "/projects.html",
+    "/review.html",
+    "/python-lab.html",
+    "/web-lab.html",
+  ]) {
+    await page.goto(path);
+    await expect(page.locator("h1")).toBeVisible();
+    expect(
+      await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth,
+        viewport: innerWidth,
+        overflow: [...document.querySelectorAll("body *")]
+          .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
+          .map((e) => ({
+            tag: e.tagName,
+            id: e.id,
+            class: e.className,
+            width: e.getBoundingClientRect().width,
+            text: e.textContent.slice(0, 70),
+          }))
+          .slice(0, 15),
+      })),
+      path,
+    ).toMatchObject({ width: 390 });
+  }
+  await page.goto("/projects.html");
+  await page
+    .getByRole("button", { name: "Open navigation", exact: true })
+    .click();
+  await expect(
+    page.getByRole("link", { name: "Groups", exact: true }),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
 });
-test('new learning screens fit a narrow Arabic viewport',async({page})=>{
- await setup(page);await page.setViewportSize({width:390,height:844});await page.addInitScript(()=>localStorage.setItem('tamareen:language','ar'));await page.route('**/api/learning-admin',r=>r.fulfill({json:{instructor:false,userId:uid,groups:[],owned:[],submissions:[],feedback:[],courses:[{code:'BCIS 313',name:'Python'}],drafts:[],questions:[],versions:[]}}));for(const route of ['/pathways.html','/content-studio.html','/question-quality.html','/submissions.html']){await page.goto(route);await expect(page.locator('html')).toHaveAttribute('dir','rtl');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+test("instructor can create a group and assign selected exercises through the UI", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  const requests = [];
+  let created = false;
+  await page.route("**/api/classrooms", (r) => {
+    const b = r.request().postDataJSON();
+    requests.push(b);
+    if (b.action === "createGroup") created = true;
+    return r.fulfill({
+      json:
+        b.action === "load"
+          ? {
+              instructor: true,
+              health: [{ kind: "quiz_save", page: "/", count: 5, alert: true }],
+              groups: created
+                ? [
+                    {
+                      id: "g",
+                      name: "Section A",
+                      join_code: "a".repeat(32),
+                      owned: true,
+                      members: 0,
+                      assignments: [],
+                      topics: [],
+                    },
+                  ]
+                : [],
+            }
+          : { ok: true },
+    });
+  });
+  await page.goto("/classrooms.html");
+  await page.locator("#groupName").fill("Section A");
+  await page.getByRole("button", { name: "Create group", exact: true }).click();
+  await expect(page.locator("#groups")).toContainText("Section A");
+  await page.getByText("Create assignment", { exact: true }).click();
+  await page.locator("input[name=title]").fill("Basics practice");
+  await page.locator("select[name=kind]").selectOption("lab");
+  await page.locator("input[name=exercise]").first().check();
+  await page
+    .getByRole("button", { name: "Assign to group", exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      requests.some((x) => x.action === "assign" && x.exercises.length === 1),
+    )
+    .toBe(true);
+  await expect(page.locator("#healthTitle")).toContainText("Attention");
+  expect(errors).toEqual([]);
+});
+
+test("learning paths show the next step and language choice survives reload", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.goto("/pathways.html");
+  await expect(page.locator("#pathList article")).toHaveCount(5);
+  await expect(page.locator("#nextStep")).toHaveAttribute("href", /stage=0/);
+  await page.locator("#languageToggle").click();
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.locator("h1")).toHaveText("مسارات التعلم");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+  await page.goto("/python-lab.html");
+  await expect(page.locator("#editor")).toHaveCSS("direction", "ltr");
+  await expect(page.locator("#labTutorSend")).toHaveText("اطلب إرشادًا");
+  expect(errors).toEqual([]);
+});
+test("diagnostic tags the attempt and withholds hints and answer feedback", async ({
+  page,
+}) => {
+  const { writes, errors } = await setup(page);
+  await page.route("**/rest/v1/questions?**", (r) =>
+    r.fulfill({
+      json: [
+        {
+          id: qid,
+          question: "Diagnostic question",
+          correct_answer: "Correct option",
+          wrong_answers: ["A", "B", "C"],
+          explanation: "Explain later",
+          topics: { name: "Python interpreter" },
+        },
+      ],
+    }),
+  );
+  await page.goto("/?course=BCIS%20313&diagnostic=1");
+  await expect(page.locator("#qtext")).toHaveText("Diagnostic question");
+  await expect(page.locator("#tutor")).toBeHidden();
+  await page.getByRole("button", { name: /Correct option/ }).click();
+  await page.locator("#check").click();
+  await expect(page.locator("#next")).toBeVisible();
+  await expect(page.locator("#feed")).not.toContainText("Explain later");
+  expect(
+    writes.find((w) => w.path.endsWith("tag_practice_attempt")).body.p_purpose,
+  ).toBe("diagnostic");
+  await page.locator("#next").click();
+  await expect(page.locator("#pathResult")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+test("content studio previews safe text and sends a validated four-option draft", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  const requests = [];
+  await page.route("**/api/learning-admin", (r) => {
+    const b = r.request().postDataJSON();
+    requests.push(b);
+    return r.fulfill({
+      json:
+        b.action === "content"
+          ? {
+              courses: [{ code: "BCIS 313", name: "Python" }],
+              drafts: [],
+              questions: [],
+              versions: [],
+            }
+          : { draft: { id: b.id, revision: 1, question_id: null } },
+    });
+  });
+  await page.goto("/content-studio.html");
+  await expect(page.locator("#studio")).toBeVisible();
+  await page.locator("#editTopic").fill("variable");
+  await page.locator("#editText").fill("<img src=x onerror=alert(1)> is text");
+  await page.locator("#editCorrect").fill("A");
+  await page.locator("#editExplanation").fill("Because");
+  for (let i = 1; i <= 3; i++)
+    await page.locator("#wrong" + i).fill("Option " + i);
+  for (let i = 0; i <= 3; i++)
+    await page.locator("#rationale" + i).fill("Explanation " + i);
+  await page.locator("#previewQuestion").click();
+  await expect(page.locator("#questionPreview img")).toHaveCount(0);
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.locator("#studioStatus")).toHaveText("Draft saved.");
+  const b = requests.find((x) => x.action === "saveQuestion");
+  expect(b.publish).toBe(false);
+  expect(Object.keys(b.payload.rationales)).toHaveLength(4);
+  expect(errors).toEqual([]);
+});
+test("project submission includes selected group and immutable snapshot and displays feedback", async ({
+  page,
+}) => {
+  const { errors } = await setup(page),
+    sent = [];
+  await page.route("**/api/learning-admin", (r) => {
+    const b = r.request().postDataJSON();
+    sent.push(b);
+    return r.fulfill({
+      json:
+        b.action === "load"
+          ? {
+              instructor: false,
+              userId: uid,
+              groups: [{ id: "g", name: "Group" }],
+              owned: [],
+              submissions: [],
+              feedback: [],
+            }
+          : { submission: { id: b.id } },
+    });
+  });
+  await page.goto("/submissions.html");
+  await expect(page.locator("#submissionForm")).toBeVisible();
+  await page.locator("#submissionGroup").selectOption("g");
+  await page.locator("#submissionCode").fill("def reorder(items): return {}");
+  await expect(page.locator("#submissionDraftStatus")).toHaveText(
+    "Saved on this device.",
+  );
+  await page.locator("#submissionReflection").fill("I tested the empty case.");
+  await page.getByRole("button", { name: "Submit new version" }).click();
+  await expect(page.locator("#submissionStatus")).toHaveText(
+    "Submission saved.",
+  );
+  const b = sent.find((x) => x.action === "submit");
+  expect(b.groupId).toBe("g");
+  expect(b.code).toContain("def reorder");
+  expect(b.id).toMatch(/^[a-f0-9-]{36}$/);
+  expect(errors).toEqual([]);
+});
+test("new learning screens fit a narrow Arabic viewport", async ({ page }) => {
+  await setup(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() =>
+    localStorage.setItem("tamareen:language", "ar"),
+  );
+  await page.route("**/api/learning-admin", (r) =>
+    r.fulfill({
+      json: {
+        instructor: false,
+        userId: uid,
+        groups: [],
+        owned: [],
+        submissions: [],
+        feedback: [],
+        courses: [{ code: "BCIS 313", name: "Python" }],
+        drafts: [],
+        questions: [],
+        versions: [],
+      },
+    }),
+  );
+  for (const route of [
+    "/pathways.html",
+    "/content-studio.html",
+    "/question-quality.html",
+    "/submissions.html",
+  ]) {
+    await page.goto(route);
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+  }
+});
+
+test("all six courses have project briefs and mobile navigation reaches every learning area", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/projects.html");
+  await expect(page.locator("#projectList article")).toHaveCount(8);
+  for (const code of [
+    "BCIS 313",
+    "BCIS 311",
+    "BCIS 317",
+    "BCIS 324",
+    "BCIS 411",
+    "BCIS 421",
+  ]) {
+    await page.locator("#projectCourse").selectOption(code);
+    await expect(page.locator("#projectList")).toContainText(code);
+    await expect(page.locator("#projectList")).toContainText("Deliverables");
+  }
+  await page.locator("#menuToggle").click();
+  await expect(
+    page.locator("#primaryNavigation [aria-current=page]"),
+  ).toHaveText("Projects");
+  await expect(page.locator("#primaryNavigation a")).toHaveCount(11);
+  await expect(page.locator("[data-instructor-link]")).toHaveCount(0);
+  await page.locator("#primaryNavigation a").first().focus();
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#menuToggle")).toBeFocused();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+  expect(errors).toEqual([]);
+});
+test("today prioritizes approaching deadlines and renders review and resume without inflating progress", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.route("**/api/classrooms", (r) =>
+    r.fulfill({
+      json: {
+        groups: [
+          {
+            name: "A",
+            owned: false,
+            assignments: [
+              {
+                id: "assignment1",
+                title: "Submit SQL report",
+                kind: "project",
+                exercise_keys: ["project-sales-sql"],
+                courses: { code: "BCIS 311" },
+                due_at: new Date(Date.now() + 3600000).toISOString(),
+                progress: [{ done: false, label: "Not started" }],
+              },
+            ],
+          },
+        ],
+      },
+    }),
+  );
+  await page.route("**/rest/v1/attempts?**", (r) =>
+    r.fulfill({
+      json:
+        new URL(r.request().url()).searchParams.get("completed_at") ===
+        "is.null"
+          ? [{ id: "resume1", started_at: new Date().toISOString() }]
+          : [],
+    }),
+  );
+  await page.goto("/today.html");
+  await expect(page.locator(".primaryAction")).toHaveAttribute(
+    "href",
+    "/submissions.html?assignment=assignment1&exercise=project-sales-sql",
+  );
+  await expect(page.locator("#todayContent")).toContainText(
+    "Continue your practice",
+  );
+  await expect(page.locator("#todayContent")).toContainText(
+    "0 questions ready for review",
+  );
+  expect(errors).toEqual([]);
+});
+test("notification read receipt persists after reload and keeps action link", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  let read = false;
+  await page.route("**/api/journey", (r) =>
+    r.fulfill({
+      json:
+        r.request().postDataJSON().action === "role"
+          ? { instructor: false }
+          : {
+              userId: uid,
+              events: [
+                {
+                  key: "feedback:test",
+                  kind: "needs_revision",
+                  project: "project-sales-sql",
+                  at: new Date().toISOString(),
+                  href: "/submissions.html#submission-s1",
+                  read,
+                },
+              ],
+            },
+    }),
+  );
+  await page.route("**/rest/v1/notification_reads?**", (r) => {
+    expect(r.request().postDataJSON()[0].user_id).toBe(uid);
+    read = true;
+    return r.fulfill({ json: null });
+  });
+  await page.goto("/notifications.html");
+  await expect(page.locator("#notificationList")).toContainText(
+    "Revision requested",
+  );
+  await page.getByRole("button", { name: "Mark as read", exact: true }).click();
+  await expect(page.locator(".notificationUnread")).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator("#notificationList")).toContainText("Read");
+  await expect(page.locator("#notificationList a")).toHaveAttribute(
+    "href",
+    "/submissions.html#submission-s1",
+  );
+  expect(errors).toEqual([]);
+});
+test("assigned project locks its scope, restores local work, saves a cloud draft and submits assignment id", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  const sent = [];
+  let drafts = [];
+  await page.route("**/api/learning-admin", (r) => {
+    const b = r.request().postDataJSON();
+    sent.push(b);
+    if (b.action === "draft")
+      drafts = [
+        {
+          assignment_id: "a",
+          code: b.code,
+          reflection: b.reflection,
+          revision: b.revision + 1,
+        },
+      ];
+    return r.fulfill({
+      json:
+        b.action === "load"
+          ? {
+              userId: uid,
+              groups: [{ id: "g", name: "G" }],
+              owned: [],
+              submissions: [],
+              feedback: [],
+              drafts,
+              assignments: [
+                {
+                  id: "a",
+                  title: "SQL task",
+                  group_id: "g",
+                  exercise_keys: ["project-sales-sql"],
+                },
+              ],
+            }
+          : b.action === "draft"
+            ? { draft: drafts[0] }
+            : { submission: { id: b.id } },
+    });
+  });
+  await page.goto("/submissions.html?assignment=a");
+  await expect(page.locator("#submissionProject")).toHaveValue(
+    "project-sales-sql",
+  );
+  await expect(page.locator("#submissionProject")).toBeDisabled();
+  await page.locator("#submissionCode").fill("SELECT 1;");
+  await page.locator("#submissionReflection").fill("Tested rows");
+  await page.reload();
+  await expect(page.locator("#submissionCode")).toHaveValue("SELECT 1;");
+  await page.locator("#saveAssignmentDraft").click();
+  await expect(page.locator("#submissionDraftStatus")).toHaveText(
+    "Cloud draft saved.",
+  );
+  await page.getByRole("button", { name: "Submit new version" }).click();
+  await expect(page.locator("#submissionStatus")).toHaveText(
+    "Submission saved.",
+  );
+  expect(sent.find((s) => s.action === "submit").assignmentId).toBe("a");
+  expect(errors).toEqual([]);
+});
+test("lab offline edits survive reload and conflicting cloud work is not silently overwritten", async ({
+  page,
+}) => {
+  const { errors, writes } = await setup(page);
+  await page.route("**/rest/v1/lab_drafts?**", (r) =>
+    r.fulfill({ json: [{ code: 'print("cloud")', revision: 2 }] }),
+  );
+  await page.goto("/python-lab.html");
+  await expect(page.locator("#editor")).toHaveValue('print("cloud")');
+  await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+  await page.locator("#editor").fill('print("my local work")');
+  await page.route("**/rest/v1/lab_drafts?**", (r) =>
+    r.fulfill({ json: [{ code: 'print("other device")', revision: 3 }] }),
+  );
+  await page.reload();
+  await expect(page.locator("#editor")).toHaveValue('print("my local work")');
+  await expect(page.locator("#draftKeep")).toBeVisible();
+  await expect(page.locator("#draftState")).toContainText(
+    "Cloud draft differs",
+  );
+  await page.waitForTimeout(1700);
+  expect(writes.filter((w) => w.path.endsWith("save_lab_draft"))).toHaveLength(
+    0,
+  );
+  expect(errors).toEqual([]);
+});
+test("new journey pages fit Arabic mobile and expose no instructor controls to students", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.addInitScript(() =>
+    localStorage.setItem("tamareen:language", "ar"),
+  );
+  await page.route("**/api/classrooms", (r) =>
+    r.fulfill({ json: { groups: [] } }),
+  );
+  for (const path of [
+    "/today.html",
+    "/notifications.html",
+    "/labs.html",
+    "/projects.html",
+  ]) {
+    await page.goto(path);
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.locator("h1")).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+      path,
+    ).toBe(true);
+    await expect(page.locator("[data-instructor-link]")).toHaveCount(0);
+  }
+  expect(errors).toEqual([]);
+});
+
+test("assignment drafts preserve conflicting local work across edits and reloads until explicit cloud restore", async ({
+  page,
+}) => {
+  await setup(page);
+  let revision = 1,
+    code = "old cloud",
+    writes = 0;
+  await page.route("**/api/learning-admin", (r) => {
+    const b = r.request().postDataJSON();
+    if (b.action === "draft") writes++;
+    return r.fulfill({
+      json:
+        b.action === "load"
+          ? {
+              userId: uid,
+              groups: [{ id: "g", name: "Group" }],
+              owned: [],
+              submissions: [],
+              feedback: [],
+              assignments: [
+                {
+                  id: "a",
+                  title: "Task",
+                  group_id: "g",
+                  exercise_keys: ["project-sales-sql"],
+                },
+              ],
+              drafts: [
+                { assignment_id: "a", code, reflection: "test", revision },
+              ],
+            }
+          : {
+              draft: {
+                assignment_id: "a",
+                code: b.code,
+                reflection: b.reflection,
+                revision: ++revision,
+              },
+            },
+    });
+  });
+  await page.goto("/submissions.html?assignment=a");
+  await expect(page.locator("#submissionCode")).toHaveValue("old cloud");
+  await page.locator("#submissionCode").fill("local work");
+  code = "new cloud";
+  revision = 2;
+  await page.reload();
+  await expect(page.locator("#submissionCode")).toHaveValue("local work");
+  await expect(page.locator("#submissionDraftStatus")).toContainText(
+    "another device",
+  );
+  await page.locator("#submissionCode").fill("more local work");
+  await page.reload();
+  await expect(page.locator("#submissionDraftStatus")).toContainText(
+    "another device",
+  );
+  await page.locator("#saveAssignmentDraft").click();
+  expect(writes).toBe(0);
+  await page.locator("#restoreAssignmentDraft").click();
+  await expect(page.locator("#submissionCode")).toHaveValue("new cloud");
 });

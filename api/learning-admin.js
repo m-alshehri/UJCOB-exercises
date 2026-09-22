@@ -168,6 +168,11 @@ export default async function handler(req, res) {
       );
       return res.json({ saved: true });
     }
+    if (action === "draft") {
+      if (typeof b.code !== 'string' || Buffer.byteLength(b.code)>100000 || typeof b.reflection!=='string' || b.reflection.length>2000 || !Number.isInteger(b.revision) || b.revision<0) fail('Invalid draft');
+      const draft = await check(db.rpc('save_assignment_draft',{p_user:user.id,p_assignment:b.assignmentId,p_code:b.code,p_reflection:b.reflection,p_revision:b.revision}));
+      return res.json({draft});
+    }
     if (action === "submit") {
       if (
         typeof b.code !== "string" ||
@@ -194,6 +199,7 @@ export default async function handler(req, res) {
           p_exercise: b.exercise,
           p_code: b.code,
           p_reflection: b.reflection,
+          p_assignment: b.assignmentId || null,
         }),
       );
       return res.json({ submission });
@@ -225,6 +231,7 @@ export default async function handler(req, res) {
         )
       )
         fail("Complete feedback and rubric");
+      if (b.outcome && !["reviewed","needs_revision","completed"].includes(b.outcome)) fail("Invalid review outcome");
       await check(
         db
           .from("project_feedback")
@@ -235,6 +242,7 @@ export default async function handler(req, res) {
             correctness: b.correctness,
             clarity: b.clarity,
             testing: b.testing,
+            outcome: b.outcome || "reviewed",
           }),
       );
       return res.json({ saved: true });
@@ -302,7 +310,10 @@ export default async function handler(req, res) {
             .order("id"),
         )),
       );
+    const assignments = memberships.length ? await all(() => db.from('study_assignments').select('*,study_groups(name)').in('group_id',memberships.map(m=>m.group_id)).eq('kind','project').order('created_at',{ascending:false}).order('id')) : [];
+    const drafts = await all(() => db.from('assignment_drafts').select('*').eq('user_id',user.id).order('assignment_id'));
     return res.json({
+      assignments, drafts,
       instructor,
       owned,
       groups: memberships.map((x) => x.study_groups),

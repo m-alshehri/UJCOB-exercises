@@ -16,7 +16,7 @@ test("login return paths cannot leave the site", () => {
     "javascript:alert(1)",
     "/\\evil.example",
   ])
-    assert.equal(shared.internalPath(path), "/dashboard.html");
+    assert.equal(shared.internalPath(path), "/today.html");
   assert.equal(
     shared.internalPath("/python-lab.html?x=1"),
     "/python-lab.html?x=1",

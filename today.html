@@ -3,31 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Mini projects · tamareen</title>
+    <title>My learning today · tamareen</title>
     <link rel="stylesheet" href="/styles/shared.css" />
     <link rel="stylesheet" href="/styles/learning.css" />
   </head>
   <body class="learningPage">
     <div id="siteHeader"></div>
-    <main id="main">
-      <p class="eyebrow">CONNECT YOUR SKILLS</p>
-      <h1>Mini projects</h1><p><a href="/submissions.html">Submissions and feedback →</a></p>
-      <p>Choose a project, read the requirements, practise in the lab, then submit your work and tests.</p>
-      <label>Course<select id="projectCourse"><option value="">All courses</option></select></label>
-      <div id="projectList"></div>
-    </main>
+    <main id="main"><h1>My learning today</h1><p id="todayStatus" role="status">Loading…</p><div id="todayContent"></div></main>
     <div id="siteFooter"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
     <script src="/supabase-client.js"></script>
+    <script src="/question-banks.js"></script>
     <script src="/js/lab-content.js"></script>
     <script src="/js/catalog.js"></script>
     <script src="/js/project-catalog.js"></script>
     <script src="/js/shared.js"></script>
-    <script src="/js/i18n.js"></script>
     <script src="/js/learning.js"></script>
     <script src="/js/pathways.js"></script>
+    <script src="/js/i18n.js"></script>
     <script src="/js/monitoring.js"></script>
     <script src="/js/shell.js"></script>
-    <script src="/js/projects.js"></script>
+
+    <script src="/js/today.js"></script>
   </body>
 </html>

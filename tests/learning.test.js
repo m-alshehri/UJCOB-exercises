@@ -138,3 +138,16 @@ test("health alerts trigger at five recent matching events, not old events", () 
   assert.equal(healthSummary(events.slice(1), now)[0].alert, false);
   assert.equal(healthSummary(events, now + 3600001).length, 0);
 });
+
+test('project status follows the latest submission and does not inherit old completion', async()=>{
+ const {projectProgress}=await import('../lib/classrooms.js');
+ const a={id:'a'}, submissions=[{id:'s1',assignment_id:'a',user_id:'u',created_at:'2026-01-01'},{id:'s2',assignment_id:'a',user_id:'u',created_at:'2026-01-03'}],feedback=[{submission_id:'s1',outcome:'completed',created_at:'2026-01-02'}];
+ assert.equal(projectProgress(a,'u',[],[],[]).state,'not_started');
+ assert.equal(projectProgress(a,'u',[],[],[{user_id:'u',assignment_id:'a'}]).state,'draft');
+ assert.equal(projectProgress(a,'u',submissions,feedback,[]).state,'submitted');
+ feedback.push({submission_id:'s2',outcome:'needs_revision',created_at:'2026-01-04'});
+ assert.equal(projectProgress(a,'u',submissions,feedback,[]).state,'needs_revision');
+ feedback.push({submission_id:'s2',outcome:'completed',created_at:'2026-01-05'});
+ assert.equal(projectProgress(a,'u',submissions,feedback,[]).done,true);
+ assert.equal(projectProgress(a,'other',submissions,feedback,[]).state,'not_started');
+});

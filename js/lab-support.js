@@ -6,7 +6,7 @@
   const panel = document.createElement("section");
   panel.className = "learningCard labSupport";
   panel.innerHTML =
-    '<h2>Practice support</h2><div class="actions"><button id="hintNext">Show next hint</button><button id="draftSave">Save cloud draft</button><button id="draftLoad">Load cloud draft</button></div><p id="draftState" role="status">Connecting draft storage…</p><ol id="hintList"></ol><details><summary>Test contract</summary><pre id="testContract"></pre></details>';
+    '<h2>Practice support</h2><div class="actions"><button id="hintNext">Show next hint</button><button id="draftSave">Save cloud draft</button><button id="draftLoad">Load cloud draft</button></div><button id="draftKeep" hidden>Keep local version</button><p id="draftState" role="status">Connecting draft storage…</p><ol id="hintList"></ol><details><summary>Test contract</summary><pre id="testContract"></pre></details>';
   editor.parentElement.insertAdjacentElement("afterend", panel);
   editor.setAttribute(
     "aria-label",
@@ -22,7 +22,10 @@
     timer,
     generation = 0,
     ready = false,
+    conflicted = false,
     hintIndex = 0;
+  const localKey = () => "tamareen:draft:" + tracker.user?.id + ":" + LAB + ":" + activeKey;
+  function rememberBase(){try{localStorage.setItem(localKey()+":base",JSON.stringify(cloud));}catch{}}
   const message = (t) =>
     (document.getElementById("draftState").textContent = t);
   const hints = () => {
@@ -77,6 +80,8 @@
     activeKey = key;
     const gen = ++generation;
     ready = false;
+    conflicted = false;
+    document.getElementById("draftKeep").hidden = true;
     cloud = null;
     revision = 0;
     hintIndex = 0;
@@ -106,25 +111,25 @@
       cloud = rows[0] || null;
       revision = cloud?.revision || 0;
       ready = true;
-      const local = localStorage.getItem(
-        "tamareen:draft:" + tracker.user.id + ":" + LAB + ":" + key,
-      );
-      if (
-        cloud &&
-        editor.value === before &&
-        (!local || local === cloud.code)
-      ) {
-        editor.value = cloud.code;
-        editor.dispatchEvent(new Event("input"));
-        message("Cloud draft restored.");
-      } else
-        message(
-          cloud
-            ? "Cloud draft available. Local edits are preserved; use Load cloud draft to replace them."
-            : "No cloud draft yet. Edits are saved after you pause.",
-        );
+      let local=null,base=null;
+      try{local=localStorage.getItem(localKey());base=JSON.parse(localStorage.getItem(localKey()+":base")||'null');}catch{}
+      if(local!==null && editor.value===before)editor.value=local;
+      if(cloud && local!==null && local!==cloud.code){
+        conflicted=base?.revision!==cloud.revision;
+        ready=!conflicted;
+        document.getElementById('draftKeep').hidden=!conflicted;
+        message(conflicted?'Cloud draft differs. Choose the cloud version or keep your local version.':'Saved on this device. Cloud saving pending.');
+        if(!conflicted)timer=setTimeout(queueSave,1500);
+      }else if(cloud && editor.value===before){
+        editor.value=cloud.code;rememberBase();
+        try{localStorage.setItem(localKey(),editor.value);}catch{}
+        message('Cloud draft restored.');
+      }else {rememberBase();message(local!==null?'Saved on this device. Cloud saving pending.':'No cloud draft yet. Edits are saved after you pause.');if(local!==null)timer=setTimeout(queueSave,1500);}
     } catch (err) {
-      if (gen === generation) message("Draft sync unavailable. " + err.message);
+      if (gen === generation) {
+        if(tracker.user){try{const local=localStorage.getItem(localKey());if(local!==null && editor.value===before)editor.value=local;}catch{}}
+        message("Draft sync unavailable. " + err.message);
+      }
     }
   };
   async function save() {
@@ -132,6 +137,8 @@
       message("Wait for the draft to load, or switch away and back to retry.");
       return;
     }
+    const session=await Tamareen.session();
+    if(session?.user.id!==tracker.user?.id){ready=false;message("Sign in to save your progress.");return;}
     const key = activeKey,
       gen = generation,
       code = editor.value;
@@ -148,7 +155,8 @@
       if (gen !== generation) return;
       revision = result.revision;
       cloud = { code, revision };
-      message("Cloud draft saved.");
+      rememberBase();
+      message(editor.value===code?"Cloud draft saved.":"Saved on this device. Cloud saving pending.");
     } catch (err) {
       Tamareen.report?.("draft_save");
       if (gen === generation) {
@@ -184,6 +192,7 @@
       cloud = rows[0] || null;
       revision = cloud?.revision || 0;
       ready = true;
+      conflicted=false;document.getElementById("draftKeep").hidden=true;rememberBase();
       if (cloud) {
         editor.value = cloud.code;
         editor.dispatchEvent(new Event("input"));
@@ -197,6 +206,9 @@
       message(err.message);
     }
   };
+  document.getElementById('draftKeep').onclick=()=>{if(!cloud)return;conflicted=false;ready=true;revision=cloud.revision;document.getElementById('draftKeep').hidden=true;queueSave();};
+  window.addEventListener('online',async()=>{if(conflicted)return;await saving;activeKey='';window.refreshLabSupport();});
+  window.addEventListener('offline',()=>message('Saved on this device. Reconnect to sync.'));
   document.getElementById("hintNext").onclick = () => {
     const li = document.createElement("li");
     li.textContent = hints()[hintIndex++];
@@ -211,9 +223,10 @@
           "tamareen:draft:" + tracker.user.id + ":" + LAB + ":" + activeKey,
           editor.value,
         );
-      } catch {}
+        message(navigator.onLine?"Saved on this device. Cloud saving pending.":"Saved on this device. Reconnect to sync.");
+      } catch {message("Local storage unavailable. Keep this page open until cloud saving succeeds.");}
     }
-    if (ready) timer = setTimeout(queueSave, 1500);
+    if (ready && navigator.onLine) timer = setTimeout(queueSave, 1500);
   });
   window.refreshLabSupport();
 })();

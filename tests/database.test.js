@@ -247,3 +247,26 @@ test('project submissions enforce membership, keep immutable versions, and hide 
  await asUser(user,async()=>{assert.equal((await db.query('select * from project_submissions')).rows.length,2);assert.equal((await db.query('select * from project_feedback')).rows.length,1);assert.equal((await db.query('update project_submissions set code=$1 returning id',['overwrite'])).rows.length,0);});
  await asUser(other,async()=>{assert.equal((await db.query('select * from project_submissions')).rows.length,0);assert.equal((await db.query('select * from project_feedback')).rows.length,0);await assert.rejects(db.query('select submit_learning_project($1,$2,$3,$4,$5,$6)',args),/permission denied/i);});
 });
+
+test('projects cover all six courses and assignment drafts reject stale writes and non-members',async()=>{
+ const gid='99999999-1111-4111-8111-111111111111',aid='99999999-2222-4222-8222-222222222222';
+ assert.equal((await db.query('select count(distinct course_code)::int n from learning_projects')).rows[0].n,6);
+ await db.query("insert into study_groups(id,owner_id,name) values($1,$2,'Project group')",[gid,other]);
+ await db.query("insert into group_members values($1,$2,now())",[gid,user]);
+ await db.query("insert into study_assignments(id,group_id,title,course_id,kind,lab_type,exercise_keys) select $1,$2,'SQL report',id,'project','sql-lab',array['project-sales-sql'] from courses where code='BCIS 311'",[aid,gid]);
+ const save=(uid,rev,code='select 1')=>db.query("select save_assignment_draft($1,$2,$3,'tests',$4) d",[uid,aid,code,rev]);
+ await assert.rejects(save(other,0),/Assignment unavailable/);
+ assert.equal((await save(user,0)).rows[0].d.revision,1);
+ await assert.rejects(save(user,0,'stale'),/Draft changed/);
+ await asUser(other,async()=>assert.equal((await db.query('select * from assignment_drafts')).rows.length,0));
+ await asUser(user,async()=>{assert.equal((await db.query('select * from assignment_drafts')).rows[0].code,'select 1');await assert.rejects(save(user,1),/permission denied/);});
+ const args=['99999999-3333-4333-8333-333333333333',user,gid,'project-sales-sql','SQL work','tests',aid];
+ const s=(await db.query('select submit_learning_project($1,$2,$3,$4,$5,$6,$7) s',args)).rows[0].s;
+ assert.equal(s.lab_type,'sql-lab');assert.equal(s.assignment_id,aid);
+ assert.equal((await db.query('select submit_learning_project($1,$2,$3,$4,$5,$6,$7) s',args)).rows[0].s.id,s.id);
+ await assert.rejects(db.query('select submit_learning_project($1,$2,$3,$4,$5,$6,$7)',[...args.slice(0,3),'project-storefront',...args.slice(4)]),/does not match/);
+});
+test('notification read receipts are private, cannot be forged for another student, and are idempotent',async()=>{
+ await asUser(user,async()=>{await db.query("insert into notification_reads(user_id,event_key) values($1,'assignment:test') on conflict do nothing",[user]);await db.query("insert into notification_reads(user_id,event_key) values($1,'assignment:test') on conflict do nothing",[user]);assert.equal((await db.query('select * from notification_reads')).rows.length,1);await assert.rejects(db.query("insert into notification_reads(user_id,event_key) values($1,'forged')",[other]),/row-level security/);});
+ await asUser(other,async()=>assert.equal((await db.query('select * from notification_reads')).rows.length,0));
+});

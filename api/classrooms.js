@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { authenticate, all } from "../lib/server.js";
-import { assignmentProgress, healthSummary } from "../lib/classrooms.js";
+import { assignmentProgress, projectProgress, healthSummary } from "../lib/classrooms.js";
 const fail = (message, status = 400) => {
   throw Object.assign(new Error(message), { status });
 };
@@ -86,13 +86,13 @@ export default async function handler(req, res) {
       const title = String(body.title || "").trim();
       if (!title || title.length > 160)
         fail("Enter a title up to 160 characters");
-      if (!["practice", "lab"].includes(body.kind))
+      if (!["practice", "lab", "project"].includes(body.kind))
         fail("Invalid assignment kind");
       const course = await check(
         db.from("courses").select("id,code").eq("code", body.course).single(),
       );
       let keys = [];
-      if (body.kind === "lab") {
+      if (body.kind === "lab" || body.kind === "project") {
         keys = [
           ...new Set(Array.isArray(body.exercises) ? body.exercises : []),
         ];
@@ -110,6 +110,11 @@ export default async function handler(req, res) {
             .eq("lab_type", body.lab)
             .in("exercise_key", keys),
         );
+        if (body.kind === 'project') {
+          if(keys.length!==1) fail('Choose one project');
+          const project=await check(db.from('learning_projects').select('exercise_key').eq('exercise_key',keys[0]).eq('course_code',course.code).eq('lab_type',body.lab).maybeSingle());
+          if(!project) fail('Invalid project for this course');
+        }
         if (catalog.length !== keys.length)
           fail("Invalid exercises for this course");
       }
@@ -127,7 +132,7 @@ export default async function handler(req, res) {
             title,
             course_id: course.id,
             kind: body.kind,
-            lab_type: body.kind === "lab" ? body.lab : null,
+            lab_type: body.kind !== "practice" ? body.lab : null,
             exercise_keys: keys,
             due_at: due?.toISOString() || null,
           }),
@@ -187,7 +192,7 @@ export default async function handler(req, res) {
         attempts = [],
         labs = [],
         profiles = [],
-        answers = [];
+        answers = [], submissions = [], feedback = [], drafts = [];
       for (let n = 0; n < ids.length; n += 100) {
         const chunk = ids.slice(n, n + 100);
         attempts.push(
@@ -211,12 +216,15 @@ export default async function handler(req, res) {
               .order("id"),
           )),
         );
+        submissions.push(...await all(()=>db.from("project_submissions").select("id,user_id,assignment_id,created_at").eq("group_id",g.id).in("user_id",chunk).order("id")));
+        drafts.push(...await all(()=>db.from("assignment_drafts").select("user_id,assignment_id,updated_at").in("user_id",chunk).in("assignment_id",assignments.length?assignments.map(a=>a.id):["00000000-0000-0000-0000-000000000000"]).order("assignment_id").order("user_id")));
         profiles.push(
           ...(await check(
             db.from("profiles").select("id,display_name").in("id", chunk),
           )),
         );
       }
+      for(let n=0;n<submissions.length;n+=100) feedback.push(...await all(()=>db.from("project_feedback").select("id,submission_id,outcome,created_at").in("submission_id",submissions.slice(n,n+100).map(s=>s.id)).order("id")));
       if (g.owned) {
         const ats = attempts.map((a) => a.id);
         for (let n = 0; n < ats.length; n += 100)
@@ -248,7 +256,7 @@ export default async function handler(req, res) {
             name:
               profiles.find((p) => p.id === m.user_id)?.display_name ||
               "Student",
-            ...assignmentProgress(a, m.user_id, attempts, labs),
+            ...(a.kind === "project" ? projectProgress(a,m.user_id,submissions,feedback,drafts) : assignmentProgress(a, m.user_id, attempts, labs)),
           })),
         })),
         members: members.length,
