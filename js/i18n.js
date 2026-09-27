@@ -307,6 +307,10 @@ window.I18n = (() => {
     "ERP Process Lab": "مختبر عمليات ERP",
     "BI Analytics Lab": "مختبر ذكاء الأعمال",
     "Data Analytics Lab": "مختبر تحليل البيانات",
+    "ERP systems": "أنظمة ERP",
+    "Business intelligence": "ذكاء الأعمال",
+    Analytics: "التحليلات",
+    "MCQ + Coding": "اختيار من متعدد + برمجة",
     "33 hands-on exercises · automatic test cases · progressive difficulty":
       "٣٣ تمرينًا عمليًا · اختبارات تلقائية · صعوبة متدرجة",
     "33 hands-on exercises · live practice database · automatic result checking":
