@@ -70,14 +70,14 @@ function draw() {
   $("topics").innerHTML = ts
     .map(
       (t) =>
-        `<button class="chip ${topicFilter === t ? "active" : ""}" onclick="setTopic('${t}')">${t}</button>`,
+        `<button class="chip ${topicFilter === t ? "active" : ""}" data-action="setTopic" data-arg="${Tamareen.escape(t)}">${Tamareen.escape(t)}</button>`,
     )
     .join("");
   let ls = ["All", "Beginner", "Intermediate", "Advanced"];
   $("levels").innerHTML = ls
     .map(
       (t) =>
-        `<button class="chip ${levelFilter === t ? "active" : ""}" onclick="setLevel('${t}')">${t}</button>`,
+        `<button class="chip ${levelFilter === t ? "active" : ""}" data-action="setLevel" data-arg="${t}">${t}</button>`,
     )
     .join("");
 }
@@ -205,4 +205,12 @@ document.getElementById("editor").addEventListener("input", () => {
         document.getElementById("editor").value,
       );
   } catch {}
+});
+Tamareen.actions({
+  setTopic: (el) => setTopic(el.dataset.arg),
+  setLevel: (el) => setLevel(el.dataset.arg),
+  randomExercise: () => randomExercise(),
+  resetCode: () => resetCode(),
+  runCode: () => runCode(),
+  nextCode: () => nextCode(),
 });

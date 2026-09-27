@@ -119,3 +119,7 @@ Tamareen.client().auth.onAuthStateChange((event) => {
 });
 if (new URLSearchParams(location.search).get("recovery") === "1")
   mode("recovery");
+Tamareen.actions({
+  mode: (el) => mode(el.dataset.arg),
+  submitAuth: () => submitAuth(),
+});

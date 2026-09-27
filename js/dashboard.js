@@ -201,7 +201,7 @@ async function load() {
               '"><b>' +
               p +
               "%</b></div><strong>" +
-              x.code +
+              Tamareen.escape(x.code) +
               "</strong><small>" +
               x.n +
               " / " +
@@ -303,11 +303,11 @@ async function load() {
             const course = Array.isArray(x.courses) ? x.courses[0] : x.courses;
             return (
               '<div class="row"><span>' +
-              (course?.code || "—") +
+              Tamareen.escape(course?.code || "—") +
               "</span><span>" +
               Math.round(Number(x.score_percent || 0)) +
               "%</span><span>" +
-              x.mode +
+              Tamareen.escape(x.mode) +
               "</span><span>" +
               new Date(x.completed_at).toLocaleDateString() +
               "</span></div>"

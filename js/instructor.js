@@ -1,9 +1,4 @@
 const $ = (x) => document.getElementById(x);
-function safe(v) {
-  const d = document.createElement("div");
-  d.textContent = v ?? "";
-  return d.innerHTML;
-}
 async function load() {
   try {
     const client = supabase.createClient(
@@ -32,15 +27,15 @@ async function load() {
           .map(
             (x) =>
               '<div class="course"><span><b>' +
-              safe(x.code) +
+              Tamareen.escape(x.code) +
               "</b><br><small>" +
-              x.students +
+              Number(x.students) +
               " students · " +
-              x.attempts +
+              Number(x.attempts) +
               ' attempts</small></span><div class="track"><div class="bar" style="width:' +
-              x.average +
+              Number(x.average) +
               '%"></div></div><span>' +
-              x.average +
+              Number(x.average) +
               "%</span></div>",
           )
           .join("")
@@ -50,17 +45,17 @@ async function load() {
           .map(
             (x) =>
               '<div class="topic"><div class="topicHead"><span><b>' +
-              safe(x.code) +
+              Tamareen.escape(x.code) +
               "</b> · " +
-              safe(x.topic) +
+              Tamareen.escape(x.topic) +
               "</span><span>" +
-              x.mastery +
+              Number(x.mastery) +
               '%</span></div><div class="track"><div class="bar" style="width:' +
-              x.mastery +
+              Number(x.mastery) +
               '%"></div></div><small>' +
-              x.ok +
+              Number(x.ok) +
               " of " +
-              x.n +
+              Number(x.n) +
               " correct</small></div>",
           )
           .join("")
@@ -70,13 +65,13 @@ async function load() {
           .map(
             (x) =>
               '<div class="qrow"><b>' +
-              safe(x.code) +
+              Tamareen.escape(x.code) +
               "</b> · " +
-              safe(x.question) +
+              Tamareen.escape(x.question) +
               "<small>" +
-              x.correctRate +
+              Number(x.correctRate) +
               "% correct · " +
-              x.n +
+              Number(x.n) +
               " answers</small></div>",
           )
           .join("")
@@ -86,13 +81,13 @@ async function load() {
           .map(
             (x) =>
               '<div class="row"><span>' +
-              safe(x.name) +
+              Tamareen.escape(x.name) +
               "</span><span>" +
-              x.attempts +
+              Number(x.attempts) +
               "</span><span>" +
-              x.average +
+              Number(x.average) +
               "%</span><span>" +
-              x.best +
+              Number(x.best) +
               "%</span><span>" +
               new Date(x.last).toLocaleDateString() +
               "</span></div>",
@@ -102,7 +97,7 @@ async function load() {
   } catch (e) {
     $("status").innerHTML =
       '<b>Instructor access is not ready for this account.</b><br><span class="bad">' +
-      safe(e.message) +
+      Tamareen.escape(e.message) +
       "</span><br>Sign in with an authorized instructor account.";
   }
 }
