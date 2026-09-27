@@ -175,6 +175,34 @@ test("failed lab save never claims completion was saved", async ({ page }) => {
     ),
   ).toEqual([]);
 });
+test("concept lab keeps answers when the category filter changes", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  await page.goto("/bi-lab.html");
+  const first = page.locator(".card").first();
+  const title = await first.locator("h3").textContent();
+  await first.locator(".opt").first().click();
+  await expect(first.locator(".feedback")).not.toBeEmpty();
+  await page.locator('.chip[data-cat]:not([data-cat="All"])').last().click();
+  await page.getByRole("button", { name: "All", exact: true }).click();
+  const again = page.locator(".card").filter({ hasText: title }).first();
+  await expect(again.locator(".feedback")).not.toBeEmpty();
+  await expect(again.locator(".opt:not([disabled])")).toHaveCount(0);
+  await expect(page.locator(".opt[onclick], .chip[onclick]")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+test("language and direction are set before page scripts run", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem("tamareen:language", "ar"),
+  );
+  await page.route("**/js/i18n.js", (r) => r.abort());
+  await page.goto("/labs.html");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+});
 test("Python executes in a worker without clearing the solution", async ({
   page,
 }) => {

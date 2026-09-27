@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="/js/lang-init.js"></script>
     <title>BCIS 324 · ERP Process Lab · tamareen</title>
     <link rel="stylesheet" href="/styles/erp-lab.css" />
     <link rel="stylesheet" href="/styles/shared.css" />
@@ -32,7 +33,7 @@
         <div class="stat">Course-aligned scenarios</div>
       </div>
       <div class="filters">
-        <button class="chip on" onclick="filter('All',this)">All</button
+        <button class="chip on" data-cat="All">All</button
         ><span id="chips"></span>
       </div>
       <div class="grid" id="grid"></div>
@@ -49,6 +50,10 @@
     <script src="/js/monitoring.js"></script>
     <script src="/js/progress.js"></script>
     <script src="/js/shell.js"></script>
-    <script src="/js/erp-lab.js"></script>
+    <script
+      src="/js/concept-lab.js"
+      data-lab="erp-lab"
+      data-course="BCIS 324"
+    ></script>
   </body>
 </html>
