@@ -28,6 +28,18 @@ window.I18n = (() => {
     "Learn the concept. Try it. Understand the result.":
       "تعلّم الفكرة. جرّبها. افهم النتيجة.",
     "Code examples": "أمثلة برمجية",
+    Variables: "المتغيرات",
+    Conditions: "الشروط",
+    Loops: "الحلقات",
+    "Next practice: Loops": "التدريب القادم: الحلقات",
+    "I'm stuck on range(3).": "توقفت عند range(3).",
+    "Hint: list the values range(3) produces, starting from 0.":
+      "تلميح: اكتب القيم التي تنتجها range(3) بدءًا من 0.",
+    "✓ Test passed": "✓ نجح الاختبار",
+    "What does int('25') + 5 return?": "ما ناتج int('25') + 5؟",
+    "int() turns the text '25' into a whole number.":
+      "int() تحوّل النص '25' إلى عدد صحيح.",
+    "Course Mastery": "إتقان المقرر",
     "Calculate total revenue": "احسب إجمالي الإيرادات",
     "A button that reacts": "زر يتفاعل مع المستخدم",
     "Top orders by value": "أعلى الطلبات قيمة",

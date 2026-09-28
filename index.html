@@ -56,14 +56,10 @@
     <div id="siteHeader"></div>
     <div class="drawerBackdrop" id="drawerBackdrop"></div>
     <main id="main">
-      <p class="practiceNotice">
-        Personal practice results · not verified grades.
-      </p>
       <section id="home">
         <div id="resumeAttempts" aria-label="Unfinished attempts"></div>
-        <div class="hero">
+        <div class="hero band navy">
           <div class="heroCopy">
-            <div class="eyebrow">SMARTER PRACTICE FOR BUSINESS STUDENTS</div>
             <h1>
               Practice smarter.<br /><span class="rotator">Master faster.</span>
             </h1>
@@ -121,6 +117,7 @@ print(revenue)</code></pre>
           </div>
         </div>
         <div class="grid" id="grid"></div>
+        <div class="band navy qcBand">
         <div class="section" id="quickCheck">
           <div>
             <h2>Quick check: 3 questions</h2>
@@ -140,6 +137,7 @@ print(revenue)</code></pre>
             <div class="qcStreak"><span>Correct in a row</span><b id="qcStreak">0</b></div>
           </aside>
         </div>
+        </div>
         <div class="section">
           <div>
             <h2>Why Tamareen?</h2>
@@ -154,6 +152,12 @@ print(revenue)</code></pre>
               Tamareen learns from your practice history, identifies weaker
               topics, and guides you toward the areas that need more attention.
             </p>
+            <div class="benefitDemo demoBars" aria-hidden="true">
+              <div><span>Variables</span><i style="--w: 90%"></i><b>90%</b></div>
+              <div><span>Conditions</span><i style="--w: 70%"></i><b>70%</b></div>
+              <div class="weak"><span>Loops</span><i style="--w: 45%"></i><b>45%</b></div>
+              <em>Next practice: Loops</em>
+            </div>
             <div class="benefitMore">
               Your performance is continuously reflected in Course Mastery and
               Topic Mastery, so your next practice session can focus on the
@@ -168,6 +172,10 @@ print(revenue)</code></pre>
               helping you understand the reasoning without simply revealing the
               answer.
             </p>
+            <div class="benefitDemo demoChat" aria-hidden="true">
+              <p class="me">I'm stuck on range(3).</p>
+              <p class="bot" translate="no" data-text="Hint: list the values range(3) produces, starting from 0."></p>
+            </div>
             <div class="benefitMore">
               Ask for a hint when you are stuck or request a concept
               explanation. The tutor supports your reasoning while keeping the
@@ -181,13 +189,17 @@ print(revenue)</code></pre>
               Move beyond multiple-choice questions with hands-on Python, SQL
               and Web coding labs, instant checking, and live feedback.
             </p>
+            <div class="benefitDemo demoRun" aria-hidden="true">
+              <code>print(sum([3, 4]))</code>
+              <span class="runOut">7 · ✓ Test passed</span>
+            </div>
             <div class="benefitMore">
               Write real code, run it in the browser, and use progressive hints
               and automatic feedback to improve your solution.
             </div>
           </div>
         </div>
-        <div class="works" id="howItWorks">
+        <div class="works band navy" id="howItWorks">
           <div class="section worksHead">
             <div>
               <h2>How Tamareen works</h2>
@@ -211,9 +223,29 @@ print(revenue)</code></pre>
             </button>
           </div>
           <div class="workProgress"><i id="workProgress"></i></div>
-          <p class="workDetail" id="workDetail" aria-live="polite">
-            Multiple-choice practice and Python, SQL and Web labs linked to your course topics.
-          </p>
+          <div class="workStage">
+            <div class="workVisual" aria-hidden="true">
+              <div class="wv wv0 on">
+                <p>What does int('25') + 5 return?</p>
+                <span>30</span><span>255</span>
+              </div>
+              <div class="wv wv1">
+                <span class="good">✓ 30</span>
+                <p>int() turns the text '25' into a whole number.</p>
+              </div>
+              <div class="wv wv2">
+                <div><small>Variables</small><i style="--w: 90%"></i></div>
+                <div><small>Conditions</small><i style="--w: 70%"></i></div>
+                <div class="weak"><small>Loops</small><i style="--w: 45%"></i></div>
+              </div>
+              <div class="wv wv3">
+                <strong>85%</strong><small>Course Mastery</small>
+              </div>
+            </div>
+            <p class="workDetail" id="workDetail" aria-live="polite">
+              Multiple-choice practice and Python, SQL and Web labs linked to your course topics.
+            </p>
+          </div>
         </div>
         <div
           id="continueLearning"

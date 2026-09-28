@@ -589,6 +589,9 @@ ORDER BY total DESC;`,
       .querySelectorAll(".workStep")
       .forEach((b, i) => b.setAttribute("aria-selected", String(i === n)));
     $("workDetail").textContent = STEP_DETAILS[n];
+    document
+      .querySelectorAll(".workVisual .wv")
+      .forEach((v, i) => v.classList.toggle("on", i === n));
     const bar = $("workProgress");
     bar.classList.remove("go");
     void bar.offsetWidth;
@@ -619,6 +622,45 @@ ORDER BY total DESC;`,
     if (!works.contains(e.relatedTarget)) resume();
   });
 
+  /* Why Tamareen: each card plays a small preview when hovered or opened. */
+  let chatTimer = null;
+  function playChat(card) {
+    const bot = card.querySelector(".demoChat .bot");
+    if (!bot) return;
+    const text = I18n.t(bot.dataset.text);
+    clearTimeout(chatTimer);
+    if (reduceMotion) {
+      bot.textContent = text;
+      return;
+    }
+    let i = 0;
+    const tick = () => {
+      bot.textContent = text.slice(0, ++i);
+      if (i < text.length) chatTimer = setTimeout(tick, 22);
+    };
+    bot.textContent = "";
+    chatTimer = setTimeout(tick, 350);
+  }
+  document.querySelectorAll(".benefit").forEach((card) => {
+    const play = () => {
+      if (card.classList.contains("playing")) return;
+      card.classList.add("playing");
+      playChat(card);
+    };
+    card.addEventListener("mouseenter", play);
+    card.addEventListener("focus", play);
+    // index.js toggles .active on click; replay the preview when it opens.
+    card.addEventListener("click", () =>
+      setTimeout(() => {
+        if (card.classList.contains("active")) {
+          card.classList.remove("playing");
+          void card.offsetWidth;
+          play();
+        }
+      }),
+    );
+  });
+
   Tamareen.actions({
     termTab: (el) => playSnippet(el.dataset.arg),
     filterCourses: (el) => filterCourses(el),
@@ -633,10 +675,16 @@ ORDER BY total DESC;`,
     workStep: (el) => showStep(Number(el.dataset.arg)),
   });
   window.addEventListener("languagechange", () => {
+    document
+      .querySelectorAll(".demoChat .bot")
+      .forEach((bot) => (bot.textContent = I18n.t(bot.dataset.text)));
     renderQuestion();
     renderSide();
   });
 
+  document
+    .querySelectorAll(".demoChat .bot")
+    .forEach((bot) => (bot.textContent = I18n.t(bot.dataset.text)));
   playSnippet("py");
   startQuickCheck(course, false);
   showStep(0);
