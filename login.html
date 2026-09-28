@@ -11,11 +11,7 @@
   </head>
   <body>
     <div id="siteHeader"></div>
-    <div
-      class="drawerBackdrop"
-      id="drawerBackdrop"
-      onclick="closeMobileNav()"
-    ></div>
+    <div class="drawerBackdrop" id="drawerBackdrop"></div>
     <main id="main">
       <section class="box">
         <div class="ey">STUDENT ACCOUNT</div>
@@ -24,9 +20,16 @@
           Sign in to save your attempts and follow your learning progress.
         </p>
         <div class="tabs">
-          <button id="loginTab" class="active" onclick="mode('login')">
+          <button
+            id="loginTab"
+            class="active"
+            data-action="mode"
+            data-arg="login"
+          >
             Login</button
-          ><button id="signupTab" onclick="mode('signup')">Sign up</button>
+          ><button id="signupTab" data-action="mode" data-arg="signup">
+            Sign up
+          </button>
         </div>
         <div class="field" id="nameField" style="display: none">
           <label>Student name</label
@@ -64,7 +67,7 @@
             placeholder="Re-enter your password"
           />
         </div>
-        <button class="pri" id="submit" onclick="submitAuth()">Login</button>
+        <button class="pri" id="submit" data-action="submitAuth">Login</button>
         <div id="msg" class="msg"></div>
         <div class="note">
           Your account is used to save quiz attempts, scores and learning

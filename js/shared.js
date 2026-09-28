@@ -44,6 +44,15 @@ window.Tamareen = (() => {
         })[c],
     );
   }
+  // Delegated click handling for [data-action] elements, so markup needs no
+  // inline handlers. Each handler receives the clicked element.
+  function actions(handlers, root = document) {
+    root.addEventListener("click", (event) => {
+      const el = event.target.closest?.("[data-action]");
+      if (el && Object.hasOwn(handlers, el.dataset.action))
+        handlers[el.dataset.action](el, event);
+    });
+  }
   function shuffle(values) {
     const result = [...values];
     for (let i = result.length - 1; i > 0; i--) {
@@ -105,6 +114,7 @@ window.Tamareen = (() => {
     internalPath,
     session,
     escape,
+    actions,
     shuffle,
     checked,
     all,

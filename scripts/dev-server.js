@@ -2,6 +2,10 @@ import { fixture, config } from "./fixture.js";
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname } from "node:path";
+// Serve the same response headers as production (vercel.json), including CSP.
+const headerRules = JSON.parse(await readFile("vercel.json", "utf8")).headers.map(
+  ({ source, headers }) => [new RegExp("^" + source + "$"), headers],
+);
 const root = resolve("."),
   types = {
     ".html": "text/html",
@@ -42,6 +46,9 @@ http
         }
         return (await import("../api/" + name + ".js")).default(req, res);
       }
+      for (const [pattern, headers] of headerRules)
+        if (pattern.test(path))
+          for (const { key, value } of headers) res.setHeader(key, value);
       if (path === "/" || path.startsWith("/courses/")) path = "/index.html";
       const file = resolve(root, "." + path);
       if (

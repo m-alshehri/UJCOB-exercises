@@ -192,6 +192,29 @@ test("concept lab keeps answers when the category filter changes", async ({
   await expect(page.locator(".opt[onclick], .chip[onclick]")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+test("pages ship a CSP and markup without inline event handlers", async ({
+  page,
+}) => {
+  const { errors } = await setup(page);
+  const violations = [];
+  page.on("console", (m) => {
+    if (/Content Security Policy/.test(m.text())) violations.push(m.text());
+  });
+  for (const path of ["/", "/login.html", "/python-lab.html", "/erp-lab.html"]) {
+    const response = await page.goto(path);
+    const csp = response.headers()["content-security-policy"];
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).not.toContain("'unsafe-inline'; style-src");
+    await expect(
+      page.locator("[onclick],[onkeydown],[onchange],[oninput],[onsubmit]"),
+    ).toHaveCount(0);
+  }
+  await page.goto("/");
+  await page.locator("#grid .course").first().click();
+  await expect(page.locator("#modeTitle")).toContainText("BCIS 313");
+  expect(violations).toEqual([]);
+  expect(errors).toEqual([]);
+});
 test("language and direction are set before page scripts run", async ({
   page,
 }) => {

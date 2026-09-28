@@ -54,11 +54,7 @@
   <body class="homepage">
     <div class="stripe"></div>
     <div id="siteHeader"></div>
-    <div
-      class="drawerBackdrop"
-      id="drawerBackdrop"
-      onclick="closeMobileNav()"
-    ></div>
+    <div class="drawerBackdrop" id="drawerBackdrop"></div>
     <main id="main">
       <p class="practiceNotice">
         Personal practice results · not verified grades.
@@ -78,12 +74,14 @@
             <div class="heroActions">
               <button
                 class="heroPri"
-                onclick="document.getElementById('coursesSection').scrollIntoView({behavior:'smooth'})"
+                data-action="scrollTo"
+                data-target="coursesSection"
               >
                 Start practicing →</button
               ><button
                 class="heroSec"
-                onclick="document.getElementById('howItWorks').scrollIntoView({behavior:'smooth'})"
+                data-action="scrollTo"
+                data-target="howItWorks"
               >
                 How Tamareen works
               </button>
@@ -210,9 +208,7 @@ print(revenue)
             <h2>Ready for your next practice?</h2>
             <p>Choose a course and start improving one question at a time.</p>
           </div>
-          <button
-            onclick="document.getElementById('coursesSection').scrollIntoView({behavior:'smooth'})"
-          >
+          <button data-action="scrollTo" data-target="coursesSection">
             Start practicing →
           </button>
         </div>
@@ -223,16 +219,16 @@ print(revenue)
             <h2 id="modeTitle"></h2>
             <p class="meta" id="modeSub"></p>
           </div>
-          <button class="btn sec" onclick="goHome()">Change course</button>
+          <button class="btn sec" data-action="goHome">Change course</button>
         </div>
         <div class="modegrid">
-          <div class="mode" onclick="guardQuiz('practice')">
+          <div class="mode" data-action="guardQuiz" data-arg="practice">
             <div class="modeicon">✓</div>
             <h3>Practice Mode</h3>
             <p class="meta" id="mcqDesc"></p>
             <span class="modeBadge">Immediate feedback</span>
           </div>
-          <div class="mode" onclick="guardQuiz('exam')">
+          <div class="mode" data-action="guardQuiz" data-arg="exam">
             <div class="modeicon">◷</div>
             <h3>Mock Exam</h3>
             <p class="meta">
@@ -256,7 +252,7 @@ print(revenue)
             </p>
             <div id="examTimer" class="timer">Time left: 10:00</div>
           </div>
-          <button class="btn sec" onclick="goBack()">Back</button>
+          <button class="btn sec" data-action="goBack">Back</button>
         </div>
         <div class="track"><div class="bar" id="bar"></div></div>
         <div class="prog">
@@ -271,9 +267,17 @@ print(revenue)
             <div class="tutorHead">
               <span class="tutorTitle">✦ AI Tutor</span>
               <div class="tutorBtns">
-                <button class="tutorBtn" onclick="tutorHelp('hint')">
+                <button
+                  class="tutorBtn"
+                  data-action="tutorHelp"
+                  data-arg="hint"
+                >
                   Give me a hint</button
-                ><button class="tutorBtn" onclick="tutorHelp('explain')">
+                ><button
+                  class="tutorBtn"
+                  data-action="tutorHelp"
+                  data-arg="explain"
+                >
                   Explain concept
                 </button>
               </div>
@@ -282,11 +286,20 @@ print(revenue)
             <div id="tutorChat" class="tutorChat">
               <div id="tutorMessages" class="tutorMessages"></div>
               <div class="tutorQuick">
-                <button onclick="askTutorQuick('Explain it more simply')">
+                <button
+                  data-action="askTutorQuick"
+                  data-arg="Explain it more simply"
+                >
                   Explain more simply</button
-                ><button onclick="askTutorQuick('Give me another example')">
+                ><button
+                  data-action="askTutorQuick"
+                  data-arg="Give me another example"
+                >
                   Another example</button
-                ><button onclick="askTutorQuick('What should I focus on?')">
+                ><button
+                  data-action="askTutorQuick"
+                  data-arg="What should I focus on?"
+                >
                   What should I focus on?
                 </button>
               </div>
@@ -295,18 +308,17 @@ print(revenue)
                   id="tutorInput"
                   maxlength="300"
                   placeholder="Ask a follow-up…"
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();sendTutorFollowup()}"
-                /><button onclick="sendTutorFollowup()">Ask</button>
+                /><button data-action="sendTutorFollowup">Ask</button>
               </div>
             </div>
           </div>
           <div class="actions">
-            <button id="check" class="btn pri" onclick="checkAns()">
+            <button id="check" class="btn pri" data-action="checkAns">
               Check answer</button
             ><button
               id="next"
               class="btn pri"
-              onclick="nextQ()"
+              data-action="nextQ"
               style="display: none"
             >
               Next question
@@ -330,10 +342,10 @@ print(revenue)
               Start adaptive practice →
             </button>
           </div>
-          <button class="btn pri" onclick="restart()">
+          <button class="btn pri" data-action="restart">
             New random attempt
           </button>
-          <button class="btn sec" onclick="goHome()">
+          <button class="btn sec" data-action="goHome">
             Choose another course
           </button>
         </div>

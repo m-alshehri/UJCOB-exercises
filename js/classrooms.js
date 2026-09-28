@@ -159,7 +159,7 @@
             a.progress
               .map(
                 (p) =>
-                  `<tr><th scope="row">${esc(p.name)}</th><td>${esc(I18n.t(p.label))}</td><td>${p.state ? I18n.t(p.label) : p.done ? "Complete" : a.due_at && Date.now() > new Date(a.due_at) ? "Overdue" : "In progress"}</td></tr>`,
+                  `<tr><th scope="row">${esc(p.name)}</th><td>${esc(I18n.t(p.label))}</td><td>${p.state ? esc(I18n.t(p.label)) : p.done ? "Complete" : a.due_at && Date.now() > new Date(a.due_at) ? "Overdue" : "In progress"}</td></tr>`,
               )
               .join("") +
             "</tbody>";

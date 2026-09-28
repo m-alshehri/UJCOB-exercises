@@ -99,3 +99,9 @@ async function check() {
     wrongAttempts[i] = (wrongAttempts[i] || 0) + 1;
   }
 }
+Tamareen.actions({
+  run: () => run(),
+  check: () => check(),
+  reset: () => reset(),
+  next: () => next(),
+});

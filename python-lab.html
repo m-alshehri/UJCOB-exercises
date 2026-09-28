@@ -5,6 +5,42 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <script src="/js/lang-init.js"></script>
     <title>tamareen · Python Coding Practice</title>
+    <meta
+      name="description"
+      content="33 hands-on Python exercises with automatic test cases and progressive difficulty, run in your browser."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="tamareen" />
+    <meta property="og:title" content="tamareen · Python Coding Practice" />
+    <meta
+      property="og:description"
+      content="33 hands-on Python exercises with automatic test cases and progressive difficulty, run in your browser."
+    />
+    <meta property="og:url" content="https://tamareen.online/python-lab.html" />
+    <meta
+      property="og:image"
+      content="https://tamareen.online/assets/og-image.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="tamareen: practice smarter, master faster"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="tamareen · Python Coding Practice" />
+    <meta
+      name="twitter:description"
+      content="33 hands-on Python exercises with automatic test cases and progressive difficulty, run in your browser."
+    />
+    <meta
+      name="twitter:image"
+      content="https://tamareen.online/assets/og-image.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="tamareen: practice smarter, master faster"
+    />
     <link rel="stylesheet" href="/styles/python-lab.css" />
     <link rel="stylesheet" href="/styles/shared.css" />
     <link rel="stylesheet" href="/styles/learning.css" />
@@ -12,11 +48,7 @@
   <body>
     <div class="top"></div>
     <div id="siteHeader"></div>
-    <div
-      class="drawerBackdrop"
-      id="drawerBackdrop"
-      onclick="closeMobileNav()"
-    ></div>
+    <div class="drawerBackdrop" id="drawerBackdrop"></div>
     <main id="main">
       <div class="intro">
         <h1>Python Coding Practice</h1>
@@ -27,7 +59,7 @@
       <div class="stats">
         <div class="stat" id="count"></div>
         <div class="stat" id="solved">Solved: 0</div>
-        <button class="btn sec" onclick="randomExercise()">
+        <button class="btn sec" data-action="randomExercise">
           Random exercise
         </button>
       </div>
@@ -51,10 +83,10 @@
         <div class="card">
           <textarea class="editor" id="editor" spellcheck="false"></textarea>
           <div class="actions">
-            <button class="btn sec" onclick="resetCode()">Reset</button
-            ><button class="btn pri" id="run" onclick="runCode()">
+            <button class="btn sec" data-action="resetCode">Reset</button
+            ><button class="btn pri" id="run" data-action="runCode">
               Run & Check</button
-            ><button class="btn sec" onclick="nextCode()">Next</button>
+            ><button class="btn sec" data-action="nextCode">Next</button>
           </div>
           <div class="meta" style="margin-top: 15px">
             Console / test results

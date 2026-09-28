@@ -2,16 +2,16 @@ const $ = (id) => document.getElementById(id),
   shuffle = Tamareen.shuffle;
 const ICONS = {
   "BCIS 313":
-    '<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python">',
+    '<img src="/assets/python.svg" alt="Python">',
   "BCIS 324": '<img src="/assets/sap.svg" alt="SAP">',
   "BCIS 317":
-    '<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" alt="HTML5">',
+    '<img src="/assets/html5.svg" alt="HTML5">',
   "BCIS 411":
-    '<img src="https://cdn.jsdelivr.net/gh/microsoft/PowerBI-Icons@main/SVG/Power-BI.svg" alt="Power BI">',
+    '<img src="/assets/power-bi.svg" alt="Power BI">',
   "BCIS 421":
     '<div class="dual"><img src="/assets/excel.svg" alt="Excel"><img src="/assets/google-sheets.svg" alt="Google Sheets"></div>',
   "BCIS 311":
-    '<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" alt="MySQL">',
+    '<img src="/assets/mysql.svg" alt="MySQL">',
 };
 const SLUGS = {
     "BCIS 313": "bcis313",
@@ -56,7 +56,7 @@ function renderGrid() {
   $("grid").innerHTML = Object.entries(COURSES)
     .map(
       ([c, v]) =>
-        `<div class="course" onclick="chooseCourse('${c}')"><div class="courseTop"><div class="courseIcon">${ICONS[c] || "&lt;/&gt;"}</div><div class="code">${c}</div></div><h3>${v.name}</h3><p class="courseSummary">${courseSummaries[c]}</p><div class="meta">${c === "BCIS 313" ? "Python · MCQ + Coding" : c === "BCIS 311" ? "SQL · MCQ + Coding" : c === "BCIS 324" ? "ERP systems" : c === "BCIS 317" ? "HTML · CSS · JavaScript · MCQ + Coding" : c === "BCIS 411" ? "Power BI · Business intelligence" : c === "BCIS 421" ? "Excel · Google Sheets · Analytics" : "Interactive practice"}</div><span class="courseExplore">Explore course →</span></div>`,
+        `<div class="course" data-action="chooseCourse" data-arg="${Tamareen.escape(c)}"><div class="courseTop"><div class="courseIcon">${ICONS[c] || "&lt;/&gt;"}</div><div class="code">${c}</div></div><h3>${v.name}</h3><p class="courseSummary">${courseSummaries[c]}</p><div class="meta">${c === "BCIS 313" ? "Python · MCQ + Coding" : c === "BCIS 311" ? "SQL · MCQ + Coding" : c === "BCIS 324" ? "ERP systems" : c === "BCIS 317" ? "HTML · CSS · JavaScript · MCQ + Coding" : c === "BCIS 411" ? "Power BI · Business intelligence" : c === "BCIS 421" ? "Excel · Google Sheets · Analytics" : "Interactive practice"}</div><span class="courseExplore">Explore course →</span></div>`,
     )
     .join("");
 }
@@ -446,7 +446,7 @@ function renderQ() {
   $("opts").innerHTML = q.options
     .map(
       (o, i) =>
-        `<div class="opt" onclick="pick(${i},this)">${String.fromCharCode(65 + i)}. ${Tamareen.escape(o)}</div>`,
+        `<div class="opt" data-action="pick" data-arg="${i}">${String.fromCharCode(65 + i)}. ${Tamareen.escape(o)}</div>`,
     )
     .join("");
   $("feed").className = "feed";
@@ -983,3 +983,23 @@ Learning.showResume();
 // Students can report an unclear question without leaving the attempt.
 const reportPanel=document.createElement('details');reportPanel.id='questionReport';reportPanel.innerHTML='<summary>Report a question</summary><label>Reason<select id="reportReason"><option value="unclear">Unclear wording</option><option value="incorrect">Incorrect answer</option><option value="other">Other</option></select></label><label>Notes<textarea id="reportNote" maxlength="1000"></textarea></label><button type="button" id="reportSend">Send report</button><p id="reportStatus" role="status"></p>';$("card").append(reportPanel);
 $("reportSend").onclick=async()=>{const q=questions[idx];if(!q?.id)return;const btn=$("reportSend");btn.disabled=true;try{await Tamareen.api('/api/learning-admin',{action:'report',questionId:q.id,reason:$("reportReason").value,note:$("reportNote").value});$("reportStatus").textContent=I18n.t('Report saved. Thank you.');}catch(e){$("reportStatus").textContent=e.message;}finally{btn.disabled=false;}};
+Tamareen.actions({
+  scrollTo: (el) => $(el.dataset.target).scrollIntoView({ behavior: "smooth" }),
+  chooseCourse: (el) => chooseCourse(el.dataset.arg),
+  guardQuiz: (el) => guardQuiz(el.dataset.arg),
+  pick: (el) => pick(Number(el.dataset.arg), el),
+  checkAns: () => checkAns(),
+  nextQ: () => nextQ(),
+  restart: () => restart(),
+  goBack: () => goBack(),
+  goHome: () => goHome(),
+  tutorHelp: (el) => tutorHelp(el.dataset.arg),
+  askTutorQuick: (el) => askTutorQuick(el.dataset.arg),
+  sendTutorFollowup: () => sendTutorFollowup(),
+});
+$("tutorInput")?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    sendTutorFollowup();
+  }
+});

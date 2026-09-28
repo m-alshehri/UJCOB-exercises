@@ -39,18 +39,20 @@ Connect this repository to the existing Vercel project. `vercel.json` declares t
 - `SUPABASE_SERVICE_ROLE_KEY`, `INSTRUCTOR_EMAILS` for instructor analytics
 - `OPENAI_API_KEY`, optional `OPENAI_MODEL` for tutoring
 
+`vercel.json` sets a Content-Security-Policy; `scripts/dev-server.js` applies the same headers locally. Markup must not use inline event handlers or inline `<script>`: use `data-action` with `Tamareen.actions`, and render text through `Tamareen.escape`. The Web lab gets a separate policy that allows inline scripts, because its `srcdoc` preview inherits the page policy and runs student code. When adding a new CDN or Supabase host, update both policies.
+
 Set Supabase Auth's Site URL and allowed redirect URLs for the production domain and the specific preview domains being tested. Required destinations include `/login.html` (confirmation and recovery) and `/dashboard.html`. Do not allow arbitrary third-party redirect origins. The login page accepts only same-origin return paths. Password reset uses an emailed recovery link. Profile names are synchronized by an Auth database trigger.
 
 Tutor requests require a valid student session and an owned practice question. The persistent limit is six requests per minute and 60 per day per account; missing quota infrastructure fails closed. Vercel or OpenAI project-level spend limits remain an operational setting.
 
 ## Code layout
 
-- `js/shared.js`: single Supabase client, session checks, safe output, pagination, request/error helpers.
+- `js/shared.js`: single Supabase client, session checks, safe output (`Tamareen.escape`), `data-action` click delegation (`Tamareen.actions`), pagination, request/error helpers.
 - `js/shell.js`: shared header/footer, navigation, account state, keyboard access.
 - `js/progress.js`: checked completion writes with explicit retry states.
 - `js/lab-content.js`: exercise definitions with **permanent IDs** and legacy mappings.
 - `js/catalog.js`: course links and completion totals derived from those definitions.
-- `js/*-lab.js`, `js/index.js`, `js/dashboard.js`: page controllers.
+- `js/*-lab.js`, `js/index.js`, `js/dashboard.js`: page controllers. `js/concept-lab.js` serves the ERP, BI and analytics labs, configured by `data-lab`/`data-course` on its script tag.
 - `workers/`: bounded Python/SQLite execution outside the UI thread.
 - `lib/server.js`, `api/`: server authentication, pagination, tutor and instructor analytics.
 - `styles/`: readable page styling and shared interface rules.
