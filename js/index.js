@@ -52,11 +52,20 @@ const courseSummaries = {
   "BCIS 421": "Analyze business data and draw actionable conclusions.",
   "BCIS 311": "Design databases and practice SQL queries.",
 };
+// Used by the homepage course filter (js/home-interactive.js).
+const COURSE_GROUPS = {
+  "BCIS 313": "code",
+  "BCIS 317": "code",
+  "BCIS 311": "data",
+  "BCIS 411": "data",
+  "BCIS 421": "data",
+  "BCIS 324": "biz",
+};
 function renderGrid() {
   $("grid").innerHTML = Object.entries(COURSES)
     .map(
       ([c, v]) =>
-        `<div class="course" data-action="chooseCourse" data-arg="${Tamareen.escape(c)}"><div class="courseTop"><div class="courseIcon">${ICONS[c] || "&lt;/&gt;"}</div><div class="code">${c}</div></div><h3>${v.name}</h3><p class="courseSummary">${courseSummaries[c]}</p><div class="meta">${c === "BCIS 313" ? "Python · MCQ + Coding" : c === "BCIS 311" ? "SQL · MCQ + Coding" : c === "BCIS 324" ? "ERP systems" : c === "BCIS 317" ? "HTML · CSS · JavaScript · MCQ + Coding" : c === "BCIS 411" ? "Power BI · Business intelligence" : c === "BCIS 421" ? "Excel · Google Sheets · Analytics" : "Interactive practice"}</div><span class="courseExplore">Explore course →</span></div>`,
+        `<div class="course" data-action="chooseCourse" data-arg="${Tamareen.escape(c)}" data-group="${COURSE_GROUPS[c] || ""}"><div class="courseTop"><div class="courseIcon">${ICONS[c] || "&lt;/&gt;"}</div><div class="code">${c}</div></div><h3>${v.name}</h3><p class="courseSummary">${courseSummaries[c]}</p><div class="meta">${c === "BCIS 313" ? "Python · MCQ + Coding" : c === "BCIS 311" ? "SQL · MCQ + Coding" : c === "BCIS 324" ? "ERP systems" : c === "BCIS 317" ? "HTML · CSS · JavaScript · MCQ + Coding" : c === "BCIS 411" ? "Power BI · Business intelligence" : c === "BCIS 421" ? "Excel · Google Sheets · Analytics" : "Interactive practice"}</div><span class="courseLinks"><span class="courseExplore">Explore course →</span><button type="button" class="courseQuick" data-action="quickCheck" data-arg="${Tamareen.escape(c)}">Try 3 questions</button></span></div>`,
     )
     .join("");
 }

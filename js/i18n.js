@@ -27,6 +27,30 @@ window.I18n = (() => {
     "Work and feedback": "أعمالك ومراجعات المدرّس",
     "Learn the concept. Try it. Understand the result.":
       "تعلّم الفكرة. جرّبها. افهم النتيجة.",
+    "Code examples": "أمثلة برمجية",
+    "Calculate total revenue": "احسب إجمالي الإيرادات",
+    "A button that reacts": "زر يتفاعل مع المستخدم",
+    "Top orders by value": "أعلى الطلبات قيمة",
+    "Filter courses": "تصفية المقررات",
+    Programming: "برمجة",
+    Data: "بيانات",
+    "Business systems": "أنظمة أعمال",
+    "Try 3 questions": "جرّب ٣ أسئلة",
+    "Quick check: 3 questions": "تحدٍ سريع: ٣ أسئلة",
+    "Instant feedback after every answer": "تغذية راجعة فورية بعد كل إجابة",
+    "This quick check": "نتيجة هذا التحدي",
+    "Not saved. Use Practice Mode to track your mastery.":
+      "لا تُحفظ. استخدم وضع التدريب لمتابعة إتقانك.",
+    Correct: "صحيحة",
+    "Correct in a row": "إجابات صحيحة متتالية",
+    "Multiple-choice practice and Python, SQL and Web labs linked to your course topics.":
+      "أسئلة اختيار من متعدد ومختبرات بايثون وSQL والويب مرتبطة بمواضيع مقررك.",
+    "Every answer shows an explanation, and the AI tutor can give a hint without revealing the answer.":
+      "بعد كل إجابة يظهر الشرح، ويمكن للمساعد التعليمي إعطاؤك تلميحًا دون كشف الإجابة.",
+    "Your practice history shows which topics are weaker, and your next practice focuses on them.":
+      "يوضح سجل تدريبك الموضوعات الأضعف، ويركّز تدريبك القادم عليها.",
+    "Course Mastery and Topic Mastery in My Progress show how far you have come.":
+      "إتقان المقرر وإتقان الموضوعات في صفحة تقدمي يوضحان إلى أين وصلت.",
     "Saved on this device.": "تم الحفظ على هذا الجهاز.",
     "Completion queued on this device. Reconnect to sync.":
       "حُفظ الإنجاز مؤقتًا على هذا الجهاز. ستتم المزامنة عند عودة الاتصال.",
