@@ -2,6 +2,7 @@ import { fixture, config } from "./fixture.js";
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname } from "node:path";
+import { vendor } from "./vendor.js";
 // Serve the same response headers as production (vercel.json), including CSP.
 const headerRules = JSON.parse(await readFile("vercel.json", "utf8")).headers.map(
   ({ source, headers }) => [new RegExp("^" + source + "$"), headers],
@@ -13,6 +14,8 @@ const root = resolve("."),
     ".css": "text/css",
     ".svg": "image/svg+xml",
     ".json": "application/json",
+    ".wasm": "application/wasm",
+    ".zip": "application/zip",
   };
 http
   .createServer(async (req, res) => {
@@ -50,6 +53,11 @@ http
         if (pattern.test(path))
           for (const { key, value } of headers) res.setHeader(key, value);
       if (path === "/" || path.startsWith("/courses/")) path = "/index.html";
+      const vendored = vendor[path.slice(1)];
+      if (vendored) {
+        res.setHeader("Content-Type", types[extname(path)] || "text/plain");
+        return res.end(await readFile(vendored));
+      }
       const file = resolve(root, "." + path);
       if (
         !file.startsWith(root + "/") ||

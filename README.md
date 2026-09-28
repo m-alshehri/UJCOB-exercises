@@ -39,7 +39,7 @@ Connect this repository to the existing Vercel project. `vercel.json` declares t
 - `SUPABASE_SERVICE_ROLE_KEY`, `INSTRUCTOR_EMAILS` for instructor analytics
 - `OPENAI_API_KEY`, optional `OPENAI_MODEL` for tutoring
 
-`vercel.json` sets a Content-Security-Policy; `scripts/dev-server.js` applies the same headers locally. Markup must not use inline event handlers or inline `<script>`: use `data-action` with `Tamareen.actions`, and render text through `Tamareen.escape`. The Web lab gets a separate policy that allows inline scripts, because its `srcdoc` preview inherits the page policy and runs student code. When adding a new CDN or Supabase host, update both policies.
+`vercel.json` sets a Content-Security-Policy; `scripts/dev-server.js` applies the same headers locally. Markup must not use inline event handlers or inline `<script>`: use `data-action` with `Tamareen.actions`, and render text through `Tamareen.escape`. The Web lab gets a separate policy that allows inline scripts, because its `srcdoc` preview inherits the page policy and runs student code. Third-party browser libraries are served from `/vendor/` (see `scripts/vendor.js`; versions come from `package.json`), so the policies allow scripts only from the site itself. When adding a Supabase host or any other external origin, update both policies.
 
 Set Supabase Auth's Site URL and allowed redirect URLs for the production domain and the specific preview domains being tested. Required destinations include `/login.html` (confirmation and recovery) and `/dashboard.html`. Do not allow arbitrary third-party redirect origins. The login page accepts only same-origin return paths. Password reset uses an emailed recovery link. Profile names are synchronized by an Auth database trigger.
 

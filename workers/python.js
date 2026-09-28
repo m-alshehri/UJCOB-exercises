@@ -1,8 +1,8 @@
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js");
+importScripts("/vendor/pyodide/pyodide.js");
 onmessage = async ({ data }) => {
   try {
     const py = await loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/",
+      indexURL: "/vendor/pyodide/",
     });
     py.globals.set("USER_CODE", data.code);
     py.globals.set("TESTS_JSON", JSON.stringify(data.tests));
