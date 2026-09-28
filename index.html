@@ -88,10 +88,12 @@
             </div>
           </div>
           <div class="terminal" id="liveDemo">
-            <div class="termbar">
-              <span>$ tamareen</span><span>Python · BCIS313</span>
+            <div class="termbar" role="tablist" aria-label="Code examples">
+              <button role="tab" aria-selected="true" data-action="termTab" data-arg="py">Python<span class="termCourse"> · BCIS 313</span></button>
+              <button role="tab" aria-selected="false" data-action="termTab" data-arg="web">HTML<span class="termCourse"> · BCIS 317</span></button>
+              <button role="tab" aria-selected="false" data-action="termTab" data-arg="sql">SQL<span class="termCourse"> · BCIS 311</span></button>
             </div>
-            <pre class="term"><code># Calculate total revenue
+            <pre class="term" id="termCode" aria-hidden="true"><code># Calculate total revenue
 prices = [120, 85, 200]
 quantity = [3, 2, 1]
 
@@ -99,9 +101,9 @@ revenue = sum(
     p * q for p, q
     in zip(prices, quantity)
 )
-print(revenue)
-&gt; 730</code></pre>
-            <div class="terminalCaption">
+print(revenue)</code></pre>
+            <pre class="termOut" id="termOut" aria-live="polite">&gt; 730</pre>
+            <div class="terminalCaption" id="termCaption">
               Learn the concept. Try it. Understand the result.
             </div>
           </div>
@@ -111,9 +113,33 @@ print(revenue)
             <h2>Choose a course</h2>
             <span>Pick a subject and start practicing</span>
           </div>
-          <span>6 learning spaces</span>
+          <div class="courseFilters" role="group" aria-label="Filter courses">
+            <button class="filterChip" aria-pressed="true" data-action="filterCourses" data-arg="all">All</button>
+            <button class="filterChip" aria-pressed="false" data-action="filterCourses" data-arg="code">Programming</button>
+            <button class="filterChip" aria-pressed="false" data-action="filterCourses" data-arg="data">Data</button>
+            <button class="filterChip" aria-pressed="false" data-action="filterCourses" data-arg="biz">Business systems</button>
+          </div>
         </div>
         <div class="grid" id="grid"></div>
+        <div class="section" id="quickCheck">
+          <div>
+            <h2>Quick check: 3 questions</h2>
+            <span id="qcSub">Instant feedback after every answer</span>
+          </div>
+        </div>
+        <div class="qcWrap">
+          <div class="qcCard" id="qcCard" aria-live="polite" translate="no"></div>
+          <aside class="qcSide">
+            <h3>This quick check</h3>
+            <p class="qcNote">Not saved. Use Practice Mode to track your mastery.</p>
+            <div class="qcRing">
+              <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><circle class="qcRingBg" cx="60" cy="60" r="50"></circle><circle class="qcRingFg" id="qcRingFg" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"></circle></svg>
+              <div><strong id="qcRingVal">0%</strong><small>Correct</small></div>
+            </div>
+            <div class="qcTopics" id="qcTopics" translate="no"></div>
+            <div class="qcStreak"><span>Correct in a row</span><b id="qcStreak">0</b></div>
+          </aside>
+        </div>
         <div class="section">
           <div>
             <h2>Why Tamareen?</h2>
@@ -170,24 +196,24 @@ print(revenue)
               >
             </div>
           </div>
-          <div class="workSteps">
-            <div class="workStep">
-              <i>1</i><b>Practice</b
-              ><span>Answer questions and write code</span>
-            </div>
-            <em></em>
-            <div class="workStep">
+          <div class="workSteps" role="tablist" aria-label="How Tamareen works">
+            <button class="workStep" role="tab" aria-selected="true" data-action="workStep" data-arg="0">
+              <i>1</i><b>Practice</b><span>Answer questions and write code</span>
+            </button>
+            <button class="workStep" role="tab" aria-selected="false" data-action="workStep" data-arg="1">
               <i>2</i><b>Feedback</b><span>Understand mistakes instantly</span>
-            </div>
-            <em></em>
-            <div class="workStep">
+            </button>
+            <button class="workStep" role="tab" aria-selected="false" data-action="workStep" data-arg="2">
               <i>3</i><b>Adapt</b><span>Identify your weaker topics</span>
-            </div>
-            <em></em>
-            <div class="workStep">
+            </button>
+            <button class="workStep" role="tab" aria-selected="false" data-action="workStep" data-arg="3">
               <i>✓</i><b>Master</b><span>Track improvement over time</span>
-            </div>
+            </button>
           </div>
+          <div class="workProgress"><i id="workProgress"></i></div>
+          <p class="workDetail" id="workDetail" aria-live="polite">
+            Multiple-choice practice and Python, SQL and Web labs linked to your course topics.
+          </p>
         </div>
         <div
           id="continueLearning"
@@ -366,5 +392,6 @@ print(revenue)
     <script src="/question-banks.js"></script>
     <script src="/js/applied-questions.js"></script>
     <script src="/js/index.js"></script>
+    <script src="/js/home-interactive.js"></script>
   </body>
 </html>
