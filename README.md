@@ -50,14 +50,15 @@ Tutor requests require a valid student session and an owned practice question. T
 - `js/shared.js`: single Supabase client, session checks, safe output (`Tamareen.escape`), `data-action` click delegation (`Tamareen.actions`), pagination, request/error helpers.
 - `js/shell.js`: shared header/footer, navigation, account state, keyboard access.
 - `js/progress.js`: checked completion writes with explicit retry states.
-- `js/lab-content.js`: exercise definitions with **permanent IDs** and legacy mappings.
+- `content/labs.json`: exercise definitions with **permanent IDs** and legacy mappings. `pnpm build` generates `js/lab-content.js` from it (`scripts/generate-content.js`).
+- `content/i18n-ar.json`: Arabic interface strings, generated into `js/i18n-ar.js`; `js/i18n.js` holds the translation logic.
 - `js/catalog.js`: course links and completion totals derived from those definitions.
 - `js/*-lab.js`, `js/index.js`, `js/dashboard.js`: page controllers. `js/concept-lab.js` serves the ERP, BI and analytics labs, configured by `data-lab`/`data-course` on its script tag.
 - `workers/`: bounded Python/SQLite execution outside the UI thread.
 - `lib/server.js`, `api/`: server authentication, pagination, tutor and instructor analytics.
 - `styles/`: readable page styling and shared interface rules.
 
-Preserve exercise IDs and `legacyIndex` values when editing or reordering exercises. After changing content, run `node scripts/generate-database.cjs` and review the generated migration/seed diff. The generated catalogue derives its totals from content. Question topics are seeded from the source concept names; existing manually tagged topics are preserved.
+Preserve exercise IDs and `legacyIndex` values when editing or reordering exercises. Edit the JSON in `content/`, not the generated `js/lab-content.js` or `js/i18n-ar.js`; `pnpm test` fails if they are out of date. After changing content, run `pnpm build`, then run `node scripts/generate-database.cjs` and review the generated migration/seed diff. The generated catalogue derives its totals from content. Question topics are seeded from the source concept names; existing manually tagged topics are preserved.
 
 Course and topic dashboard statistics cover all completed attempts; the displayed history lists the latest 30. Adaptive practice intentionally uses the latest 30 practice attempts for that course. Lab completion is self-reported after browser checks. Python/SQL drafts are stored locally per account and exercise; they do not sync between devices. An unfinished quiz is not resumed by Continue Learning.
 
