@@ -1,7 +1,11 @@
-import "./lab-context.js";
 import { mkdir, cp, readdir, rm, readFile, writeFile } from "node:fs/promises";
 import vm from "node:vm";
+import { vendor } from "./vendor.js";
+import { writeGenerated } from "./generate-content.js";
 await writeFile("js/project-catalog.js", "// Generated from assets/projects.json by scripts/build.js.\nwindow.PROJECTS = " + await readFile("assets/projects.json", "utf8") + ";\n");
+await writeGenerated();
+// Derives lib/lab-context.json from the regenerated js/lab-content.js.
+await import("./lab-context.js");
 await rm("dist", { recursive: true, force: true });
 await mkdir("dist");
 for (const item of await readdir("."))
@@ -18,6 +22,8 @@ for (const item of await readdir("."))
     ].includes(item)
   )
     await cp(item, "dist/" + item, { recursive: true });
+for (const [path, source] of Object.entries(vendor))
+  await cp(source, "dist/" + path);
 for (const dir of ["js", "workers"])
   for (const file of await readdir(dir)) {
     if (file.endsWith(".js"))

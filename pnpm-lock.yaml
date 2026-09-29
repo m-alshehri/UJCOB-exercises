@@ -11,6 +11,15 @@ importers:
       '@supabase/supabase-js':
         specifier: 2.57.4
         version: 2.57.4
+      chart.js:
+        specifier: 4.4.7
+        version: 4.4.7
+      pyodide:
+        specifier: 0.27.7
+        version: 0.27.7
+      sql.js:
+        specifier: 1.10.3
+        version: 1.10.3
     devDependencies:
       '@electric-sql/pglite':
         specifier: 0.3.10
@@ -26,6 +35,9 @@ packages:
 
   '@electric-sql/pglite@0.3.10':
     resolution: {integrity: sha512-1XtXXprd848aR4hvjNqBc3Gc86zNGmd60x+MgOUShbHYxt+J76N8A81DqTEl275T8xBD0vdTgqR/dJ4yJyz0NQ==}
+
+  '@kurkle/color@0.3.4':
+    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
 
   '@playwright/test@1.55.1':
     resolution: {integrity: sha512-IVAh/nOJaw6W9g+RJVlIQJ6gSiER+ae6mKQ5CX1bERzQgbC1VSeBlwdvczT7pxb0GWiyrxH4TGKbMfDb4Sq/ig==}
@@ -63,6 +75,10 @@ packages:
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
+  chart.js@4.4.7:
+    resolution: {integrity: sha512-pwkcKfdzTMAU/+jNosKhNL2bHtJc/sSmYgVbuGTEDhzkrhmyihmP7vUc/5ZK9WopidMDHNe3Wm7jOd/WhuHWuw==}
+    engines: {pnpm: '>=8'}
+
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -82,6 +98,13 @@ packages:
     resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
     engines: {node: '>=14'}
     hasBin: true
+
+  pyodide@0.27.7:
+    resolution: {integrity: sha512-RUSVJlhQdfWfgO9hVHCiXoG+nVZQRS5D9FzgpLJ/VcgGBLSAKoPL8kTiOikxbHQm1kRISeWUBdulEgO26qpSRA==}
+    engines: {node: '>=18.0.0'}
+
+  sql.js@1.10.3:
+    resolution: {integrity: sha512-H46aWtQkdyjZwFQgraUruy5h/DyJBbAK3EA/WEMqiqF6PGPfKBSKBj/er3dVyYqVIoYfRf5TFM/loEjtQIrqJg==}
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
@@ -110,6 +133,8 @@ packages:
 snapshots:
 
   '@electric-sql/pglite@0.3.10': {}
+
+  '@kurkle/color@0.3.4': {}
 
   '@playwright/test@1.55.1':
     dependencies:
@@ -167,6 +192,10 @@ snapshots:
     dependencies:
       '@types/node': 26.6.2
 
+  chart.js@4.4.7:
+    dependencies:
+      '@kurkle/color': 0.3.4
+
   fsevents@2.3.2:
     optional: true
 
@@ -179,6 +208,15 @@ snapshots:
       fsevents: 2.3.2
 
   prettier@3.6.2: {}
+
+  pyodide@0.27.7:
+    dependencies:
+      ws: 8.21.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  sql.js@1.10.3: {}
 
   tr46@0.0.3: {}
 

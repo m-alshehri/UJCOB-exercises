@@ -1,12 +1,9 @@
-importScripts(
-  "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js",
-);
+importScripts("/vendor/sql.js/sql-wasm.js");
 onmessage = async ({ data }) => {
   let student, answer;
   try {
     const S = await initSqlJs({
-      locateFile: (f) =>
-        "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/" + f,
+      locateFile: (f) => "/vendor/sql.js/" + f,
     });
     student = new S.Database();
     answer = new S.Database();
