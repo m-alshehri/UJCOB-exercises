@@ -1480,3 +1480,156 @@ textarea {
 .homepage #home .courseSummary {font-size:14px;line-height:1.8;color:#536f7d;margin:0 0 18px;flex:1}
 .homepage #home .courseExplore {display:block;color:#004f6e;margin-top:18px;font-size:13px;font-weight:650}
 @media(max-width:760px){.homepage main{padding-inline:20px!important}}
+
+/* Interactive homepage: typing terminal, course filter, quick check, stepper. */
+.homepage #home .rotator {transition:opacity .25s,transform .25s}
+.homepage #home .rotator.swap {opacity:0;transform:translateY(-6px)}
+.homepage #home .termbar {padding:0;gap:0}
+.homepage #home .termbar button {flex:1;min-width:0;border:0;border-bottom:2px solid transparent;background:none;color:#536f7d;padding:12px 8px;font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.homepage #home .termbar button[aria-selected="true"] {color:#004f6e;border-bottom-color:#004f6e;background:#fff}
+.homepage #home .term {direction:ltr;text-align:left;min-height:calc(9 * 2em + 48px)}
+.homepage #home .termOut {direction:ltr;text-align:left;margin:0 18px 18px;padding:10px 14px;border-radius:10px;background:#0b2f3f;color:#9ff0c6;font:13px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;min-height:calc(4 * 1.7em + 20px);white-space:pre;overflow-x:auto;opacity:0;transition:opacity .3s}
+.homepage #home .termOut.show {opacity:1}
+.homepage #home .tkC {color:#6b8a97}
+.homepage #home .tkK {color:#0873a0}
+.homepage #home .tkN {color:#b0620f}
+.homepage #home .term .cursor {display:inline-block;width:7px;height:15px;background:#004f6e;vertical-align:-2px;animation:blink .8s infinite}
+.homepage #home .courseFilters {display:flex;gap:6px;flex-wrap:wrap}
+.homepage #home .filterChip {border:1px solid #d7e5ec;background:#fff;color:#153b4b;border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer}
+.homepage #home .filterChip[aria-pressed="true"] {background:#005879;border-color:#005879;color:#fff}
+.homepage #home .course {transition:opacity .25s,background .2s,border-color .2s}
+.homepage #home .course.dimmed {opacity:.35}
+.homepage #home .courseLinks {display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.homepage #home .courseLinks .courseExplore {margin-top:0}
+.homepage #home .courseQuick {border:1px solid #d7e5ec;background:#fff;color:#004f6e;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+.homepage #home .courseQuick:hover {border-color:#004f6e}
+.homepage #quickCheck {scroll-margin-top:24px}
+.homepage #home .qcWrap {display:grid;grid-template-columns:1.4fr .6fr;gap:16px}
+.homepage #home .qcCard,.homepage #home .qcSide {background:#fff;border:1px solid #d7e5ec;border-radius:14px;padding:24px;min-width:0}
+.homepage #home .qcHead {display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:#536f7d}
+.homepage #home .qcDots {display:flex;gap:6px}
+.homepage #home .qcDots i {width:28px;height:6px;border-radius:9px;background:#eaf5fa}
+.homepage #home .qcDots i.cur {background:#83ccea}
+.homepage #home .qcDots i.ok {background:#147a54}
+.homepage #home .qcDots i.bad {background:#b43d3d}
+.homepage #home .qcQuestion {font-size:18px;line-height:1.7;margin:14px 0;color:#153b4b}
+.homepage #home .qcOpts {display:grid;gap:8px}
+.homepage #home .qcOpt {display:flex;align-items:center;gap:10px;text-align:start;border:1px solid #d7e5ec;background:#fff;color:#153b4b;border-radius:10px;padding:11px 14px;font-size:14px;cursor:pointer}
+.homepage #home .qcOpt:hover:not(:disabled) {border-color:#004f6e;background:#eaf5fa}
+.homepage #home .qcOpt:disabled {cursor:default}
+.homepage #home .qcOpt b {flex:none;width:24px;height:24px;border-radius:7px;background:#eaf5fa;display:grid;place-items:center;font-size:12px}
+.homepage #home .qcOpt.good {border-color:#147a54;background:#e5f4ee}
+.homepage #home .qcOpt.wrong {border-color:#b43d3d;background:#fbeaea}
+.homepage #home .qcFeed {margin-top:12px;border-radius:10px;padding:12px 14px;font-size:14px}
+.homepage #home .qcFeed.good {background:#e5f4ee;color:#147a54}
+.homepage #home .qcFeed.wrong {background:#fbeaea;color:#b43d3d}
+.homepage #home .qcFeed p {margin:4px 0 0;color:#153b4b}
+.homepage #home .qcActions {display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.homepage #home .qcSide h3 {margin:0 0 4px;font-size:16px;color:#004f6e}
+.homepage #home .qcNote {margin:0 0 12px;font-size:13px;line-height:1.7;color:#536f7d}
+.homepage #home .qcRing {position:relative;display:grid;place-items:center;width:120px;height:120px;margin:4px auto 14px}
+.homepage #home .qcRing svg {transform:rotate(-90deg)}
+.homepage #home .qcRing circle {fill:none;stroke-width:10}
+.homepage #home .qcRingBg {stroke:#eaf5fa}
+.homepage #home .qcRingFg {stroke:#005879;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.homepage #home .qcRing div {position:absolute;text-align:center;line-height:1.2}
+.homepage #home .qcRing strong {font-size:26px;color:#004f6e;font-variant-numeric:tabular-nums}
+.homepage #home .qcRing small {display:block;font-size:11px;color:#536f7d}
+.homepage #home .qcTopics {display:grid;gap:9px}
+.homepage #home .qcTopic {display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:12px;color:#536f7d}
+.homepage #home .qcTrack {grid-column:1/-1;height:6px;border-radius:9px;background:#eaf5fa;overflow:hidden}
+.homepage #home .qcTrack i {display:block;height:100%;background:#005879;border-radius:9px;transition:width .6s ease}
+.homepage #home .qcStreak {display:flex;justify-content:space-between;margin-top:14px;background:#eaf5fa;border-radius:10px;padding:8px 12px;font-size:13px}
+.homepage #home .qcStreak b {color:#004f6e;font-variant-numeric:tabular-nums}
+.homepage #home .workStep {text-align:start;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;display:block}
+.homepage #home .workStep b,.homepage #home .workStep span {display:block}
+.homepage #home .workStep i {transition:border-color .3s}
+.homepage #home .workStep[aria-selected="true"] i {border-bottom-color:#004f6e}
+.homepage #home .workStep[aria-selected="true"] b {color:#004f6e}
+.homepage #home .workProgress {height:3px;margin-top:22px;background:#eaf5fa;border-radius:9px;overflow:hidden}
+.homepage #home .workProgress i {display:block;height:100%;width:0;background:#83ccea}
+.homepage #home .workProgress i.go {animation:workGrow 4.5s linear forwards}
+@keyframes workGrow {to {width:100%}}
+.homepage #home .workDetail {margin:14px 0 0;font-size:15px;line-height:1.8;color:#153b4b;max-width:70ch}
+@media(max-width:760px){.homepage #home .qcWrap{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.homepage #home .rotator,.homepage #home .termOut,.homepage #home .qcRingFg,.homepage #home .qcTrack i{transition:none}.homepage #home .term .cursor{animation:none}}
+@media(max-width:480px){.homepage #home .termCourse{display:none}}
+
+/* Full-width section bands. Navy bands: hero, quick check, how it works. */
+.homepage {--navy:#0b2c45;--navy2:#071f33;--navyLine:#ffffff1f;--navyText:#c9dde8}
+.homepage #home .band {position:relative;box-shadow:0 0 0 100vmax var(--bandBg);clip-path:inset(0 -100vmax);background:var(--bandBg)}
+.homepage #home .band.navy {--bandBg:var(--navy);color:#fff}
+.homepage #home .hero.band {padding:64px 0}
+.homepage #home .hero.band h1 {color:#fff}
+.homepage #home .hero.band .rotator {color:#83ccea}
+.homepage #home .hero.band p {color:var(--navyText)}
+.homepage #home .hero.band .heroPri {background:#83ccea;color:#07384b}
+.homepage #home .hero.band .heroSec {background:transparent;border-color:#ffffff40;color:#fff}
+.homepage #home .hero.band .heroSec:hover {background:#ffffff14}
+.homepage #home .hero.band .terminal {background:var(--navy2);border-color:var(--navyLine);box-shadow:0 18px 44px #0006}
+.homepage #home .hero.band .termbar {background:#ffffff08;border-bottom:1px solid var(--navyLine)}
+.homepage #home .hero.band .termbar button {color:#8fb3c4}
+.homepage #home .hero.band .termbar button[aria-selected="true"] {background:#ffffff0d;color:#fff;border-bottom-color:#83ccea}
+.homepage #home .hero.band .term {background:transparent;color:#d7ecf4}
+.homepage #home .hero.band .tkC {color:#7f9fae}
+.homepage #home .hero.band .tkK {color:#83ccea}
+.homepage #home .hero.band .tkN {color:#f3c98b}
+.homepage #home .hero.band .term .cursor {background:#83ccea}
+.homepage #home .hero.band .termOut {background:#00000055}
+.homepage #home .hero.band .terminalCaption {border-top-color:var(--navyLine);color:#9fc5d4}
+.homepage #home .qcBand {padding:8px 0 48px;margin-top:48px}
+.homepage #home .qcBand .section {margin-top:40px}
+.homepage #home .band.navy h2 {color:#fff}
+.homepage #home .band.navy .section span {color:var(--navyText)}
+.homepage #home .qcBand .qcCard,.homepage #home .qcBand .qcSide {border-color:transparent;box-shadow:0 12px 32px #00000033}
+/* How it works on navy with a visual stage per step */
+.homepage #home .works.band {margin-top:48px;padding:48px 0}
+.homepage #home .works.band .workStep i {color:#83ccea;border-bottom-color:var(--navyLine)}
+.homepage #home .works.band .workStep b {color:#fff}
+.homepage #home .works.band .workStep span {color:var(--navyText)}
+.homepage #home .works.band .workStep:hover b {color:#83ccea}
+.homepage #home .works.band .workStep[aria-selected="true"] i {border-bottom-color:#83ccea}
+.homepage #home .works.band .workStep[aria-selected="true"] b {color:#83ccea}
+.homepage #home .works.band .workStep:focus-visible {outline:2px solid #83ccea;outline-offset:6px}
+.homepage #home .works.band .workProgress {background:var(--navyLine)}
+.homepage #home .workStage {display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;align-items:center;margin-top:24px}
+.homepage #home .works.band .workDetail {margin:0;color:#fff;font-size:17px}
+.homepage #home .workVisual {position:relative;height:150px;border-radius:14px;background:var(--navy2);border:1px solid var(--navyLine);overflow:hidden}
+.homepage #home .wv {position:absolute;inset:0;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:8px;opacity:0;transform:translateY(10px);transition:opacity .35s,transform .35s;color:#fff;font-size:13px}
+.homepage #home .wv.on {opacity:1;transform:none}
+.homepage #home .wv p {margin:0;color:#fff;font-size:14px;line-height:1.6}
+.homepage #home .wv0 span {display:block;border:1px solid var(--navyLine);border-radius:8px;padding:5px 10px;color:var(--navyText)}
+.homepage #home .wv0 span:first-of-type {border-color:#83ccea;color:#fff}
+.homepage #home .wv1 .good {align-self:flex-start;background:#147a54;color:#fff;border-radius:8px;padding:4px 12px}
+.homepage #home .wv1 p {color:var(--navyText);font-size:13px}
+.homepage #home .wv2 div {display:grid;grid-template-columns:80px 1fr;align-items:center;gap:10px}
+.homepage #home .wv2 small {color:var(--navyText);font-size:12px}
+.homepage #home .wv2 i {display:block;height:8px;border-radius:9px;background:#83ccea;width:0;transition:width .7s ease .15s}
+.homepage #home .wv2.on i {width:var(--w)}
+.homepage #home .wv2 .weak i {background:#f3c98b}
+.homepage #home .wv3 {align-items:center;text-align:center}
+.homepage #home .wv3 strong {font-size:44px;color:#83ccea;line-height:1;font-variant-numeric:tabular-nums}
+.homepage #home .wv3 small {color:var(--navyText)}
+/* Why Tamareen: interactive cards with a live preview */
+.homepage #home .benefits {gap:16px}
+.homepage #home .benefit {background:#fff;border:1px solid #d7e5ec;border-radius:14px;padding:22px;transition:transform .25s,border-color .25s,box-shadow .25s}
+.homepage #home .benefit:hover,.homepage #home .benefit.active {transform:translateY(-4px);border-color:#004f6e;box-shadow:0 14px 30px #0b2c4518}
+.homepage #home .benefit.active {padding-bottom:22px}
+.homepage #home .benefitDemo {margin-top:14px;border-radius:10px;background:#f1f7fa;padding:12px 14px;font-size:12px;min-height:96px}
+.homepage #home .demoBars div {display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:8px;color:#536f7d;margin-bottom:6px}
+.homepage #home .demoBars i {display:block;height:6px;border-radius:9px;background:#005879;width:var(--w)}
+.homepage #home .demoBars .weak i {background:#d98a1f}
+.homepage #home .demoBars b {font-weight:400;text-align:end;font-variant-numeric:tabular-nums}
+.homepage #home .demoBars em {font-style:normal;color:#b06a0c}
+.homepage #home .benefit.playing .demoBars i {animation:barGrow .8s ease}
+@keyframes barGrow {from {width:0}}
+.homepage #home .demoChat p {margin:0 0 6px;padding:7px 10px;border-radius:10px;max-width:90%;font-size:12px;line-height:1.6;color:#153b4b}
+.homepage #home .demoChat .me {background:#dcebf2;margin-inline-start:auto}
+.homepage #home .demoChat .bot {background:#fff;border:1px solid #d7e5ec;min-height:2.6em}
+.homepage #home .demoRun code {display:block;direction:ltr;text-align:left;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:#0b2c45;color:#d7ecf4;border-radius:8px;padding:8px 10px}
+.homepage #home .runOut {display:inline-block;margin-top:8px;color:#147a54}
+.homepage #home .benefit.playing .runOut {animation:runIn .5s ease .4s backwards}
+@keyframes runIn {from {opacity:0;transform:translateY(4px)}}
+@media(max-width:760px){.homepage #home .hero.band{padding:36px 0}.homepage #home .workStage{grid-template-columns:1fr}.homepage #home .benefits{gap:12px}}
+@media(prefers-reduced-motion:reduce){.homepage #home .wv,.homepage #home .wv2 i,.homepage #home .benefit{transition:none}.homepage #home .benefit.playing .demoBars i,.homepage #home .benefit.playing .runOut{animation:none}}
+.homepage #home .qcBand .qcCard,.homepage #home .qcBand .qcSide {color:#153b4b}

@@ -86,6 +86,8 @@ function enableCards() {
       el.tabIndex = 0;
       el.setAttribute("role", "button");
       el.onkeydown = (e) => {
+        // Buttons nested inside a card handle their own keys.
+        if (e.target !== el) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           el.click();
