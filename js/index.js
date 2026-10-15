@@ -270,15 +270,8 @@ function warmQuestionCache() {
 }
 async function ensureSession() {
   try {
-    if (!window.supabaseClient) {
-      window.supabaseClient = Tamareen.client();
-    }
-    let { data } = await window.supabaseClient.auth.getSession();
-    if (data?.session) return data.session;
-    location.href = "login.html?next=" + encodeURIComponent("index.html");
-    return null;
+    return await Tamareen.session(true);
   } catch (e) {
-    location.href = "login.html?next=" + encodeURIComponent("index.html");
     return null;
   }
 }

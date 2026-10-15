@@ -1,20 +1,31 @@
 importScripts(
   "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js",
 );
-onmessage = async ({ data }) => {
-  let student, answer;
-  try {
-    const S = await initSqlJs({
+let sqlPromise = null;
+function getSql() {
+  if (!sqlPromise) {
+    sqlPromise = initSqlJs({
       locateFile: (f) =>
         "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/" + f,
     });
+  }
+  return sqlPromise;
+}
+onmessage = async ({ data }) => {
+  let student, answer;
+  try {
+    const S = await getSql();
     student = new S.Database();
     answer = new S.Database();
     student.run(data.schema);
     answer.run(data.schema);
     const rows = (r) => (r.length ? r[r.length - 1].values : []);
     let got, expected;
-    if (data.expected === "VERIFY_INSERT") {
+    if (data.verificationQuery) {
+      student.run(data.code);
+      got = student.exec(data.verificationQuery);
+      expected = data.expectedRows || [];
+    } else if (data.expected === "VERIFY_INSERT") {
       student.run(data.code);
       got = student.exec(
         "SELECT CustomerID,Name,City FROM Customers WHERE CustomerID=6",
