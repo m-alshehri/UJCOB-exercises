@@ -714,6 +714,17 @@ window.I18n = (() => {
       "استُكملت المحاولة مع الاحتفاظ بالإجابات المحفوظة وموعد انتهاء الاختبار الأصلي.",
     "This attempt is complete. View My Progress for the result.":
       "هذه المحاولة مكتملة. شاهد النتيجة في صفحة تقدمي.",
+    "Resume your practice": "متابعة التدريب",
+    "Resume Practice": "متابعة التدريب",
+    "Pick up right where you left off":
+      "جلسات سابقة غير مكتملة يمكنك استئنافها من حيث توقفت",
+    "Dismiss all": "تجاهل الكل",
+    "Dismiss session": "تجاهل هذه الجلسة",
+    "Resume session →": "استئناف الجلسة ←",
+    "Submit exam →": "تسليم الاختبار ←",
+    "Expired exam": "اختبار منتهي",
+    "Mock exam": "اختبار تجريبي",
+    "Finish expired exam": "تسليم الاختبار المنتهي",
     "Build a broader picture": "كوّن صورة أوضح عن مستواك",
     "More distinct questions are needed before identifying a weak topic.":
       "نحتاج إلى أسئلة مختلفة أكثر قبل تحديد موضوع يحتاج إلى تدريب.",

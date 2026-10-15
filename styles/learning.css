@@ -303,3 +303,245 @@ main:focus {outline:none}
 .stateBadge {display:inline-block;padding:4px 10px;border-radius:8px;background:#e8f3f7;color:#143d50}
 @media(max-width:720px){header .head>.nav{display:none!important}header .head>.nav.open{display:flex!important;flex-direction:row!important;align-items:stretch!important;max-height:65vh!important;overflow-y:auto;width:100%!important;inset:auto!important}header .navlink{flex:1 1 130px}header .head .menuToggle{display:block!important}.drawerBackdrop{display:none!important}body.drawerOpen{overflow:auto!important}input,select,textarea{font-size:16px!important}button,.navlink{min-height:44px}.todayGrid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+
+/* Resume Attempts Widget */
+#resumeAttempts {
+  margin: 28px 0 24px 0;
+  width: 100%;
+}
+#resumeAttempts:empty {
+  display: none !important;
+}
+.resumeWidget {
+  background: #ffffff;
+  border: 1px solid #d4e3eb;
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: 0 6px 22px rgba(11, 44, 69, 0.05);
+  box-sizing: border-box;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.resumeWidgetHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #edf4f7;
+  gap: 12px;
+}
+.resumeWidgetTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.resumeIcon {
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: #eef7fb;
+  border-radius: 12px;
+  border: 1px solid #d0e5f0;
+  flex-shrink: 0;
+}
+.resumeWidgetTitle h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: #0b2c45;
+}
+.resumeWidgetTitle p {
+  margin: 3px 0 0 0;
+  font-size: 0.88rem;
+  color: #536f7d;
+  line-height: 1.4;
+}
+.resumeDismissAllBtn {
+  background: transparent;
+  border: 1px solid #d0e1ea;
+  color: #5a7482;
+  font-size: 0.82rem;
+  font-weight: 650;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.resumeDismissAllBtn:hover {
+  background: #fde8e8;
+  color: #b43d3d;
+  border-color: #f7c5c5;
+}
+.resumeCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+}
+.resumeCard {
+  background: #f8fafc;
+  border: 1px solid #e1ecf1;
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.resumeCard:hover {
+  border-color: #9acde4;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(11, 44, 69, 0.07);
+}
+.resumeCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.resumeBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.resumeCode {
+  font-size: 0.8rem;
+  font-weight: 750;
+  color: #004f6e;
+  background: #e1f1f7;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+}
+.resumeBadge {
+  font-size: 0.76rem;
+  font-weight: 650;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.resumeBadgePractice {
+  background: #e6f6ee;
+  color: #147a54;
+}
+.resumeBadgeExam {
+  background: #fef4e5;
+  color: #b25e02;
+}
+.resumeBadgeExpired {
+  background: #fde8e8;
+  color: #b43d3d;
+}
+.resumeDismissBtn {
+  background: transparent;
+  border: none;
+  color: #8c9ea6;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+.resumeDismissBtn:hover {
+  background: #fde8e8;
+  color: #b43d3d;
+}
+.resumeCardBody {
+  margin-bottom: 14px;
+  flex-grow: 1;
+}
+.resumeName {
+  margin: 0 0 8px 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #153b4b;
+  line-height: 1.4;
+}
+.resumeMeta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.82rem;
+  color: #637d8b;
+  flex-wrap: wrap;
+}
+.resumeMeta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.resumeCardFooter {
+  margin-top: auto;
+}
+.resumeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+.resumeBtnPrimary {
+  background: #004f6e;
+  color: #ffffff !important;
+}
+.resumeBtnPrimary:hover {
+  background: #003a52;
+}
+.resumeBtnExpired {
+  background: #b43d3d;
+  color: #ffffff !important;
+}
+.resumeBtnExpired:hover {
+  background: #962f2f;
+}
+.resumeMoreDetails {
+  margin-top: 14px;
+  border-top: 1px dashed #d8e6ed;
+  padding-top: 12px;
+}
+.resumeMoreSummary {
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: #005879;
+  cursor: pointer;
+  padding: 6px 0;
+}
+.resumeMoreSummary:hover {
+  text-decoration: underline;
+}
+.resumeExtraGrid {
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .resumeWidget {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .resumeWidgetHead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .resumeDismissAllBtn {
+    align-self: flex-end;
+  }
+  .resumeCardsGrid {
+    grid-template-columns: 1fr;
+  }
+}

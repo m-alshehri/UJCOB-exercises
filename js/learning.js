@@ -174,6 +174,40 @@ window.Learning = (() => {
         : "Your assessed topics are doing well. Try varied questions to broaden your practice.",
     };
   }
+  const COURSE_NAMES = {
+    "BCIS 313": { en: "Programming for Business (Python)", ar: "البرمجة للأعمال (بايثون)" },
+    "BCIS 324": { en: "Enterprise Resource Planning (ERP)", ar: "تخطيط موارد المؤسسات (ERP)" },
+    "BCIS 317": { en: "Web Development", ar: "تطوير تطبيقات الويب" },
+    "BCIS 411": { en: "Business Intelligence (Power BI)", ar: "ذكاء الأعمال (Power BI)" },
+    "BCIS 421": { en: "Business Analytics (Excel)", ar: "تحليلات الأعمال (Excel)" },
+    "BCIS 311": { en: "Database Management (SQL)", ar: "إدارة قواعد البيانات (SQL)" },
+  };
+
+  function timeAgo(dateStr, isAr) {
+    const diff = Math.max(0, Date.now() - new Date(dateStr).getTime());
+    const mins = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    if (mins < 1) return isAr ? "الآن" : "Just now";
+    if (mins < 60) return isAr ? `منذ ${mins} دقيقة` : `${mins}m ago`;
+    if (hours < 24) {
+      if (isAr) {
+        if (hours === 1) return "منذ ساعة";
+        if (hours === 2) return "منذ ساعتين";
+        if (hours >= 3 && hours <= 10) return `منذ ${hours} ساعات`;
+        return `منذ ${hours} ساعة`;
+      }
+      return `${hours}h ago`;
+    }
+    if (days === 1) return isAr ? "أمس" : "Yesterday";
+    if (isAr) {
+      if (days === 2) return "منذ يومين";
+      if (days >= 3 && days <= 10) return `منذ ${days} أيام`;
+      return `منذ ${days} يوم`;
+    }
+    return `${days}d ago`;
+  }
+
   async function resumable() {
     const s = await Tamareen.session();
     if (!s) return [];
@@ -187,26 +221,232 @@ window.Learning = (() => {
         .limit(20),
     );
   }
+
   async function showResume() {
+    if (typeof document === "undefined") return;
     const host = document.getElementById("resumeAttempts");
     if (!host) return;
+
+    let dismissed = [];
     try {
-      const rows = (await resumable()).filter((a) => a.question_ids?.length);
-      host.replaceChildren();
-      for (const a of rows) {
-        const link = document.createElement("a");
-        link.className = "learningCard";
-        link.href = "/?resume=" + a.id;
-        link.textContent =
-          (a.mode === "exam" && Date.now() - new Date(a.started_at) > 600000
-            ? "Finish expired exam: "
-            : "Resume " + a.mode + ": ") + (a.courses?.code || "Course");
-        host.append(link);
+      dismissed = JSON.parse(
+        localStorage.getItem("tamareen:dismissed_attempts") || "[]",
+      );
+    } catch {}
+    const dismissedSet = new Set(dismissed);
+
+    try {
+      const raw = await resumable();
+      const rows = (raw || []).filter(
+        (a) => a.question_ids?.length && !dismissedSet.has(a.id),
+      );
+
+      if (!rows.length) {
+        host.replaceChildren();
+        host.style.display = "none";
+        return;
       }
+
+      host.style.display = "";
+
+      // Deduplicate: Keep only the most recent unfinished attempt per course
+      const courseMap = new Map();
+      for (const a of rows) {
+        const code = a.courses?.code || "other";
+        if (!courseMap.has(code)) {
+          courseMap.set(code, a);
+        }
+      }
+      const unique = Array.from(courseMap.values());
+
+      if (!unique.length) {
+        host.replaceChildren();
+        host.style.display = "none";
+        return;
+      }
+
+      const isAr =
+        (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+        document.documentElement.lang === "ar" ||
+        document.body.dir === "rtl";
+
+      const widget = document.createElement("section");
+      widget.className = "resumeWidget";
+      widget.setAttribute(
+        "aria-label",
+        isAr ? "استئناف التدريب" : "Resume Practice",
+      );
+
+      // Header
+      const head = document.createElement("div");
+      head.className = "resumeWidgetHead";
+
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "resumeWidgetTitle";
+      titleWrap.innerHTML = `
+        <span class="resumeIcon" aria-hidden="true">⏱️</span>
+        <div>
+          <h3>${isAr ? "متابعة التدريب" : "Resume your practice"}</h3>
+          <p>${isAr ? "جلسات سابقة غير مكتملة يمكنك استئنافها من حيث توقفت" : "Pick up right where you left off"}</p>
+        </div>
+      `;
+
+      const actionsWrap = document.createElement("div");
+      actionsWrap.className = "resumeWidgetActions";
+      const dismissAllBtn = document.createElement("button");
+      dismissAllBtn.type = "button";
+      dismissAllBtn.className = "resumeDismissAllBtn";
+      dismissAllBtn.textContent = isAr ? "تجاهل الكل" : "Dismiss all";
+      dismissAllBtn.onclick = () => {
+        try {
+          const allIds = unique.map((x) => x.id);
+          const current = JSON.parse(
+            localStorage.getItem("tamareen:dismissed_attempts") || "[]",
+          );
+          localStorage.setItem(
+            "tamareen:dismissed_attempts",
+            JSON.stringify([...new Set([...current, ...allIds])]),
+          );
+        } catch {}
+        widget.style.opacity = "0";
+        widget.style.transform = "scale(0.98)";
+        setTimeout(() => {
+          host.replaceChildren();
+          host.style.display = "none";
+        }, 200);
+      };
+      actionsWrap.append(dismissAllBtn);
+      head.append(titleWrap, actionsWrap);
+      widget.append(head);
+
+      const grid = document.createElement("div");
+      grid.className = "resumeCardsGrid";
+
+      function createCard(a) {
+        const code = a.courses?.code || "Course";
+        const meta = COURSE_NAMES[code] || {};
+        const courseName = (isAr ? meta.ar : meta.en) || a.courses?.name || code;
+        const isExpired =
+          a.mode === "exam" &&
+          Date.now() - new Date(a.started_at).getTime() > 600000;
+        const qCount = a.question_ids.length;
+
+        const card = document.createElement("div");
+        card.className = "resumeCard";
+        card.dataset.attemptId = a.id;
+
+        let badgeText, badgeClass;
+        if (isExpired) {
+          badgeText = isAr ? "اختبار منتهي" : "Expired exam";
+          badgeClass = "resumeBadgeExpired";
+        } else if (a.mode === "exam") {
+          badgeText = isAr ? "اختبار تجريبي" : "Mock exam";
+          badgeClass = "resumeBadgeExam";
+        } else {
+          badgeText = isAr ? "تدريب" : "Practice";
+          badgeClass = "resumeBadgePractice";
+        }
+
+        const dismissTitle = isAr ? "تجاهل هذه الجلسة" : "Dismiss session";
+        const actionText = isExpired
+          ? isAr
+            ? "تسليم الاختبار ←"
+            : "Submit exam →"
+          : isAr
+            ? "استئناف الجلسة ←"
+            : "Resume session →";
+
+        card.innerHTML = `
+          <div class="resumeCardHeader">
+            <div class="resumeBadges">
+              <span class="resumeCode">${code}</span>
+              <span class="resumeBadge ${badgeClass}">${badgeText}</span>
+            </div>
+            <button type="button" class="resumeDismissBtn" title="${dismissTitle}" aria-label="${dismissTitle}">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="12" y2="12"></line><line x1="12" y1="2" x2="2" y2="12"></line></svg>
+            </button>
+          </div>
+          <div class="resumeCardBody">
+            <h4 class="resumeName">${courseName}</h4>
+            <div class="resumeMeta">
+              <span class="resumeTime">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14.5a6.5 6.5 0 110-13 6.5 6.5 0 010 13zM8.5 4h-1.25v4.5l3.5 2.1.62-1.03-2.87-1.7V4z"/></svg>
+                ${timeAgo(a.started_at, isAr)}
+              </span>
+              <span class="resumeQuestions">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M4 1.5A1.5 1.5 0 002.5 3v10A1.5 1.5 0 004 14.5h8a1.5 1.5 0 001.5-1.5V3A1.5 1.5 0 0012 1.5H4zM4 3h8v10H4V3zm1.5 2v1.5h5V5h-5zm0 3v1.5h5V8h-5zm0 3v1.5h3V11h-3z"/></svg>
+                ${qCount} ${isAr ? "أسئلة" : "questions"}
+              </span>
+            </div>
+          </div>
+          <div class="resumeCardFooter">
+            <a href="/?resume=${encodeURIComponent(a.id)}" class="resumeBtn ${isExpired ? "resumeBtnExpired" : "resumeBtnPrimary"}">
+              ${actionText}
+            </a>
+          </div>
+        `;
+
+        const disBtn = card.querySelector(".resumeDismissBtn");
+        disBtn.onclick = (e) => {
+          e.preventDefault();
+          try {
+            const current = JSON.parse(
+              localStorage.getItem("tamareen:dismissed_attempts") || "[]",
+            );
+            current.push(a.id);
+            localStorage.setItem(
+              "tamareen:dismissed_attempts",
+              JSON.stringify(current),
+            );
+          } catch {}
+          card.style.opacity = "0";
+          card.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            card.remove();
+            if (!grid.querySelector(".resumeCard")) {
+              host.replaceChildren();
+              host.style.display = "none";
+            }
+          }, 200);
+        };
+
+        return card;
+      }
+
+      const primaryItems = unique.slice(0, 2);
+      const remainingItems = unique.slice(2);
+
+      primaryItems.forEach((a) => grid.append(createCard(a)));
+      widget.append(grid);
+
+      if (remainingItems.length > 0) {
+        const details = document.createElement("details");
+        details.className = "resumeMoreDetails";
+        const summary = document.createElement("summary");
+        summary.className = "resumeMoreSummary";
+        summary.textContent = isAr
+          ? `+ عرض المزيد من الجلسات (${remainingItems.length})`
+          : `+ Show ${remainingItems.length} more unfinished session${remainingItems.length > 1 ? "s" : ""}`;
+
+        const extraGrid = document.createElement("div");
+        extraGrid.className = "resumeCardsGrid resumeExtraGrid";
+        remainingItems.forEach((a) => extraGrid.append(createCard(a)));
+
+        details.append(summary, extraGrid);
+        widget.append(details);
+      }
+
+      host.replaceChildren(widget);
     } catch {
-      host.textContent =
-        "Could not load unfinished attempts. Refresh to try again.";
+      host.replaceChildren();
+      host.style.display = "none";
     }
+  }
+
+  if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    window.addEventListener("languagechange", () => {
+      showResume();
+    });
   }
   return {
     profile,
