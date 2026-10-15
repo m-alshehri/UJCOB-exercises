@@ -443,3 +443,64 @@ footer {
     z-index: 1007 !important;
   }
 }
+
+/* Instructor Export & At-Risk Controls */
+.cardHeadFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.cardHeadActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.btnExport {
+  background: #004f6e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btnExport:hover {
+  background: #00374d;
+}
+.filterBtn {
+  background: #f0f6f9;
+  border: 1px solid #d4e3eb;
+  color: #557280;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.filterBtn.active {
+  background: #fff0ed;
+  color: #b43d3d;
+  border-color: #f7c5c5;
+}
+.badgeAtRisk {
+  background: #fff0ed;
+  color: #b43d3d;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-inline-start: 6px;
+}
+.row.atRisk {
+  background: #fffbfb;
+}
+

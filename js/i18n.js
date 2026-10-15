@@ -725,6 +725,16 @@ window.I18n = (() => {
     "Expired exam": "اختبار منتهي",
     "Mock exam": "اختبار تجريبي",
     "Finish expired exam": "تسليم الاختبار المنتهي",
+    "Performance by Topic": "تحليل الأداء حسب الموضوع",
+    "Breakdown of your practice to help you focus on areas for improvement":
+      "تفصيل إجاباتك لمساعدتك في معرفة نقاط القوة والفرص التي تحتاج لتدريب إضافي",
+    "Practice this topic →": "تدرّب على هذا الموضوع ←",
+    "Flagged Questions for Review": "الأسئلة المميّزة للمراجعة",
+    "Correct answer:": "الإجابة الصحيحة:",
+    "Flag": "تمييز",
+    "Flagged ★": "مميّز ★",
+    "Show at-risk": "عرض المتعثرين",
+    "Export CSV / Excel": "تصدير كشف الدرجات (CSV / Excel)",
     "Build a broader picture": "كوّن صورة أوضح عن مستواك",
     "More distinct questions are needed before identifying a weak topic.":
       "نحتاج إلى أسئلة مختلفة أكثر قبل تحديد موضوع يحتاج إلى تدريب.",

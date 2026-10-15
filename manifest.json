@@ -1,0 +1,20 @@
+{
+  "name": "Tamareen · تمارين",
+  "short_name": "Tamareen",
+  "description": "منصة التدريب التفاعلي والتقييم الذاتي لطلاب كلية الأعمال بجامعة جدة",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b2c45",
+  "theme_color": "#004f6e",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/assets/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

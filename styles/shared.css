@@ -42,3 +42,126 @@ button:disabled {
   padding: 16px;
   color: #526d7a;
 }
+
+/* Code Editor Toolbar & Dark Mode */
+.editorControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.editorControlsLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editorControlsRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.editorLangBadge {
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  background: #e1f1f7;
+  color: #004f6e;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+.draftIndicator {
+  font-size: 12px;
+  color: #557280;
+}
+.draftIndicator.saved {
+  color: #147a54;
+}
+.editorBtn {
+  background: #ffffff;
+  border: 1px solid #d0e1ea;
+  color: #153b4b;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.editorBtn:hover {
+  background: #eef7fb;
+  border-color: #9acde4;
+}
+.editorDark {
+  background: #181f26 !important;
+  color: #e6edf3 !important;
+  border-color: #303e4d !important;
+  caret-color: #58a6ff !important;
+}
+.consoleDark {
+  background: #0d1217 !important;
+  color: #7ee787 !important;
+  border-color: #212c37 !important;
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobileBottomNav {
+  display: none;
+}
+@media (max-width: 720px) {
+  body {
+    padding-bottom: 64px !important;
+  }
+  .mobileBottomNav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #ffffff;
+    border-top: 1px solid #d4e3eb;
+    box-shadow: 0 -4px 16px rgba(11, 44, 69, 0.08);
+    z-index: 999;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mobileNavItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #637d8b;
+    font-size: 11px;
+    font-weight: 650;
+    padding: 6px 10px;
+    gap: 3px;
+    transition: color 0.15s ease;
+    flex: 1;
+    text-align: center;
+  }
+  .mobileNavItem svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .mobileNavItem.active,
+  .mobileNavItem:hover {
+    color: #004f6e;
+  }
+  .mobileNavItem.active svg {
+    stroke-width: 2.4;
+  }
+}
+

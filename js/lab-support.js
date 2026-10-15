@@ -3,6 +3,86 @@
   const editor =
     document.getElementById("editor") || document.getElementById("code");
   if (!editor) return;
+
+  const isAr =
+    (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+    document.documentElement.lang === "ar";
+  const langName =
+    LAB === "web-lab" ? "HTML / JS" : LAB === "python-lab" ? "Python" : "SQL";
+  const controls = document.createElement("div");
+  controls.className = "editorControls";
+  controls.innerHTML = `
+    <div class="editorControlsLeft">
+      <span class="editorLangBadge">${langName}</span>
+      <span id="draftIndicator" class="draftIndicator">${isAr ? "💾 حفظ تلقائي مفعل" : "💾 Auto-save active"}</span>
+    </div>
+    <div class="editorControlsRight">
+      <button type="button" class="editorBtn" id="btnCopyCode" title="${isAr ? "نسخ الكود" : "Copy code"}">📋 ${isAr ? "نسخ" : "Copy"}</button>
+      <button type="button" class="editorBtn" id="btnToggleDark" title="${isAr ? "تبديل الوضع الداكن" : "Toggle dark mode"}">🌙 ${isAr ? "داكن" : "Dark"}</button>
+      <button type="button" class="editorBtn" id="btnResetCode" title="${isAr ? "استعادة الكود الأصلي" : "Reset code"}">↺ ${isAr ? "إعادة تعيين" : "Reset"}</button>
+    </div>
+  `;
+  editor.insertAdjacentElement("beforebegin", controls);
+
+  const consoleEl = document.getElementById("console");
+  const applyDarkTheme = (dark) => {
+    editor.classList.toggle("editorDark", dark);
+    if (consoleEl) consoleEl.classList.toggle("consoleDark", dark);
+    const darkBtn = document.getElementById("btnToggleDark");
+    if (darkBtn)
+      darkBtn.textContent = dark
+        ? isAr
+          ? "☀️ فاتح"
+          : "☀️ Light"
+        : isAr
+          ? "🌙 داكن"
+          : "🌙 Dark";
+  };
+  let isDarkInit = false;
+  try {
+    isDarkInit = localStorage.getItem("tamareen:editor_theme") === "dark";
+  } catch {}
+  applyDarkTheme(isDarkInit);
+
+  document.getElementById("btnToggleDark")?.addEventListener("click", () => {
+    const isNowDark = !editor.classList.contains("editorDark");
+    applyDarkTheme(isNowDark);
+    try {
+      localStorage.setItem(
+        "tamareen:editor_theme",
+        isNowDark ? "dark" : "light",
+      );
+    } catch {}
+  });
+
+  document.getElementById("btnCopyCode")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(editor.value);
+      const b = document.getElementById("btnCopyCode");
+      const oldText = b.textContent;
+      b.textContent = isAr ? "✓ تم النسخ!" : "✓ Copied!";
+      setTimeout(() => (b.textContent = oldText), 1800);
+    } catch {
+      editor.select();
+      document.execCommand("copy");
+    }
+  });
+
+  document.getElementById("btnResetCode")?.addEventListener("click", () => {
+    const confirmMsg = isAr
+      ? "هل أنت متأكد من إعادة تعيين الكود للتمرين الأصلي؟"
+      : "Reset code back to the starting template?";
+    if (confirm(confirmMsg)) {
+      if (typeof E !== "undefined" && typeof i !== "undefined" && E[i]) {
+        const defaultCode = LAB === "web-lab" ? E[i][2] : E[i][5];
+        if (defaultCode !== undefined) {
+          editor.value = defaultCode;
+          editor.dispatchEvent(new Event("input"));
+        }
+      }
+    }
+  });
+
   const panel = document.createElement("section");
   panel.className = "learningCard labSupport";
   panel.innerHTML =
@@ -223,6 +303,11 @@
           "tamareen:draft:" + tracker.user.id + ":" + LAB + ":" + activeKey,
           editor.value,
         );
+        const ind = document.getElementById("draftIndicator");
+        if (ind) {
+          ind.textContent = isAr ? "✓ تم الحفظ محلياً" : "✓ Saved locally";
+          ind.classList.add("saved");
+        }
         message(navigator.onLine?"Saved on this device. Cloud saving pending.":"Saved on this device. Reconnect to sync.");
       } catch {message("Local storage unavailable. Keep this page open until cloud saving succeeds.");}
     }
