@@ -864,6 +864,10 @@ async function finish(timedOut = false) {
       $("finalMsg").textContent =
         (timedOut ? "Time is up. " : "") +
         `You scored ${p}%. Personal practice result, not a verified grade.`;
+      if (p >= 80) {
+        Tamareen.confetti?.();
+      }
+      Tamareen.recordActivity?.(user?.id || "guest", questions.length);
       renderTopicBreakdown();
       renderFlaggedSummary();
       await showAdaptiveRecommendation();
@@ -1248,3 +1252,136 @@ window.addEventListener("keydown", (e) => {
     toggleFlag();
   }
 });
+
+// Catalog Concept Search
+function initCatalogSearch() {
+  const searchInput = $("catalogSearch");
+  const searchResults = $("searchResults");
+  const clearBtn = $("clearSearch");
+  if (!searchInput || !searchResults) return;
+
+  const performSearch = (query) => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      searchResults.hidden = true;
+      searchResults.innerHTML = "";
+      if (clearBtn) clearBtn.hidden = true;
+      return;
+    }
+    if (clearBtn) clearBtn.hidden = false;
+
+    const matches = [];
+
+    // Search in Courses
+    if (typeof COURSES !== "undefined") {
+      for (const [code, course] of Object.entries(COURSES)) {
+        const name = course.name || "";
+        const summary = courseSummaries[code] || "";
+        if (
+          code.toLowerCase().includes(q) ||
+          name.toLowerCase().includes(q) ||
+          summary.toLowerCase().includes(q)
+        ) {
+          matches.push({
+            type: "course",
+            title: `${code} · ${name}`,
+            sub: summary,
+            action: () => chooseCourse(code),
+            actionLabel: "افتح المقرر →",
+          });
+        }
+      }
+    }
+
+    // Search in Concepts (S from question-banks.js)
+    if (typeof S !== "undefined") {
+      for (const [code, data] of Object.entries(S)) {
+        for (const row of data.rows || []) {
+          const concept = row[0] || "";
+          const def = row[1] || "";
+          const purpose = row[2] || "";
+          const example = row[3] || "";
+          if (
+            concept.toLowerCase().includes(q) ||
+            def.toLowerCase().includes(q) ||
+            purpose.toLowerCase().includes(q) ||
+            example.toLowerCase().includes(q)
+          ) {
+            matches.push({
+              type: "concept",
+              title: `${concept} (${code})`,
+              sub: `${def} · مثال: ${example}`,
+              action: () => chooseCourse(code),
+              actionLabel: "تدرب الآن →",
+            });
+            if (matches.length >= 15) break;
+          }
+        }
+        if (matches.length >= 15) break;
+      }
+    }
+
+    // Search in Coding Labs
+    if (typeof LAB_CATALOG !== "undefined") {
+      for (const [labType, lab] of Object.entries(LAB_CATALOG)) {
+        for (const ex of lab.exercises || []) {
+          const title = ex.title || "";
+          if (title.toLowerCase().includes(q)) {
+            matches.push({
+              type: "lab",
+              title: `[معمل ${lab.code}] ${title}`,
+              sub: `تمرين برمجي عملي`,
+              action: () => (location.href = lab.url),
+              actionLabel: "افتح المعمل →",
+            });
+          }
+        }
+      }
+    }
+
+    if (!matches.length) {
+      searchResults.hidden = false;
+      searchResults.innerHTML = `<div class="empty">${
+        (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+        document.documentElement.lang === "ar"
+          ? "لم يتم العثور على مفاهيم مطابقة."
+          : "No matching concepts or courses found."
+      }</div>`;
+      return;
+    }
+
+    searchResults.hidden = false;
+    searchResults.innerHTML = matches
+      .slice(0, 10)
+      .map(
+        (m, idx) => `
+        <div class="searchResultItem" data-index="${idx}">
+          <div class="searchResMeta">
+            <span class="searchResTitle">${Tamareen.escape(m.title)}</span>
+            <span class="searchResSub">${Tamareen.escape(m.sub)}</span>
+          </div>
+          <span class="searchResAction">${m.actionLabel}</span>
+        </div>
+      `,
+      )
+      .join("");
+
+    searchResults.querySelectorAll(".searchResultItem").forEach((el) => {
+      const idx = Number(el.dataset.index);
+      el.onclick = () => {
+        matches[idx]?.action();
+        searchResults.hidden = true;
+      };
+    });
+  };
+
+  searchInput.addEventListener("input", (e) => performSearch(e.target.value));
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      performSearch("");
+      searchInput.focus();
+    });
+  }
+}
+initCatalogSearch();

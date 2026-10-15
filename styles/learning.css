@@ -545,3 +545,184 @@ main:focus {outline:none}
     grid-template-columns: 1fr;
   }
 }
+
+/* Review Mistakes View Toggle & Flashcards Mode */
+.viewModeToggle {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.viewModeBtn {
+  background: #ffffff;
+  border: 1px solid #c4d7e0;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-weight: 650;
+  color: #173746;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+.viewModeBtn:hover {
+  background: #f0f7fa;
+  border-color: #28a9dc;
+}
+.viewModeBtn.active {
+  background: #004f6e;
+  color: #ffffff;
+  border-color: #004f6e;
+  box-shadow: 0 4px 12px rgba(0, 79, 110, 0.2);
+}
+
+.flashcardDeck {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin: 20px 0 40px;
+  max-width: 720px;
+  margin-inline: auto;
+}
+.fcHeader {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+#fcCounter {
+  font-size: 14px;
+  font-weight: 650;
+  color: #486270;
+}
+.fcProgressBar {
+  width: 100%;
+  height: 6px;
+  background: #dbe8ef;
+  border-radius: 999px;
+  overflow: hidden;
+}
+#fcProgressFill {
+  height: 100%;
+  background: #28a9dc;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.fcCardWrap {
+  perspective: 1200px;
+  width: 100%;
+  min-height: 340px;
+}
+.flashcard {
+  width: 100%;
+  min-height: 340px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(11, 44, 69, 0.08);
+}
+.flashcard.flipped {
+  transform: rotateY(180deg);
+}
+.fcSide {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1.5px solid #d4e3eb;
+  background: #ffffff;
+}
+.fcFront {
+  background: linear-gradient(180deg, #ffffff 0%, #f9fcfe 100%);
+}
+.fcBack {
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  transform: rotateY(180deg);
+  overflow-y: auto;
+}
+.fcMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fcBadge {
+  background: #e2eef3;
+  color: #004f6e;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+.fcQuestionText {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  color: #072735;
+  margin: 20px 0;
+}
+.fcInstruction {
+  font-size: 12px;
+  font-weight: 600;
+  color: #889fab;
+  text-align: center;
+}
+.fcAnswerBlock {
+  margin-bottom: 12px;
+}
+.fcLabel {
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #15803d;
+  margin-bottom: 4px;
+}
+.fcAnswerText {
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: #14532d;
+  background: #dcfce7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+.fcExplanationBlock {
+  font-size: 14px;
+  color: #334e5c;
+  line-height: 1.6;
+}
+.fcExplanationBlock p {
+  margin: 4px 0 10px;
+}
+.fcControls {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+}
+.fcBtn {
+  min-width: 110px;
+  font-weight: 650;
+  border-radius: 10px;
+  padding: 10px 18px;
+}
+.fcFlipBtn {
+  background: #28a9dc;
+  color: #ffffff;
+  border-color: #28a9dc;
+}
+.fcFlipBtn:hover {
+  background: #1e92c0;
+}
+.fcShortcutsHint {
+  font-size: 12px;
+  color: #637d8b;
+  text-align: center;
+}

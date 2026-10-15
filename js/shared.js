@@ -109,6 +109,98 @@ window.Tamareen = (() => {
     }
     return data;
   }
+  function confetti() {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.id = "tamareenConfetti";
+      canvas.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:999999;";
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ["#28a9dc", "#004f6e", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#6366f1"];
+      const particles = Array.from({ length: 90 }, () => ({
+        x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+        y: canvas.height * 0.45 + (Math.random() - 0.5) * 100,
+        vx: (Math.random() - 0.5) * 14,
+        vy: Math.random() * -12 - 4,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        vRot: (Math.random() - 0.5) * 10,
+        alpha: 1,
+      }));
+      let start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        const elapsed = ts - start;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35;
+          p.rotation += p.vRot;
+          if (elapsed > 1200) p.alpha = Math.max(0, 1 - (elapsed - 1200) / 1000);
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.5);
+          ctx.restore();
+        });
+        if (elapsed < 2400) {
+          requestAnimationFrame(step);
+        } else {
+          canvas.remove();
+        }
+      }
+      requestAnimationFrame(step);
+    } catch {}
+  }
+  function streakKey(uid = "guest") {
+    return "tamareen:streak:" + uid;
+  }
+  function getStreak(uid = "guest") {
+    try {
+      const raw = localStorage.getItem(streakKey(uid));
+      const today = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      if (!raw) return { streak: 0, lastDate: "", todayCount: 0, todayDate: today, goal: 5 };
+      const data = JSON.parse(raw);
+      if (data.lastDate && data.lastDate !== today && data.lastDate !== yesterday) {
+        data.streak = 0;
+      }
+      if (data.todayDate !== today) {
+        data.todayCount = 0;
+        data.todayDate = today;
+      }
+      data.goal = data.goal || 5;
+      return data;
+    } catch {
+      return { streak: 0, lastDate: "", todayCount: 0, todayDate: new Date().toISOString().slice(0, 10), goal: 5 };
+    }
+  }
+  function recordActivity(uid = "guest", count = 1) {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const data = getStreak(uid);
+      if (data.lastDate === yesterday) {
+        data.streak = (data.streak || 0) + 1;
+      } else if (data.lastDate !== today) {
+        data.streak = 1;
+      }
+      data.lastDate = today;
+      data.todayDate = today;
+      data.todayCount = (data.todayCount || 0) + count;
+      localStorage.setItem(streakKey(uid), JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent("tamareen:streak-updated", { detail: data }));
+      return data;
+    } catch {
+      return { streak: 1, lastDate: "", todayCount: 1, goal: 5 };
+    }
+  }
   return {
     client,
     internalPath,
@@ -120,5 +212,8 @@ window.Tamareen = (() => {
     all,
     status,
     api,
+    confetti,
+    getStreak,
+    recordActivity,
   };
 })();

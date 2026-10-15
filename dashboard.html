@@ -34,7 +34,10 @@
         </div>
         <div class="stat"><b id="avg">—</b><span>Average score</span></div>
         <div class="stat"><b id="best">—</b><span>Best score</span></div>
+        <div class="stat"><b id="streakStat">0 🔥</b><span>Daily streak</span></div>
+        <div class="stat"><b id="goalStat">0 / 5</b><span>Today's goal</span></div>
       </div>
+      <div id="certBannerWrap" class="certBannerWrap" style="display: none;"></div>
       <div class="vizgrid">
         <div class="card vizcard">
           <h2>Course mastery</h2>
@@ -70,6 +73,45 @@
         <h2>Recent attempts</h2>
         <div class="row"><b>Course</b><b>Score</b><b>Mode</b><b>Date</b></div>
         <div id="list" class="empty">Loading progress…</div>
+      </div>
+      <div id="certModal" class="modalBackdrop" style="display: none;">
+        <div class="certDialog" role="dialog" aria-modal="true" aria-labelledby="certTitle">
+          <button type="button" class="modalClose" id="btnCloseCert" aria-label="Close">✕</button>
+          <div class="certPaper" id="certPaper">
+            <div class="certBorder">
+              <div class="certHeader">
+                <div class="certLogo">
+                  <svg viewBox="0 0 64 64" width="48" height="48" role="img" aria-hidden="true"><defs><linearGradient id="certG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#83ccea"/><stop offset="1" stop-color="#28a9dc"/></linearGradient></defs><path fill="#004f6e" d="M9 10h38c3 0 5 2 5 5v5c0 3-2 5-5 5H35v26c0 3-2 5-5 5h-5c-3 0-5-2-5-5V25H9c-3 0-5-2-5-5v-5c0-3 2-5 5-5z"/><path d="M23 36l9 9 21-23" fill="none" stroke="url(#certG)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="certBrand">tamareen.online</div>
+              </div>
+              <div class="certEyebrow">CERTIFICATE OF MASTERY & ACHIEVEMENT</div>
+              <h1 id="certTitle" class="certTitle">شهادة إتقان وتفوق أكاديمي</h1>
+              <p class="certPresented">تُمنح هذه الشهادة تقديراً للتميز وإتقان المهارات للطالب / الطالبة:</p>
+              <div class="certRecipient" id="certRecipient">Student Name</div>
+              <p class="certReason">لاكتساب وإتقان المعارف والمهارات لمقرر:</p>
+              <div class="certCourse" id="certCourse">CPIT 110 · Computer Programming</div>
+              <div class="certScoreBadge">بمعدل إتقان متميز: <b id="certScore">95%</b></div>
+              <div class="certFooter">
+                <div class="certMeta">
+                  <span>تاريخ الاعتماد: <b id="certDate">2026-10-16</b></span>
+                  <span>الرمز المرجعي: <b id="certId">TAM-8921</b></span>
+                </div>
+                <div class="certSeal">
+                  <div class="sealInner">
+                    <span>★</span>
+                    <b>TAMAREEN</b>
+                    <small>VERIFIED</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="certActions">
+            <button type="button" id="btnPrintCert" class="btnPri">🖨️ طباعة / حفظ كـ PDF</button>
+            <button type="button" id="btnDismissCert" class="btnSec">إغلاق</button>
+          </div>
+        </div>
       </div>
     </main>
     <div id="siteFooter"></div>

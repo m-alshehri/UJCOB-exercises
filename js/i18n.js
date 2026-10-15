@@ -1,5 +1,18 @@
 window.I18n = (() => {
   const dictionary = {
+    "Daily streak": "الأيام المتتالية",
+    "Today's goal": "هدف اليوم",
+    "Download": "تنزيل",
+    "Zen": "تركيز",
+    "Exit": "خروج",
+    "List view": "عرض القائمة",
+    "Flashcards mode": "بطاقات تفاعلية",
+    "Flip card": "قلب البطاقة",
+    "View Certificate": "عرض شهادة الإنجاز",
+    "Group Gradebook Matrix": "مصفوفة تسليمات الواجبات",
+    "Export Full Gradebook (Excel / CSV)": "تصدير مصفوفة الدرجات بالكامل (Excel / CSV)",
+    "Export assignment CSV": "تصدير كشف هذا الواجب CSV",
+    "Search courses, topics, or concepts (e.g. Loops, SQL, JOIN, HTML, OOP)...": "ابحث في المقررات والمفاهيم (مثال: Loops, SQL, JOIN, HTML, OOP)...",
     "Explore course →": "استكشف المقرر ←",
     "Build programming foundations and solve business problems with Python.": "ابنِ أساسك البرمجي وحل مسائل الأعمال باستخدام Python.",
     "Explore business processes and their integration through ERP systems.": "افهم عمليات المؤسسة وتكاملها عبر أنظمة ERP.",

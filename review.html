@@ -29,8 +29,48 @@
           </select></label
         ><button id="reviewPractice">Practice due questions</button>
       </div>
+      <div class="viewModeToggle">
+        <button type="button" id="btnListView" class="viewModeBtn active">📋 عرض القائمة</button>
+        <button type="button" id="btnFlashcardView" class="viewModeBtn">🗂️ بطاقات تفاعلية (Flashcards)</button>
+      </div>
       <p id="reviewCount" role="status"></p>
       <div id="reviewList">Loading your saved answers…</div>
+      <div id="flashcardDeck" class="flashcardDeck" style="display: none;">
+        <div class="fcHeader">
+          <span id="fcCounter">بطاقة 1 من 10</span>
+          <div class="fcProgressBar"><div id="fcProgressFill" style="width: 10%;"></div></div>
+        </div>
+        <div class="fcCardWrap">
+          <div class="flashcard" id="flashcard" role="button" tabindex="0">
+            <div class="fcSide fcFront">
+              <div class="fcMeta">
+                <span class="fcBadge" id="fcCourse"></span>
+                <span class="fcBadge" id="fcTopic"></span>
+              </div>
+              <h2 id="fcQuestion" class="fcQuestionText"></h2>
+              <div class="fcInstruction">💡 اضغط أو المسافة [Space] لقلب البطاقة</div>
+            </div>
+            <div class="fcSide fcBack">
+              <div class="fcAnswerBlock">
+                <div class="fcLabel">الإجابة الصحيحة:</div>
+                <div class="fcAnswerText" id="fcAnswer"></div>
+              </div>
+              <div class="fcExplanationBlock">
+                <div class="fcLabel">التفسير:</div>
+                <p id="fcExplanation"></p>
+                <div id="fcOptionsExplanation"></div>
+              </div>
+              <div class="fcInstruction">↩ اضغط لقلب البطاقة مجدداً</div>
+            </div>
+          </div>
+        </div>
+        <div class="fcControls">
+          <button type="button" id="fcPrev" class="fcBtn">⬅ السابق</button>
+          <button type="button" id="fcFlip" class="fcBtn fcFlipBtn">🔄 قلب البطاقة</button>
+          <button type="button" id="fcNext" class="fcBtn">التالي ➡</button>
+        </div>
+        <div class="fcShortcutsHint">اختصارات: [مسافة] للقلب · [الأسهم ← / →] للتنقل</div>
+      </div>
     </main>
     <div id="siteFooter"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>

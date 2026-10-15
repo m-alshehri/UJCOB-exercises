@@ -113,6 +113,14 @@ print(revenue)</code></pre>
             <h2>Choose a course</h2>
             <span>Pick a subject and start practicing</span>
           </div>
+          <div class="searchBarWrapper">
+            <div class="searchBox">
+              <span class="searchIcon">🔍</span>
+              <input type="search" id="catalogSearch" class="catalogSearch" placeholder="Search courses, topics, or concepts (e.g. Loops, SQL, JOIN, HTML, OOP)..." aria-label="Search courses, topics, and concepts" autocomplete="off" />
+              <button type="button" id="clearSearch" class="clearSearchBtn" hidden aria-label="Clear search">✕</button>
+            </div>
+            <div id="searchResults" class="searchResultsPanel" hidden></div>
+          </div>
           <div class="courseFilters" role="group" aria-label="Filter courses">
             <button class="filterChip" aria-pressed="true" data-action="filterCourses" data-arg="all">All</button>
             <button class="filterChip" aria-pressed="false" data-action="filterCourses" data-arg="code">Programming</button>

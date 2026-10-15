@@ -128,18 +128,124 @@
           details.innerHTML = "<summary>Create assignment</summary>";
           details.append(assignmentForm(g));
           card.append(details);
+
+          // Gradebook Matrix across all assignments in group
+          if (g.assignments.length > 0) {
+            const studentsSet = new Map();
+            g.assignments.forEach((a) => {
+              a.progress.forEach((p) => {
+                if (!studentsSet.has(p.name)) studentsSet.set(p.name, {});
+                const status = p.state
+                  ? I18n.t(p.label)
+                  : p.done
+                    ? "Complete"
+                    : a.due_at && Date.now() > new Date(a.due_at)
+                      ? "Overdue"
+                      : "In progress";
+                studentsSet.get(p.name)[a.id] = { done: p.done, status, label: p.label };
+              });
+            });
+            if (studentsSet.size > 0) {
+              const matrixDetails = document.createElement("details");
+              matrixDetails.className = "gradebookDetails";
+              const isAr =
+                (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+                document.documentElement.lang === "ar";
+              matrixDetails.innerHTML = `<summary>📊 ${isAr ? "مصفوفة تسليمات الواجبات (Gradebook Matrix)" : "Group Gradebook Matrix"}</summary>`;
+              const matrixWrap = document.createElement("div");
+              matrixWrap.style.cssText = "margin-top: 10px;";
+
+              const btnExportFull = document.createElement("button");
+              btnExportFull.type = "button";
+              btnExportFull.className = "btnExport";
+              btnExportFull.style.cssText =
+                "margin-bottom: 12px; font-size: 13px; font-weight: 650; display: inline-block;";
+              btnExportFull.textContent = isAr
+                ? "📥 تصدير مصفوفة الدرجات بالكامل (Excel / CSV)"
+                : "📥 Export Full Gradebook (Excel / CSV)";
+              btnExportFull.onclick = () => {
+                const headers = [
+                  isAr ? "اسم الطالب" : "Student",
+                  ...g.assignments.map((a) => `"${(a.title || "").replace(/"/g, '""')}"`),
+                  isAr ? "نسبة الإنجاز" : "Completion Rate",
+                ];
+                const rows = [...studentsSet.entries()].map(([name, assigns]) => {
+                  let doneCount = 0;
+                  const cols = g.assignments.map((a) => {
+                    const st = assigns[a.id];
+                    if (st?.done) doneCount++;
+                    return `"${(st?.status || "—").replace(/"/g, '""')}"`;
+                  });
+                  const rate =
+                    Math.round((doneCount / g.assignments.length) * 100) + "%";
+                  return [`"${name.replace(/"/g, '""')}"`, ...cols, `"${rate}"`].join(",");
+                });
+                const csvContent =
+                  "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+                const blob = new Blob([csvContent], {
+                  type: "text/csv;charset=utf-8;",
+                });
+                const url = URL.createObjectURL(blob);
+                const aTag = document.createElement("a");
+                aTag.href = url;
+                aTag.download = `gradebook-${(g.name || "group").replace(/[^a-zA-Z0-9_\-\u0600-\u06FF]/g, "_")}.csv`;
+                aTag.click();
+                URL.revokeObjectURL(url);
+              };
+              matrixWrap.append(btnExportFull);
+
+              const mTable = document.createElement("table");
+              mTable.innerHTML =
+                `<thead><tr><th>${isAr ? "اسم الطالب" : "Student"}</th>${g.assignments.map((a) => `<th>${esc(a.title)}</th>`).join("")}<th>${isAr ? "الإنجاز" : "Rate"}</th></tr></thead><tbody>` +
+                [...studentsSet.entries()]
+                  .map(([name, assigns]) => {
+                    let doneCount = 0;
+                    const cells = g.assignments
+                      .map((a) => {
+                        const st = assigns[a.id];
+                        if (st?.done) doneCount++;
+                        const badge = st?.done
+                          ? "✅"
+                          : st?.status === "Overdue"
+                            ? "⚠️"
+                            : "⏳";
+                        return `<td>${badge} ${esc(st?.status || "—")}</td>`;
+                      })
+                      .join("");
+                    const rate =
+                      Math.round((doneCount / g.assignments.length) * 100) + "%";
+                    return `<tr><th>${esc(name)}</th>${cells}<td><b>${rate}</b></td></tr>`;
+                  })
+                  .join("") +
+                "</tbody>";
+
+              const mScroll = document.createElement("div");
+              mScroll.className = "tableScroll";
+              mScroll.append(mTable);
+              matrixWrap.append(mScroll);
+              matrixDetails.append(matrixWrap);
+              card.append(matrixDetails);
+            }
+          }
         }
         for (const a of g.assignments) {
           const section = document.createElement("article");
           section.className = "assignment";
-          section.id="assignment-"+a.id;
+          section.id = "assignment-" + a.id;
           section.innerHTML = `<h3>${esc(a.title)}</h3><p>${esc(a.courses.code)} · ${esc(a.kind)} ${a.due_at ? "· Due " + esc(new Date(a.due_at).toLocaleString()) : ""}</p>`;
           if (!g.owned) {
             const link = document.createElement("a");
             link.href =
-              a.kind === "project" ? "/submissions.html?assignment="+a.id+"&exercise="+a.exercise_keys[0] : a.kind === "practice"
-                ? "/?course=" + encodeURIComponent(a.courses.code) + "&mode=practice"
-                : LAB_CATALOG[a.lab_type]?.url || "/";
+              a.kind === "project"
+                ? "/submissions.html?assignment=" +
+                  a.id +
+                  "&exercise=" +
+                  a.exercise_keys[0]
+                : a.kind === "practice"
+                  ? "/?course=" +
+                    encodeURIComponent(a.courses.code) +
+                    "&mode=practice"
+                  : LAB_CATALOG[a.lab_type]?.url || "/";
             link.textContent = "Open practice →";
             section.append(link);
             if (a.kind === "lab") {
@@ -163,7 +269,58 @@
               )
               .join("") +
             "</tbody>";
-          const scroll=document.createElement("div");scroll.className="tableScroll";scroll.tabIndex=0;scroll.setAttribute("role","region");scroll.setAttribute("aria-label",I18n.t("Practice completion"));scroll.append(table);section.append(scroll);
+          const scroll = document.createElement("div");
+          scroll.className = "tableScroll";
+          scroll.tabIndex = 0;
+          scroll.setAttribute("role", "region");
+          scroll.setAttribute("aria-label", I18n.t("Practice completion"));
+          scroll.append(table);
+          section.append(scroll);
+
+          if (g.owned) {
+            const btnExportA = document.createElement("button");
+            btnExportA.type = "button";
+            btnExportA.className = "btnExport";
+            btnExportA.style.cssText =
+              "margin-top: 10px; font-size: 12px; font-weight: 600; padding: 6px 12px;";
+            const isAr =
+              (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+              document.documentElement.lang === "ar";
+            btnExportA.textContent = isAr
+              ? "📥 تصدير كشف هذا الواجب CSV"
+              : "📥 Export assignment CSV";
+            btnExportA.onclick = () => {
+              const headers = isAr
+                ? ["اسم الطالب", "التقدم", "الحالة"]
+                : ["Student", "Progress", "Status"];
+              const rows = a.progress.map((p) => {
+                const status = p.state
+                  ? I18n.t(p.label)
+                  : p.done
+                    ? "Complete"
+                    : a.due_at && Date.now() > new Date(a.due_at)
+                      ? "Overdue"
+                      : "In progress";
+                return [
+                  `"${(p.name || "").replace(/"/g, '""')}"`,
+                  `"${(p.label || "").replace(/"/g, '""')}"`,
+                  `"${status}"`,
+                ].join(",");
+              });
+              const csvContent =
+                "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+              const blob = new Blob([csvContent], {
+                type: "text/csv;charset=utf-8;",
+              });
+              const url = URL.createObjectURL(blob);
+              const aTag = document.createElement("a");
+              aTag.href = url;
+              aTag.download = `assignment-${a.id}-status.csv`;
+              aTag.click();
+              URL.revokeObjectURL(url);
+            };
+            section.append(btnExportA);
+          }
           card.append(section);
         }
         if (!g.assignments.length) card.append("No assignments yet.");
