@@ -358,6 +358,18 @@ window.I18n = (() => {
       "يعمل بايثون محليًا في بيئة معزولة.",
     "Running Python in an isolated worker…":
       "جارٍ تشغيل بايثون في بيئة معزولة…",
+    "SQLite runs locally in an isolated worker.":
+      "يعمل SQLite محليًا في بيئة معزولة.",
+    "Running SQL in an isolated worker…":
+      "جارٍ تشغيل SQL في بيئة معزولة…",
+    "Correct! Your SQL passed the checker.":
+      "صحيح! اجتاز استعلام SQL الفحص بنجاح.",
+    "Not correct yet. Check columns, filtering and ordering.":
+      "غير صحيح بعد. راجع الأعمدة، والتصفية، والترتيب.",
+    "Correct the query and try again.":
+      "صحّح الاستعلام وحاول مرة أخرى.",
+    "No exercises match these filters. Choose another topic or level.":
+      "لا توجد تمارين تطابق هذه التصفية. اختر موضوعًا أو مستوى آخر.",
     Basics: "الأساسيات",
     Conditions: "الشروط",
     Loops: "الحلقات",
@@ -761,6 +773,8 @@ window.I18n = (() => {
         /^You scored (.*)\. Personal practice result, not a verified grade\.$/,
         (_, a) => `نتيجتك ${a}. نتيجة تدريب شخصية وليست درجة معتمدة.`,
       ],
+      [/^Correct\.\s*(.*)$/, (_, a) => `صحيح. ${a}`],
+      [/^Not quite\.\s*(.*)$/, (_, a) => `غير دقيق. ${a}`],
     ];
     for (const [re, fn] of patterns)
       if (re.test(key)) return key.replace(re, fn);
