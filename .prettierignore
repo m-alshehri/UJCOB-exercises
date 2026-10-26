@@ -1,0 +1,5 @@
+# Generated from content/*.json and assets/projects.json
+js/lab-content.js
+js/i18n-ar.js
+js/applied-questions.js
+js/project-catalog.js

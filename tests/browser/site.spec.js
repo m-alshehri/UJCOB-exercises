@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { readFile } from "node:fs/promises";
 const uid = "11111111-1111-4111-8111-111111111111",
   cid = "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
   qid = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
@@ -8,13 +7,6 @@ async function setup(page, { signedIn = true, failSave = false } = {}) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   // All database traffic stays in this controlled fixture; no real student records are touched.
-  const umd = await readFile(
-    "node_modules/@supabase/supabase-js/dist/umd/supabase.js",
-    "utf8",
-  );
-  await page.route("https://cdn.jsdelivr.net/npm/@supabase/**", (r) =>
-    r.fulfill({ contentType: "text/javascript", body: umd }),
-  );
   if (signedIn)
     await page.addInitScript(
       ({ uid }) =>

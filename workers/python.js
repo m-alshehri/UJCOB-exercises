@@ -1,9 +1,9 @@
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js");
+importScripts("/vendor/pyodide/pyodide.js");
 let pyPromise = null;
 function getPyodide() {
   if (!pyPromise) {
     pyPromise = loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/",
+      indexURL: "/vendor/pyodide/",
     });
   }
   return pyPromise;
