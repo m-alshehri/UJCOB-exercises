@@ -8,7 +8,6 @@
 }
 * {
   box-sizing: border-box;
-  font-weight: 400 !important;
 }
 body {
   margin: 0;
@@ -915,5 +914,281 @@ footer .footcol a {
   .chartBox,
   .activityWrap {
     height: 240px;
+  }
+}
+
+/* Certificate of Mastery & Banner */
+.certBannerWrap {
+  margin: 16px 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.certBanner {
+  background: linear-gradient(135deg, #fef9c3 0%, #fffbeb 100%);
+  border: 1.5px solid #fde047;
+  border-radius: 14px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(234, 179, 8, 0.12);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.certBannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.certBannerIcon {
+  font-size: 28px;
+}
+.certBannerTitle {
+  font-weight: 750;
+  font-size: 15px;
+  color: #854d0e;
+}
+.certBannerSub {
+  font-size: 13px;
+  color: #a16207;
+}
+.btnViewCert {
+  background: #ca8a04;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(202, 138, 4, 0.25);
+  transition: all 0.2s ease;
+}
+.btnViewCert:hover {
+  background: #a16207;
+  transform: translateY(-1px);
+}
+
+/* Modal Dialog */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 39, 53, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.certDialog {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 860px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: auto;
+}
+.modalClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #f1f5f9;
+  border: none;
+  font-size: 18px;
+  color: #475569;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s ease;
+  z-index: 2;
+}
+.modalClose:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.certPaper {
+  background: #ffffff;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+.certBorder {
+  border: 6px double #004f6e;
+  border-radius: 12px;
+  padding: 36px 32px;
+  text-align: center;
+  background: radial-gradient(circle at center, #ffffff 0%, #f8fbfd 100%);
+  position: relative;
+}
+.certHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.certBrand {
+  font-size: 20px;
+  font-weight: 800;
+  color: #004f6e;
+  letter-spacing: -0.5px;
+}
+.certEyebrow {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 2px;
+  color: #28a9dc;
+  margin-bottom: 12px;
+}
+.certTitle {
+  font-size: 26px;
+  color: #004f6e;
+  margin: 0 0 16px;
+  font-weight: 800;
+}
+.certPresented {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 8px;
+}
+.certRecipient {
+  font-size: 28px;
+  font-weight: 850;
+  color: #0f172a;
+  border-bottom: 2px solid #cbd5e1;
+  display: inline-block;
+  padding: 0 30px 4px;
+  margin-bottom: 14px;
+}
+.certReason {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 6px;
+}
+.certCourse {
+  font-size: 20px;
+  font-weight: 750;
+  color: #0369a1;
+  margin-bottom: 14px;
+}
+.certScoreBadge {
+  font-size: 15px;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 6px 16px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 28px;
+}
+.certFooter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 20px;
+  margin-top: 10px;
+}
+.certMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #64748b;
+  text-align: right;
+  direction: rtl;
+}
+.certSeal {
+  width: 76px;
+  height: 76px;
+  border: 3px dashed #ca8a04;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 3px;
+  box-sizing: border-box;
+}
+.sealInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ca8a04;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+.certActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.btnPri {
+  background: #004f6e;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btnPri:hover {
+  background: #00364d;
+}
+.btnSec {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #certModal, #certModal * {
+    visibility: visible;
+  }
+  #certModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    padding: 0;
+    display: block !important;
+  }
+  .certDialog {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+  .modalClose, .certActions {
+    display: none !important;
+  }
+  .certPaper {
+    border: none;
+    padding: 0;
   }
 }

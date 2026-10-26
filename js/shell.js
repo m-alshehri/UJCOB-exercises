@@ -1,7 +1,7 @@
 document.getElementById("siteHeader")?.replaceWith(
   Object.assign(document.createElement("div"), {
     innerHTML:
-      '<header><div class="head"><a class="brandwrap" href="/" aria-label="Tamareen home"><div class="mark" aria-label="Tamareen logo"><svg class="brandLogo" viewBox="0 0 64 64" role="img" aria-hidden="true"><defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#83ccea"/><stop offset="1" stop-color="#28a9dc"/></linearGradient></defs><path fill="#004f6e" d="M9 10h38c3 0 5 2 5 5v5c0 3-2 5-5 5H35v26c0 3-2 5-5 5h-5c-3 0-5-2-5-5V25H9c-3 0-5-2-5-5v-5c0-3 2-5 5-5z"/><path d="M23 36l9 9 21-23" fill="none" stroke="url(#tg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="brand">tamareen<span>Interactive learning & self-assessment</span></div></a><nav class="nav"><a class="navlink" href="/">Courses</a><a class="navlink" href="/resources.html">Resources</a><a class="navlink" href="/dashboard.html">My Progress</a><a class="navlink" href="/review.html">Review mistakes</a><a class="navlink" href="/projects.html">Projects</a><a class="navlink" href="/classrooms.html">Groups</a></nav><div class="headerActions"><a class="gh" href="https://github.com/m-alshehri/UJCOB-exercises" target="_blank" rel="noopener" aria-label="GitHub repository"><svg viewBox="0 0 24 24"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.2c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg></a><a class="authHeader" id="authHeader" href="/login.html">Login</a><button class="menuToggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">\u2630</button></div></div></header>',
+      '<header><div class="head"><a class="brandwrap" href="/" aria-label="Tamareen home"><div class="mark" aria-label="Tamareen logo"><svg class="brandLogo" viewBox="0 0 64 64" role="img" aria-hidden="true"><defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#83ccea"/><stop offset="1" stop-color="#28a9dc"/></linearGradient></defs><path fill="#004f6e" d="M9 10h38c3 0 5 2 5 5v5c0 3-2 5-5 5H35v26c0 3-2 5-5 5h-5c-3 0-5-2-5-5V25H9c-3 0-5-2-5-5v-5c0-3 2-5 5-5z"/><path d="M23 36l9 9 21-23" fill="none" stroke="url(#tg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="brand">tamareen<span>Interactive learning & self-assessment</span></div></a><nav class="nav"><a class="navlink" href="/">Courses</a><a class="navlink" href="/resources.html">Resources</a><a class="navlink" href="/dashboard.html">My Progress</a><a class="navlink" href="/review.html">Review mistakes</a><a class="navlink" href="/projects.html">Projects</a><a class="navlink" href="/classrooms.html">Groups</a><a class="navlink" href="/pathways.html">Learning paths</a><a class="navlink" href="/submissions.html">Submissions</a></nav><div class="headerActions"><div class="streakPill" id="headerStreak" role="button" tabindex="0" aria-label="Daily learning streak and target"><span class="streakFlame">🔥</span><span id="headerStreakCount">0</span><div class="streakDropdown" id="streakDropdown"><div class="streakDropTitle">سلسلة المذاكرة اليومية</div><div class="streakDropStreak" id="streakDropStreak">0 أيام متتالية</div><div class="streakDropGoalLabel" id="streakDropGoalLabel">هدف اليوم: 0 / 5</div><div class="streakDropBar"><div class="streakDropFill" id="streakDropFill" style="width: 0%"></div></div></div></div><a class="gh" href="https://github.com/m-alshehri/UJCOB-exercises" target="_blank" rel="noopener" aria-label="GitHub repository"><svg viewBox="0 0 24 24"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.2c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg></a><a class="authHeader" id="authHeader" href="/login.html">Login</a><button class="menuToggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">\u2630</button></div></div></header>',
   }),
 );
 document.getElementById("siteFooter")?.replaceWith(
@@ -19,6 +19,13 @@ function closeMobileNav() {
     b.setAttribute("aria-expanded", "false");
     b.textContent = "☰";
   }
+}
+if (!document.getElementById("drawerBackdrop")) {
+  const backdrop = document.createElement("div");
+  backdrop.className = "drawerBackdrop";
+  backdrop.id = "drawerBackdrop";
+  backdrop.onclick = closeMobileNav;
+  document.body.prepend(backdrop);
 }
 function toggleMobileNav() {
   const n = document.querySelector(".head>.nav");
@@ -47,6 +54,34 @@ window.addEventListener("resize", () => {
 async function syncHeader() {
   try {
     const session = await Tamareen.session();
+    const updateStreakUI = () => {
+      if (typeof Tamareen === "undefined" || !Tamareen.getStreak) return;
+      const s = Tamareen.getStreak(session?.user?.id || "guest");
+      const countEl = document.getElementById("headerStreakCount");
+      const streakDropStreak = document.getElementById("streakDropStreak");
+      const streakDropGoalLabel = document.getElementById("streakDropGoalLabel");
+      const streakDropFill = document.getElementById("streakDropFill");
+      const isAr =
+        (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+        document.documentElement.lang === "ar";
+      if (countEl) countEl.textContent = s.streak || 0;
+      if (streakDropStreak)
+        streakDropStreak.textContent = isAr
+          ? `${s.streak || 0} أيام متتالية`
+          : `${s.streak || 0} days streak`;
+      if (streakDropGoalLabel)
+        streakDropGoalLabel.textContent = isAr
+          ? `هدف اليوم: ${s.todayCount || 0} / ${s.goal || 5}`
+          : `Today's goal: ${s.todayCount || 0} / ${s.goal || 5}`;
+      if (streakDropFill)
+        streakDropFill.style.width =
+          Math.min(100, Math.round(((s.todayCount || 0) / (s.goal || 5)) * 100)) +
+          "%";
+    };
+    updateStreakUI();
+    window.removeEventListener("tamareen:streak-updated", updateStreakUI);
+    window.addEventListener("tamareen:streak-updated", updateStreakUI);
+
     const b = document.getElementById("authHeader");
     if (!b) return;
     b.textContent = session ? "Logout" : "Login";
@@ -338,4 +373,69 @@ document.querySelectorAll("canvas").forEach((c) => {
   }
   roleLinks();
   Tamareen.client().auth.onAuthStateChange(() => setTimeout(roleLinks, 0));
+})();
+
+// Register Service Worker for PWA
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
+// Mobile Bottom Navigation Bar
+(() => {
+  if (document.querySelector(".mobileBottomNav")) return;
+  const isAr =
+    (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+    document.documentElement.lang === "ar";
+  const nav = document.createElement("nav");
+  nav.className = "mobileBottomNav";
+  nav.setAttribute("aria-label", isAr ? "التنقل السريع" : "Mobile navigation");
+  const path = location.pathname;
+
+  const items = [
+    {
+      href: "/",
+      label: isAr ? "الرئيسية" : "Home",
+      active: path === "/" || path === "/index.html",
+      icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>',
+    },
+    {
+      href: "/#coursesSection",
+      label: isAr ? "تدريب" : "Practice",
+      active: path === "/courses" || location.hash === "#coursesSection",
+      icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>',
+    },
+    {
+      href: "/labs.html",
+      label: isAr ? "مختبرات" : "Labs",
+      active: path.includes("lab"),
+      icon: '<polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline>',
+    },
+    {
+      href: "/dashboard.html",
+      label: isAr ? "تقدّمي" : "Progress",
+      active: path.includes("dashboard") || path.includes("review"),
+      icon: '<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>',
+    },
+    {
+      href: "/login.html",
+      label: isAr ? "حسابي" : "Account",
+      active: path.includes("login") || path.includes("classrooms"),
+      icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
+    },
+  ];
+
+  nav.innerHTML = items
+    .map(
+      (item) => `
+    <a class="mobileNavItem ${item.active ? "active" : ""}" href="${item.href}">
+      <svg viewBox="0 0 24 24" aria-hidden="true">${item.icon}</svg>
+      <span>${item.label}</span>
+    </a>
+  `,
+    )
+    .join("");
+
+  document.body.appendChild(nav);
 })();

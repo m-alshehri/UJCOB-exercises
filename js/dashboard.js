@@ -296,6 +296,86 @@ async function load() {
     document.getElementById("best").textContent = rows.length
       ? Math.max(...rows.map((x) => Number(x.score_percent || 0))) + "%"
       : "—";
+
+    const streak =
+      typeof Tamareen !== "undefined" && Tamareen.getStreak
+        ? Tamareen.getStreak(uid)
+        : { streak: 0, todayCount: 0, goal: 5 };
+    const streakStat = document.getElementById("streakStat");
+    if (streakStat) streakStat.textContent = `${streak.streak || 0} 🔥`;
+    const goalStat = document.getElementById("goalStat");
+    if (goalStat)
+      goalStat.textContent = `${streak.todayCount || 0} / ${streak.goal || 5}`;
+
+    // Certificate of Mastery
+    const certWrap = document.getElementById("certBannerWrap");
+    const certCandidates = gs.filter((g) => g.avg >= 80);
+    if (certWrap) {
+      if (certCandidates.length > 0) {
+        certWrap.style.display = "flex";
+        const isAr =
+          (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+          document.documentElement.lang === "ar";
+        certWrap.innerHTML = certCandidates
+          .map(
+            (c) => `
+            <div class="certBanner">
+              <div class="certBannerLeft">
+                <span class="certBannerIcon">🏆</span>
+                <div>
+                  <div class="certBannerTitle">${isAr ? `شهادة إتقان وتفوق: ${Tamareen.escape(c.code)}` : `Mastery Certificate Available: ${Tamareen.escape(c.code)}`}</div>
+                  <div class="certBannerSub">${isAr ? `حققت معدل ${c.avg}% في مقرر ${Tamareen.escape(c.name)}` : `You achieved ${c.avg}% mastery in ${Tamareen.escape(c.name)}`}</div>
+                </div>
+              </div>
+              <button type="button" class="btnViewCert" data-code="${Tamareen.escape(c.code)}" data-name="${Tamareen.escape(c.name)}" data-score="${c.avg}%">
+                ${isAr ? "عرض شهادة الإنجاز 🏅" : "View Certificate 🏅"}
+              </button>
+            </div>
+          `,
+          )
+          .join("");
+
+        certWrap.querySelectorAll(".btnViewCert").forEach((btn) => {
+          btn.onclick = async () => {
+            const courseCode = btn.dataset.code;
+            const courseName = btn.dataset.name;
+            const score = btn.dataset.score;
+            let studentName =
+              s.session.user.user_metadata?.display_name ||
+              s.session.user.email?.split("@")[0] ||
+              "Student";
+            try {
+              const { data: p } = await client
+                .from("profiles")
+                .select("display_name")
+                .eq("id", uid)
+                .single();
+              if (p?.display_name) studentName = p.display_name;
+            } catch {}
+
+            document.getElementById("certRecipient").textContent = studentName;
+            document.getElementById("certCourse").textContent =
+              `${courseCode} · ${courseName}`;
+            document.getElementById("certScore").textContent = score;
+            document.getElementById("certDate").textContent =
+              new Date().toLocaleDateString(isAr ? "ar-SA" : "en-US");
+            let hash = 0;
+            const str = uid + courseCode;
+            for (let k = 0; k < str.length; k++) {
+              hash = (hash << 5) - hash + str.charCodeAt(k);
+              hash |= 0;
+            }
+            document.getElementById("certId").textContent =
+              "TAM-" +
+              Math.abs(hash).toString(36).toUpperCase().padStart(6, "0");
+            document.getElementById("certModal").style.display = "flex";
+          };
+        });
+      } else {
+        certWrap.style.display = "none";
+      }
+    }
+
     list.innerHTML = rows.length
       ? rows
           .slice(0, 30)
@@ -331,3 +411,16 @@ async function load() {
 load();
 
 Learning.showResume();
+
+const closeCertModal = () => {
+  const m = document.getElementById("certModal");
+  if (m) m.style.display = "none";
+};
+document.getElementById("btnCloseCert")?.addEventListener("click", closeCertModal);
+document.getElementById("btnDismissCert")?.addEventListener("click", closeCertModal);
+document.getElementById("btnPrintCert")?.addEventListener("click", () => {
+  window.print();
+});
+document.getElementById("certModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "certModal") closeCertModal();
+});

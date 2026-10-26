@@ -47,6 +47,10 @@
       name="twitter:image:alt"
       content="tamareen: practice smarter, master faster"
     />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#004f6e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="stylesheet" href="/styles/index.css" />
     <link rel="stylesheet" href="/styles/shared.css" />
     <link rel="stylesheet" href="/styles/learning.css" />
@@ -57,7 +61,6 @@
     <div class="drawerBackdrop" id="drawerBackdrop"></div>
     <main id="main">
       <section id="home">
-        <div id="resumeAttempts" aria-label="Unfinished attempts"></div>
         <div class="hero band navy">
           <div class="heroCopy">
             <h1>
@@ -104,10 +107,19 @@ print(revenue)</code></pre>
             </div>
           </div>
         </div>
+        <div id="resumeAttempts" aria-label="Unfinished attempts"></div>
         <div class="section" id="coursesSection">
           <div>
             <h2>Choose a course</h2>
             <span>Pick a subject and start practicing</span>
+          </div>
+          <div class="searchBarWrapper">
+            <div class="searchBox">
+              <span class="searchIcon">🔍</span>
+              <input type="search" id="catalogSearch" class="catalogSearch" placeholder="Search courses, topics, or concepts (e.g. Loops, SQL, JOIN, HTML, OOP)..." aria-label="Search courses, topics, and concepts" autocomplete="off" />
+              <button type="button" id="clearSearch" class="clearSearchBtn" hidden aria-label="Clear search">✕</button>
+            </div>
+            <div id="searchResults" class="searchResultsPanel" hidden></div>
           </div>
           <div class="courseFilters" role="group" aria-label="Filter courses">
             <button class="filterChip" aria-pressed="true" data-action="filterCourses" data-arg="all">All</button>
@@ -314,10 +326,17 @@ print(revenue)</code></pre>
         </div>
         <div class="track"><div class="bar" id="bar"></div></div>
         <div class="prog">
-          <span id="progress"></span><span id="scoreNow"></span>
+          <span id="progress"></span>
+          <span id="flaggedBadge" class="flaggedBadge" style="display:none"></span>
+          <span id="scoreNow"></span>
         </div>
         <div class="card" id="card">
-          <div class="qno" id="qno"></div>
+          <div class="cardHead">
+            <div class="qno" id="qno"></div>
+            <button id="flagBtn" class="flagBtn" type="button" data-action="toggleFlag" title="Flag question for review (F)">
+              <span class="flagIcon">⭐️</span> <span id="flagLabel">Flag</span>
+            </button>
+          </div>
           <div class="qtext" id="qtext"></div>
           <div class="opts" id="opts"></div>
           <div id="feed" class="feed"></div>
@@ -327,6 +346,7 @@ print(revenue)</code></pre>
               <div class="tutorBtns">
                 <button
                   class="tutorBtn"
+                  id="tutorHintBtn"
                   data-action="tutorHelp"
                   data-arg="hint"
                 >
@@ -341,6 +361,10 @@ print(revenue)</code></pre>
               </div>
             </div>
             <div id="tutorText" class="tutorText"></div>
+            <div id="tutorStepWrap" class="tutorStepWrap" style="display:none">
+              <span id="tutorLevelLabel" class="tutorLevelLabel">Hint Level 1/3 (Concept)</span>
+              <button id="tutorNextHintBtn" class="tutorNextHintBtn" data-action="tutorNextHint">💡 Deeper hint (Level 2) →</button>
+            </div>
             <div id="tutorChat" class="tutorChat">
               <div id="tutorMessages" class="tutorMessages"></div>
               <div class="tutorQuick">
@@ -388,6 +412,8 @@ print(revenue)</code></pre>
           <div id="finalScore" class="score"></div>
           <h2 id="finalTitle"></h2>
           <p id="finalMsg"></p>
+          <div id="topicBreakdown" class="topicBreakdown"></div>
+          <div id="flaggedSummary" class="flaggedSummary" style="display:none"></div>
           <div class="adaptiveRec" id="adaptiveRec">
             <div class="adaptiveLabel">ADAPTIVE LEARNING</div>
             <h3 id="adaptiveTitle">Your next recommended practice</h3>

@@ -32,6 +32,8 @@ window.I18n = (() => {
         /^You scored (.*)\. Personal practice result, not a verified grade\.$/,
         (_, a) => `نتيجتك ${a}. نتيجة تدريب شخصية وليست درجة معتمدة.`,
       ],
+      [/^Correct\.\s*(.*)$/, (_, a) => `صحيح. ${a}`],
+      [/^Not quite\.\s*(.*)$/, (_, a) => `غير دقيق. ${a}`],
     ];
     for (const [re, fn] of patterns)
       if (re.test(key)) return key.replace(re, fn);

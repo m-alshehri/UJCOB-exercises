@@ -43,7 +43,10 @@ let active = "",
   examSeconds = Math.max(
     0,
     Math.ceil((attemptStart + 600000 - Date.now()) / 1000),
-  );
+  ),
+  flaggedQuestions = new Set(),
+  answersHistory = [],
+  currentHintLevel = 1;
 const courseSummaries = {
   "BCIS 313": "Build programming foundations and solve business problems with Python.",
   "BCIS 324": "Explore business processes and their integration through ERP systems.",
@@ -270,15 +273,8 @@ function warmQuestionCache() {
 }
 async function ensureSession() {
   try {
-    if (!window.supabaseClient) {
-      window.supabaseClient = Tamareen.client();
-    }
-    let { data } = await window.supabaseClient.auth.getSession();
-    if (data?.session) return data.session;
-    location.href = "login.html?next=" + encodeURIComponent("index.html");
-    return null;
+    return await Tamareen.session(true);
   } catch (e) {
-    location.href = "login.html?next=" + encodeURIComponent("index.html");
     return null;
   }
 }
@@ -393,6 +389,9 @@ async function startQuiz(
       throw new Error("No questions are available for this course.");
     questions = picked.map(makeQ);
     idx = score = 0;
+    flaggedQuestions.clear();
+    answersHistory = [];
+    currentHintLevel = 1;
     if (questions.every((q) => q.id)) {
       const id = crypto.randomUUID();
       try {
@@ -432,6 +431,38 @@ async function startQuiz(
     startingQuiz = false;
   }
 }
+function updateFlaggedBadge() {
+  const badge = $("flaggedBadge");
+  if (!badge) return;
+  if (flaggedQuestions.size > 0) {
+    badge.style.display = "inline-block";
+    const isAr = I18n.lang === "ar";
+    badge.textContent = `⭐️ ${flaggedQuestions.size} ${isAr ? "مميّز" : "flagged"}`;
+  } else {
+    badge.style.display = "none";
+  }
+}
+function toggleFlag() {
+  const q = questions[idx];
+  if (!q) return;
+  const qId = q.id || idx;
+  if (flaggedQuestions.has(qId)) {
+    flaggedQuestions.delete(qId);
+  } else {
+    flaggedQuestions.add(qId);
+  }
+  const flagBtn = $("flagBtn");
+  if (flagBtn) {
+    const isFlagged = flaggedQuestions.has(qId);
+    flagBtn.classList.toggle("flagged", isFlagged);
+    const flagLabel = $("flagLabel");
+    if (flagLabel) {
+      const isAr = I18n.lang === "ar";
+      flagLabel.textContent = isFlagged ? (isAr ? "مميّز ★" : "Flagged ★") : (isAr ? "تمييز" : "Flag");
+    }
+  }
+  updateFlaggedBadge();
+}
 function renderQ() {
   selected = null;
   locked = false;
@@ -447,15 +478,32 @@ function renderQ() {
     tm = $("tutorMessages");
   if (tc) tc.classList.remove("show");
   if (tm) tm.innerHTML = "";
+  const stepWrap = $("tutorStepWrap");
+  if (stepWrap) stepWrap.style.display = "none";
   tutorHistory = [];
+  currentHintLevel = 1;
   const tutor = $("tutor");
   if (tutor) tutor.style.display = quizMode === "practice" && quizPurpose !== "diagnostic" ? "block" : "none";
   $("qno").textContent = `QUESTION ${idx + 1} OF ${total}`;
+
+  // Update Flag button state
+  const flagBtn = $("flagBtn");
+  if (flagBtn) {
+    const isFlagged = flaggedQuestions.has(q.id || idx);
+    flagBtn.classList.toggle("flagged", isFlagged);
+    const flagLabel = $("flagLabel");
+    if (flagLabel) {
+      const isAr = I18n.lang === "ar";
+      flagLabel.textContent = isFlagged ? (isAr ? "مميّز ★" : "Flagged ★") : (isAr ? "تمييز" : "Flag");
+    }
+  }
+  updateFlaggedBadge();
+
   $("qtext").textContent = q.q;
   $("opts").innerHTML = q.options
     .map(
       (o, i) =>
-        `<div class="opt" data-action="pick" data-arg="${i}">${String.fromCharCode(65 + i)}. ${Tamareen.escape(o)}</div>`,
+        `<div class="opt" data-action="pick" data-arg="${i}"><span class="optKey">${String.fromCharCode(65 + i)}</span><span class="optText">${Tamareen.escape(o)}</span></div>`,
     )
     .join("");
   $("feed").className = "feed";
@@ -511,7 +559,7 @@ function addTutorMessage(role, text) {
   wrap.appendChild(d);
   $("tutorChat")?.classList.add("show");
 }
-async function callTutor(kind, message = "") {
+async function callTutor(kind, message = "", level = 1) {
   if (quizMode !== "practice") return;
   const q = questions[idx],
     box = $("tutorText");
@@ -520,6 +568,8 @@ async function callTutor(kind, message = "") {
   box.textContent = "AI Tutor is thinking…";
   box.style.display = "block";
   document.querySelectorAll(".tutorBtn").forEach((b) => (b.disabled = true));
+  const nextHintBtn = $("tutorNextHintBtn");
+  if (nextHintBtn) nextHintBtn.disabled = true;
   try {
     const r = await fetch("/api/tutor", {
       method: "POST",
@@ -531,6 +581,7 @@ async function callTutor(kind, message = "") {
         attemptId,
         questionId: q.id,
         kind,
+        level,
         course: active,
         topic: q.topic || "General",
         question: q.q,
@@ -548,6 +599,45 @@ async function callTutor(kind, message = "") {
     box.style.display = "none";
     addTutorMessage("assistant", answer);
     tutorHistory.push({ role: "assistant", content: answer });
+
+    if (kind === "hint") {
+      const stepWrap = $("tutorStepWrap");
+      if (stepWrap) {
+        stepWrap.style.display = "flex";
+        const isAr = I18n.lang === "ar";
+        const lvlLabel = $("tutorLevelLabel");
+        const nextBtn = $("tutorNextHintBtn");
+        if (currentHintLevel === 1) {
+          if (lvlLabel)
+            lvlLabel.textContent = isAr
+              ? "تلميح ١ من ٣ (مفهوم السؤال)"
+              : "Hint 1 of 3 (Concept)";
+          if (nextBtn) {
+            nextBtn.textContent = isAr
+              ? "💡 تلميح أعمق (مستوى ٢) ←"
+              : "💡 Deeper hint (Level 2) →";
+            nextBtn.style.display = "inline-block";
+          }
+        } else if (currentHintLevel === 2) {
+          if (lvlLabel)
+            lvlLabel.textContent = isAr
+              ? "تلميح ٢ من ٣ (توجيه التفكير)"
+              : "Hint 2 of 3 (Guiding reasoning)";
+          if (nextBtn) {
+            nextBtn.textContent = isAr
+              ? "💡 تلميح أخير (مستوى ٣) ←"
+              : "💡 Final hint (Level 3) →";
+            nextBtn.style.display = "inline-block";
+          }
+        } else {
+          if (lvlLabel)
+            lvlLabel.textContent = isAr
+              ? "تلميح ٣ من ٣ (طريقة الحل)"
+              : "Hint 3 of 3 (Solution approach)";
+          if (nextBtn) nextBtn.style.display = "none";
+        }
+      }
+    }
     return answer;
   } catch (e) {
     Tamareen.report?.("tutor_error");
@@ -555,11 +645,21 @@ async function callTutor(kind, message = "") {
       "AI Tutor is not available yet. Please try again shortly.";
   } finally {
     document.querySelectorAll(".tutorBtn").forEach((b) => (b.disabled = false));
+    if (nextHintBtn) nextHintBtn.disabled = false;
   }
 }
 function tutorHelp(kind) {
   tutorHistory = [];
-  return callTutor(kind);
+  currentHintLevel = 1;
+  const stepWrap = $("tutorStepWrap");
+  if (stepWrap) stepWrap.style.display = "none";
+  return callTutor(kind, "", 1);
+}
+function tutorNextHint() {
+  if (currentHintLevel < 3) {
+    currentHintLevel++;
+    return callTutor("hint", "", currentHintLevel);
+  }
 }
 async function sendTutorFollowup() {
   const input = $("tutorInput");
@@ -604,6 +704,12 @@ async function checkAns() {
       score = result.correct_answers ?? score;
       Tamareen.status("Answer saved.", "success");
     } else if (correct) score++;
+    answersHistory.push({
+      question: q,
+      idx,
+      selected,
+      correct,
+    });
     if (quizMode === "practice" && quizPurpose !== "diagnostic") {
       const els = [...document.querySelectorAll(".opt")];
       els[q.answer].classList.add("good");
@@ -643,6 +749,91 @@ function nextQ() {
   idx++;
   idx < questions.length ? renderQ() : finish();
 }
+function renderTopicBreakdown() {
+  const host = $("topicBreakdown");
+  if (!host) return;
+  const isAr = I18n.lang === "ar";
+  const stats = {};
+  for (const item of answersHistory) {
+    const topic = item.question?.topic || (isAr ? "عام" : "General");
+    if (!stats[topic]) stats[topic] = { total: 0, correct: 0 };
+    stats[topic].total++;
+    if (item.correct) stats[topic].correct++;
+  }
+  const topics = Object.entries(stats);
+  if (!topics.length) {
+    host.innerHTML = "";
+    return;
+  }
+  host.innerHTML = `
+    <div class="topicBreakdownCard">
+      <div class="topicBreakdownHead">
+        <h3>${isAr ? "تحليل الأداء حسب الموضوع" : "Performance by Topic"}</h3>
+        <p>${isAr ? "تفصيل إجاباتك لمساعدتك في معرفة نقاط القوة والفرص التي تحتاج لتدريب إضافي" : "Breakdown of your practice to help you focus on areas for improvement"}</p>
+      </div>
+      <div class="topicList">
+        ${topics
+          .map(([topic, data]) => {
+            const pct = Math.round((data.correct / data.total) * 100);
+            const isWeak = pct < 70;
+            return `
+            <div class="topicRow">
+              <div class="topicInfo">
+                <span class="topicName">${Tamareen.escape(topic)}</span>
+                <span class="topicScore ${pct >= 80 ? "good" : isWeak ? "weak" : "mid"}">${data.correct}/${data.total} (${pct}%)</span>
+              </div>
+              <div class="topicTrack"><i style="width: ${pct}%" class="${pct >= 80 ? "good" : isWeak ? "weak" : "mid"}"></i></div>
+              ${
+                isWeak
+                  ? `
+                <a class="topicActionLink" href="/pathways.html?course=${encodeURIComponent(active)}">
+                  ${isAr ? "تدرّب على هذا الموضوع ←" : "Practice this topic →"}
+                </a>
+              `
+                  : ""
+              }
+            </div>
+          `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+function renderFlaggedSummary() {
+  const host = $("flaggedSummary");
+  if (!host) return;
+  if (!flaggedQuestions.size) {
+    host.style.display = "none";
+    host.innerHTML = "";
+    return;
+  }
+  host.style.display = "block";
+  const isAr = I18n.lang === "ar";
+  const flaggedList = questions.filter((q, i) =>
+    flaggedQuestions.has(q.id || i),
+  );
+  host.innerHTML = `
+    <div class="flaggedSummaryCard">
+      <h3>⭐️ ${isAr ? "الأسئلة المميّزة للمراجعة" : "Flagged Questions for Review"} (${flaggedList.length})</h3>
+      <div class="flaggedItems">
+        ${flaggedList
+          .map(
+            (q, i) => `
+          <details class="flaggedItem">
+            <summary><b>#${i + 1}</b> ${Tamareen.escape(q.q)}</summary>
+            <div class="flaggedItemBody">
+              <p class="flaggedCorrect"><b>${isAr ? "الإجابة الصحيحة:" : "Correct answer:"}</b> ${Tamareen.escape(q.options[q.answer])}</p>
+              <p class="flaggedExplain">${Tamareen.escape(q.explain)}</p>
+            </div>
+          </details>
+        `,
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+}
 async function finish(timedOut = false) {
   if (finishPromise) return finishPromise;
   clearInterval(examTimerId);
@@ -673,6 +864,12 @@ async function finish(timedOut = false) {
       $("finalMsg").textContent =
         (timedOut ? "Time is up. " : "") +
         `You scored ${p}%. Personal practice result, not a verified grade.`;
+      if (p >= 80) {
+        Tamareen.confetti?.();
+      }
+      Tamareen.recordActivity?.(user?.id || "guest", questions.length);
+      renderTopicBreakdown();
+      renderFlaggedSummary();
       await showAdaptiveRecommendation();
       let link = $("pathResult"); if (!link) {link=document.createElement("a");link.id="pathResult";$("result").append(link);}
       link.href="/pathways.html?course="+encodeURIComponent(active);link.textContent=I18n.t("Your next step")+" →";
@@ -1002,7 +1199,9 @@ Tamareen.actions({
   restart: () => restart(),
   goBack: () => goBack(),
   goHome: () => goHome(),
+  toggleFlag: () => toggleFlag(),
   tutorHelp: (el) => tutorHelp(el.dataset.arg),
+  tutorNextHint: () => tutorNextHint(),
   askTutorQuick: (el) => askTutorQuick(el.dataset.arg),
   sendTutorFollowup: () => sendTutorFollowup(),
 });
@@ -1012,3 +1211,177 @@ $("tutorInput")?.addEventListener("keydown", (event) => {
     sendTutorFollowup();
   }
 });
+
+// Keyboard shortcuts for quiz mode: 1-4, A-D to pick, Enter/Space to check/next, F to flag
+window.addEventListener("keydown", (e) => {
+  const quiz = $("quiz");
+  if (!quiz || quiz.style.display !== "block") return;
+  const tag = (document.activeElement?.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") return;
+
+  const key = e.key.toUpperCase();
+  let optIdx = -1;
+  if (key === "1" || key === "A") optIdx = 0;
+  else if (key === "2" || key === "B") optIdx = 1;
+  else if (key === "3" || key === "C") optIdx = 2;
+  else if (key === "4" || key === "D") optIdx = 3;
+
+  if (optIdx >= 0) {
+    const opts = document.querySelectorAll("#opts .opt");
+    if (opts[optIdx] && !locked) {
+      e.preventDefault();
+      pick(optIdx, opts[optIdx]);
+    }
+  } else if (e.key === "Enter" || e.key === " ") {
+    if (e.key === " ") e.preventDefault();
+    const checkBtn = $("check");
+    const nextBtn = $("next");
+    if (
+      checkBtn &&
+      checkBtn.style.display !== "none" &&
+      !checkBtn.disabled &&
+      selected !== null &&
+      !locked
+    ) {
+      checkAns();
+    } else if (nextBtn && nextBtn.style.display !== "none" && !nextBtn.disabled) {
+      nextQ();
+    }
+  } else if (key === "F") {
+    e.preventDefault();
+    toggleFlag();
+  }
+});
+
+// Catalog Concept Search
+function initCatalogSearch() {
+  const searchInput = $("catalogSearch");
+  const searchResults = $("searchResults");
+  const clearBtn = $("clearSearch");
+  if (!searchInput || !searchResults) return;
+
+  const performSearch = (query) => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      searchResults.hidden = true;
+      searchResults.innerHTML = "";
+      if (clearBtn) clearBtn.hidden = true;
+      return;
+    }
+    if (clearBtn) clearBtn.hidden = false;
+
+    const matches = [];
+
+    // Search in Courses
+    if (typeof COURSES !== "undefined") {
+      for (const [code, course] of Object.entries(COURSES)) {
+        const name = course.name || "";
+        const summary = courseSummaries[code] || "";
+        if (
+          code.toLowerCase().includes(q) ||
+          name.toLowerCase().includes(q) ||
+          summary.toLowerCase().includes(q)
+        ) {
+          matches.push({
+            type: "course",
+            title: `${code} · ${name}`,
+            sub: summary,
+            action: () => chooseCourse(code),
+            actionLabel: "افتح المقرر →",
+          });
+        }
+      }
+    }
+
+    // Search in Concepts (S from question-banks.js)
+    if (typeof S !== "undefined") {
+      for (const [code, data] of Object.entries(S)) {
+        for (const row of data.rows || []) {
+          const concept = row[0] || "";
+          const def = row[1] || "";
+          const purpose = row[2] || "";
+          const example = row[3] || "";
+          if (
+            concept.toLowerCase().includes(q) ||
+            def.toLowerCase().includes(q) ||
+            purpose.toLowerCase().includes(q) ||
+            example.toLowerCase().includes(q)
+          ) {
+            matches.push({
+              type: "concept",
+              title: `${concept} (${code})`,
+              sub: `${def} · مثال: ${example}`,
+              action: () => chooseCourse(code),
+              actionLabel: "تدرب الآن →",
+            });
+            if (matches.length >= 15) break;
+          }
+        }
+        if (matches.length >= 15) break;
+      }
+    }
+
+    // Search in Coding Labs
+    if (typeof LAB_CATALOG !== "undefined") {
+      for (const [labType, lab] of Object.entries(LAB_CATALOG)) {
+        for (const ex of lab.exercises || []) {
+          const title = ex.title || "";
+          if (title.toLowerCase().includes(q)) {
+            matches.push({
+              type: "lab",
+              title: `[معمل ${lab.code}] ${title}`,
+              sub: `تمرين برمجي عملي`,
+              action: () => (location.href = lab.url),
+              actionLabel: "افتح المعمل →",
+            });
+          }
+        }
+      }
+    }
+
+    if (!matches.length) {
+      searchResults.hidden = false;
+      searchResults.innerHTML = `<div class="empty">${
+        (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+        document.documentElement.lang === "ar"
+          ? "لم يتم العثور على مفاهيم مطابقة."
+          : "No matching concepts or courses found."
+      }</div>`;
+      return;
+    }
+
+    searchResults.hidden = false;
+    searchResults.innerHTML = matches
+      .slice(0, 10)
+      .map(
+        (m, idx) => `
+        <div class="searchResultItem" data-index="${idx}">
+          <div class="searchResMeta">
+            <span class="searchResTitle">${Tamareen.escape(m.title)}</span>
+            <span class="searchResSub">${Tamareen.escape(m.sub)}</span>
+          </div>
+          <span class="searchResAction">${m.actionLabel}</span>
+        </div>
+      `,
+      )
+      .join("");
+
+    searchResults.querySelectorAll(".searchResultItem").forEach((el) => {
+      const idx = Number(el.dataset.index);
+      el.onclick = () => {
+        matches[idx]?.action();
+        searchResults.hidden = true;
+      };
+    });
+  };
+
+  searchInput.addEventListener("input", (e) => performSearch(e.target.value));
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      performSearch("");
+      searchInput.focus();
+    });
+  }
+}
+initCatalogSearch();

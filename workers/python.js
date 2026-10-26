@@ -1,9 +1,16 @@
 importScripts("/vendor/pyodide/pyodide.js");
-onmessage = async ({ data }) => {
-  try {
-    const py = await loadPyodide({
+let pyPromise = null;
+function getPyodide() {
+  if (!pyPromise) {
+    pyPromise = loadPyodide({
       indexURL: "/vendor/pyodide/",
     });
+  }
+  return pyPromise;
+}
+onmessage = async ({ data }) => {
+  try {
+    const py = await getPyodide();
     py.globals.set("USER_CODE", data.code);
     py.globals.set("TESTS_JSON", JSON.stringify(data.tests));
     await py.runPythonAsync(`

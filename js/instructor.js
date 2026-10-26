@@ -76,24 +76,102 @@ async function load() {
           )
           .join("")
       : '<div class="empty">Question analytics will appear after practice activity.</div>';
-    $("studentRows").innerHTML = j.students.length
-      ? j.students
-          .map(
-            (x) =>
-              '<div class="row"><span>' +
-              Tamareen.escape(x.name) +
-              "</span><span>" +
-              Number(x.attempts) +
-              "</span><span>" +
-              Number(x.average) +
-              "%</span><span>" +
-              Number(x.best) +
-              "%</span><span>" +
-              new Date(x.last).toLocaleDateString() +
-              "</span></div>",
-          )
-          .join("")
-      : '<div class="empty">No student activity yet.</div>';
+    let showingAtRiskOnly = false;
+    function renderStudents() {
+      const list = showingAtRiskOnly
+        ? j.students.filter((x) => x.average < 60)
+        : j.students;
+      const isAr =
+        (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+        document.documentElement.lang === "ar";
+      $("studentRows").innerHTML = list.length
+        ? list
+            .map(
+              (x) =>
+                `<div class="row ${x.average < 60 ? "atRisk" : ""}"><span>${Tamareen.escape(x.name)}${x.average < 60 ? `<span class="badgeAtRisk">${isAr ? "⚠️ متعثر" : "⚠️ At risk"}</span>` : ""}</span><span>${Number(x.attempts)}</span><span>${Number(x.average)}%</span><span>${Number(x.best)}%</span><span>${new Date(x.last).toLocaleDateString()}</span></div>`,
+            )
+            .join("")
+        : `<div class="empty">${showingAtRiskOnly ? (isAr ? "لا يوجد طلاب متعثرون حالياً." : "No at-risk students right now.") : (isAr ? "لا يوجد نشاط للطلاب حتى الآن." : "No student activity yet.")}</div>`;
+    }
+    renderStudents();
+
+    const btnFilter = $("btnFilterAtRisk");
+    if (btnFilter) {
+      btnFilter.onclick = () => {
+        showingAtRiskOnly = !showingAtRiskOnly;
+        btnFilter.classList.toggle("active", showingAtRiskOnly);
+        const isAr =
+          (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+          document.documentElement.lang === "ar";
+        btnFilter.textContent = showingAtRiskOnly
+          ? isAr
+            ? "عرض الكل"
+            : "Show all"
+          : isAr
+            ? "⚠️ عرض المتعثرين"
+            : "⚠️ Show at-risk";
+        renderStudents();
+      };
+    }
+
+    const btnExport = $("btnExportCSV");
+    if (btnExport) {
+      btnExport.onclick = () => {
+        const isAr =
+          (typeof I18n !== "undefined" && I18n.lang === "ar") ||
+          document.documentElement.lang === "ar";
+        const headers = isAr
+          ? [
+              "اسم الطالب",
+              "عدد المحاولات",
+              "متوسط الدرجة (%)",
+              "أعلى درجة (%)",
+              "آخر نشاط",
+              "حالة الأداء",
+            ]
+          : [
+              "Student Name",
+              "Attempts",
+              "Average (%)",
+              "Best (%)",
+              "Last Active",
+              "Status",
+            ];
+        const rows = j.students.map((s) => {
+          const status =
+            s.average < 60
+              ? isAr
+                ? "متعثر"
+                : "At Risk"
+              : s.average >= 85
+                ? isAr
+                  ? "متميز"
+                  : "High Performer"
+                : isAr
+                  ? "مستقر"
+                  : "On Track";
+          return [
+            `"${(s.name || "").replace(/"/g, '""')}"`,
+            s.attempts,
+            s.average,
+            s.best,
+            `"${new Date(s.last).toLocaleDateString()}"`,
+            `"${status}"`,
+          ].join(",");
+        });
+        const csvContent =
+          "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `tamareen-students-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+    }
   } catch (e) {
     $("status").innerHTML =
       '<b>Instructor access is not ready for this account.</b><br><span class="bad">' +
